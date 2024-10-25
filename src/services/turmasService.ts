@@ -4,7 +4,7 @@ import { MysqlDataSource } from '../config/database';
 /**
  * Classe para gerenciar operações relacionadas a turmas.
  */
-class TurmasServiceClass {
+export class TurmasService {
   private repository = MysqlDataSource.getRepository(Turma);
 
   /**
@@ -70,6 +70,3 @@ class TurmasServiceClass {
     return await this.repository.findOneBy({ id: turmaId });
   }
 }
-
-const TurmasService = new TurmasServiceClass();
-export default TurmasService;

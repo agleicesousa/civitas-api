@@ -1,14 +1,14 @@
-import TurmasController from '../controller/turmasController';
+import { TurmasController } from '../controller/turmasController';
 import { Router } from 'express';
-
+const turmaController = new TurmasController();
 const turmasRouter = Router();
 
-turmasRouter.post('/', (req, res) => TurmasController.criarTurma(req, res));
-turmasRouter.get('/', (req, res) => TurmasController.listarTurmas(req, res));
-turmasRouter.get('/:id', (req, res) => TurmasController.buscarTurma(req, res));
-turmasRouter.put('/:id', (req, res) => TurmasController.editarTurma(req, res));
+turmasRouter.post('/', (req, res) => turmaController.criarTurma(req, res));
+turmasRouter.get('/', (req, res) => turmaController.listarTurmas(req, res));
+turmasRouter.get('/:id', (req, res) => turmaController.buscarTurma(req, res));
+turmasRouter.put('/:id', (req, res) => turmaController.editarTurma(req, res));
 turmasRouter.delete('/:id', (req, res) =>
-  TurmasController.deletarTurma(req, res)
+  turmaController.deletarTurma(req, res)
 );
 
 export default turmasRouter;

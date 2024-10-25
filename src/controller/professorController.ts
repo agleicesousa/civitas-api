@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import ProfessorService from '../services/professorService';
+import { ProfessorService } from '../services/professorService';
 
 /**
  * Classe responsável por gerenciar as operações de controle de professores.
  */
-class ProfessorControllerClass {
+export class ProfessorController {
+  private professorService = new ProfessorService();
   /**
    * Cria um novo professor.
    *
@@ -15,7 +16,7 @@ class ProfessorControllerClass {
     try {
       const { senha, turmas, membroId } = req.body;
 
-      const novoProfessor = await ProfessorService.criarProfessor(
+      const novoProfessor = await this.professorService.criarProfessor(
         senha,
         turmas,
         membroId
@@ -23,7 +24,7 @@ class ProfessorControllerClass {
 
       res.status(201).json(novoProfessor);
     } catch (error) {
-      res.status(400).json({ message: 'Erro ao criar professor', error });
+      res.status(404).json({ message: 'Erro ao criar professor', error });
     }
   }
   /**
@@ -34,10 +35,10 @@ class ProfessorControllerClass {
    */
   async listarProfessores(req: Request, res: Response) {
     try {
-      const professores = await ProfessorService.listarProfessores();
+      const professores = await this.professorService.listarProfessores();
       res.json(professores);
     } catch (error) {
-      res.status(500).json({ message: 'Erro ao listar professores', error });
+      res.status(404).json({ message: 'Erro ao listar professores', error });
     }
   }
   /**
@@ -51,11 +52,11 @@ class ProfessorControllerClass {
       const { id } = req.params;
       const professorId = Number(id);
       const professor =
-        await ProfessorService.buscarProfessorPorId(professorId);
+        await this.professorService.buscarProfessorPorId(professorId);
       return res.json(professor);
     } catch (error) {
       return res
-        .status(500)
+        .status(404)
         .json({ message: 'Erro ao buscar professor', error });
     }
   }
@@ -69,11 +70,11 @@ class ProfessorControllerClass {
     try {
       const { id } = req.params;
       const professorId = Number(id);
-      await ProfessorService.deletarProfessor(professorId);
+      await this.professorService.deletarProfessor(professorId);
       return res.status(204).send();
     } catch (error) {
       return res
-        .status(500)
+        .status(404)
         .json({ message: 'Erro ao deletar professor', error });
     }
   }
@@ -89,7 +90,7 @@ class ProfessorControllerClass {
       const id = parseInt(req.params.id, 10);
       const { turmas, senha, membroId } = req.body;
 
-      const professorAtualizado = await ProfessorService.editar(
+      const professorAtualizado = await this.professorService.editar(
         id,
         turmas,
         senha,
@@ -99,10 +100,7 @@ class ProfessorControllerClass {
       return res.json(professorAtualizado);
     } catch (error) {
       console.error('Erro ao editar professor:', error);
-      return res.status(500).json({ error: error.message });
+      return res.status(404).json({ error: error.message });
     }
   }
 }
-
-const ProfessorController = new ProfessorControllerClass();
-export default ProfessorController;

@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import TurmasService from '../services/turmasService';
+import { TurmasService } from '../services/turmasService';
 
 /**
  * Controlador para gerenciar as rotas relacionadas a turmas.
  */
-class TurmasControllerClass {
+export class TurmasController {
+  private turmasService = new TurmasService();
+
   /**
    * Cria uma nova turma com os dados fornecidos na requisição.
    *
@@ -14,10 +16,10 @@ class TurmasControllerClass {
    */
   async criarTurma(req: Request, res: Response): Promise<Response> {
     try {
-      const novaTurma = await TurmasService.criar(req.body);
+      const novaTurma = await this.turmasService.criar(req.body);
       return res.status(201).json(novaTurma);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao criar turma' });
+      return res.status(404).json({ error: 'Erro ao criar turma' });
     }
   }
 
@@ -30,10 +32,10 @@ class TurmasControllerClass {
    */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
     try {
-      const turmas = await TurmasService.listar();
+      const turmas = await this.turmasService.listar();
       return res.status(200).json(turmas);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao buscar turmas' });
+      return res.status(404).json({ error: 'Erro ao buscar turmas' });
     }
   }
 
@@ -47,10 +49,10 @@ class TurmasControllerClass {
   async buscarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const turma = await TurmasService.buscarPorId(id);
+      const turma = await this.turmasService.buscarPorId(id);
       return res.status(200).json(turma);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao buscar turma' });
+      return res.status(404).json({ error: 'Erro ao buscar turma' });
     }
   }
 
@@ -64,10 +66,10 @@ class TurmasControllerClass {
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const turmaAtualizada = await TurmasService.editar(id, req.body);
+      const turmaAtualizada = await this.turmasService.editar(id, req.body);
       return res.status(200).json(turmaAtualizada);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res.status(404).json({ error: error.message });
     }
   }
 
@@ -81,13 +83,10 @@ class TurmasControllerClass {
   async deletarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      await TurmasService.deletar(id);
-      return res.status(204).send(); // Usar send() para não retornar conteúdo
+      await this.turmasService.deletar(id);
+      return res.status(204).send();
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao deletar turma' });
+      return res.status(404).json({ error: 'Erro ao deletar turma' });
     }
   }
 }
-
-const TurmasController = new TurmasControllerClass();
-export default TurmasController;

@@ -8,11 +8,10 @@ import adminRouter from './routes/adminRoutes';
 import membrosRouter from './routes/membrosRoutes';
 import turmasRouter from './routes/turmaRoutes';
 import professorRouter from './routes/professorRoutes';
-import { inserirTurmarIniciais } from './utils/seedTurmas';
+
 MysqlDataSource.initialize()
   .then(() => {
     console.log('Database initialized!');
-    inserirTurmarIniciais();
   })
   .catch((err) => {
     console.error('Database Error: ', err);
