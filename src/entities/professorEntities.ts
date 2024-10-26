@@ -27,9 +27,9 @@ export class Professor extends BaseEntity {
    * Representa a relação entre o professor e as turmas que ele ensina.
    * Permite atribuir múltiplas turmas a um professor.
    */
-  @ManyToMany(() => Turma)
+  @ManyToMany(() => Turma, { eager: true })
   @JoinTable({ name: 'professoresTurma' })
-  turmas: Turma[] | null;
+  turmas: Turma[];
 
   @Column()
   senha: string;

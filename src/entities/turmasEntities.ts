@@ -62,7 +62,7 @@ export class Turma extends BaseEntity {
   })
   turmaApelido: string;
 
-  @ManyToOne(() => Admin)
+  @ManyToOne(() => Admin, { eager: true })
   admin: Admin;
 
   @OneToMany(() => Aluno, (aluno) => aluno.turma)

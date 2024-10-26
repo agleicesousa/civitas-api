@@ -14,12 +14,12 @@ export class ProfessorController {
    */
   async criarProfessor(req: Request, res: Response) {
     try {
-      const { senha, turmas, membroId } = req.body;
+      const { senha, membroId, turmasApelido } = req.body;
 
       const novoProfessor = await this.professorService.criarProfessor(
         senha,
-        turmas,
-        membroId
+        Number(membroId),
+        turmasApelido
       );
 
       res.status(201).json(novoProfessor);
@@ -50,9 +50,9 @@ export class ProfessorController {
   async buscarProfessorPorId(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const professorId = Number(id);
-      const professor =
-        await this.professorService.buscarProfessorPorId(professorId);
+      const professor = await this.professorService.buscarProfessorPorId(
+        Number(id)
+      );
       return res.json(professor);
     } catch (error) {
       return res
@@ -69,8 +69,7 @@ export class ProfessorController {
   async deletarProfessor(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const professorId = Number(id);
-      await this.professorService.deletarProfessor(professorId);
+      await this.professorService.deletarProfessor(Number(id));
       return res.status(204).send();
     } catch (error) {
       return res
@@ -87,14 +86,14 @@ export class ProfessorController {
    */
   async editarProfessor(req: Request, res: Response): Promise<Response> {
     try {
-      const id = parseInt(req.params.id, 10);
-      const { turmas, senha, membroId } = req.body;
+      const id = req.params.id;
+      const { turmasApelidos, senha, membroId } = req.body;
 
-      const professorAtualizado = await this.professorService.editar(
-        id,
-        turmas,
+      const professorAtualizado = await this.professorService.editarProfessor(
+        Number(id),
+        turmasApelidos,
         senha,
-        membroId
+        Number(membroId)
       );
 
       return res.json(professorAtualizado);

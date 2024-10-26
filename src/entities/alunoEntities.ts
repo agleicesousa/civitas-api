@@ -10,7 +10,7 @@ export class Aluno extends BaseEntity {
    * Um membro corresponde a um aluno.
    * @type {Membros}
    */
-  @OneToOne(() => Membros)
+  @OneToOne(() => Membros, { eager: true })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
@@ -26,7 +26,7 @@ export class Aluno extends BaseEntity {
    * Relacionamento com a entidade `Turma`, indicando a turma à qual o aluno pertence.
    * @type {Turma}
    */
-  @ManyToOne(() => Turma, { eager: true })
+  @ManyToOne(() => Turma, (turma) => turma.alunos)
   @JoinColumn({ name: 'turmaId' })
   turma: Turma;
 }

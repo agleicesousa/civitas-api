@@ -2,27 +2,29 @@ import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
 import { Turma } from '../entities/turmasEntities';
 import { Membros } from '../entities/membrosEntities';
-
+import { In } from 'typeorm';
+import { criptografarSenha } from '../utils/senhaUtils';
 /**
  * Classe responsável por gerenciar operações relacionadas a Professores.
  */
 export class ProfessorService {
   private professorRepository = MysqlDataSource.getRepository(Professor);
   private membrosRepository = MysqlDataSource.getRepository(Membros);
+  private turmasRepository = MysqlDataSource.getRepository(Turma);
 
   /**
    * Cria um novo professor.
    *
    * @param senha - A senha do professor.
-   * @param turmas - Lista de turmas associadas ao professor.
+   * @param turmasApelido - Array de apelidos das turmas associadas ao professor.
    * @param membroId - ID do membro associado ao professor.
    * @throws Error se o membro não for encontrado
    * @returns O professor criado.
    */
   async criarProfessor(
     senha: string,
-    turmas: Turma[],
-    membroId: number
+    membroId: number,
+    turmaApelido: string[]
   ): Promise<Professor> {
     const membro = await this.membrosRepository.findOneBy({ id: membroId });
 
@@ -30,12 +32,15 @@ export class ProfessorService {
       throw new Error(`Membro com ID ${membroId} não encontrado`);
     }
 
+    const turmas = await this.turmasRepository.findBy({
+      turmaApelido: In(turmaApelido)
+    });
+
     const novoProfessor = this.professorRepository.create({
       senha,
       membro,
       turmas
     });
-
     return await this.professorRepository.save(novoProfessor);
   }
   /**
@@ -76,25 +81,30 @@ export class ProfessorService {
    * @returns O resultado da operação de deleção.
    */
   async deletarProfessor(id: number) {
-    const resultado = await this.professorRepository.delete(id);
+    const professor = await this.professorRepository.findOne({
+      where: { id },
+      relations: ['membro']
+    });
 
-    if (resultado.affected === 0) {
+    if (!professor) {
       throw new Error(`Professor com ID ${id} não encontrado`);
     }
-    return resultado;
+    await this.professorRepository.delete(id);
+    await this.membrosRepository.delete(professor.membro.id);
   }
-  /**
-   * Edita os detalhes de um professor existente.
+    /**
+   * Atualiza os dados de um professor existente.
    *
-   * @param id - O ID do professor a ser editado.
-   * @param turmas - Novas turmas associadas ao professor || null se não houver turmas.
-   * @param senha - A nova senha do professor.
-   * @param membroId - O ID do membro a ser associado ao professor.
-   * @returns O professor atualizado.
+   * @param id - ID do professor que será atualizado.
+   * @param turmasApelidos - Array de apelidos das novas turmas que serão associadas ao professor;
+   * @param senha - Nova senha do professor.
+   * @param membroId - ID do membro que será associado ao professor.
+   * @returns Retorna o professor atualizado com as novas associações e dados.
+   * @throws Lança um erro se o professor ou membro não forem encontrados.
    */
-  async editar(
+  async editarProfessor(
     id: number,
-    turmas: Turma[] | null,
+    turmasApelidos: string[],
     senha: string,
     membroId: number
   ) {
@@ -110,8 +120,13 @@ export class ProfessorService {
       throw new Error(`Professor com ID ${id} não encontrado`);
     }
 
+    const turmas = await this.turmasRepository.findBy({
+      turmaApelido: In(turmasApelidos)
+    });
+
+    professorExistente.senha = await criptografarSenha(senha);
+
     Object.assign(professorExistente, {
-      senha,
       membro,
       turmas: turmas || professorExistente.turmas
     });

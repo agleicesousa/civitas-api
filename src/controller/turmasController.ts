@@ -16,7 +16,16 @@ export class TurmasController {
    */
   async criarTurma(req: Request, res: Response): Promise<Response> {
     try {
-      const novaTurma = await this.turmasService.criar(req.body);
+      const { turmaApelido, periodoLetivo, anoLetivo, ensino, adminId } =
+        req.body;
+
+      const novaTurma = await this.turmasService.criar(
+        anoLetivo,
+        periodoLetivo,
+        ensino,
+        turmaApelido,
+        Number(adminId)
+      );
       return res.status(201).json(novaTurma);
     } catch (error) {
       return res.status(404).json({ error: 'Erro ao criar turma' });
@@ -49,7 +58,7 @@ export class TurmasController {
   async buscarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const turma = await this.turmasService.buscarPorId(id);
+      const turma = await this.turmasService.buscarPorId(Number(id));
       return res.status(200).json(turma);
     } catch (error) {
       return res.status(404).json({ error: 'Erro ao buscar turma' });
@@ -66,7 +75,10 @@ export class TurmasController {
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const turmaAtualizada = await this.turmasService.editar(id, req.body);
+      const turmaAtualizada = await this.turmasService.editar(
+        Number(id),
+        req.body
+      );
       return res.status(200).json(turmaAtualizada);
     } catch (error) {
       return res.status(404).json({ error: error.message });
@@ -83,7 +95,7 @@ export class TurmasController {
   async deletarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      await this.turmasService.deletar(id);
+      await this.turmasService.deletar(Number(id));
       return res.status(204).send();
     } catch (error) {
       return res.status(404).json({ error: 'Erro ao deletar turma' });
