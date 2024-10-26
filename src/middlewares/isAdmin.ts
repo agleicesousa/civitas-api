@@ -15,7 +15,7 @@ export function isAdmin(req: Request, res: Response, next: NextFunction) {
   if (user.tipoConta === 'admin') {
     next();
   } else {
-    res.status(403).json({
+    return res.status(403).json({
       error:
         'Acesso negado. Apenas administradores podem realizar essa operação.'
     });

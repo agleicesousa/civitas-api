@@ -1,9 +1,5 @@
 import { Request, Response } from 'express';
 import { AdminService } from '../services/adminService';
-import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
-import { gerarToken } from '../utils/jwtUtils';
-import { MysqlDataSource } from '../config/database';
-import { Admin } from '../entities/adminEntities';
 
 export class AdminController {
   private adminService = new AdminService();
@@ -12,7 +8,7 @@ export class AdminController {
    * Lista todos os administradores.
    * @param req - Objeto da requisição HTTP.
    * @param res - Objeto da resposta HTTP.
-   * @returns Retorna a lista de administradores em formato JSON ou um erro em caso de falha.
+   * @returns Uma lista de administradores em formato JSON.
    */
   async listarAdmins(req: Request, res: Response): Promise<Response> {
     try {
@@ -27,9 +23,8 @@ export class AdminController {
    * Busca um administrador específico pelo ID.
    * @param req - Objeto da requisição HTTP, contendo o ID do administrador nos parâmetros.
    * @param res - Objeto da resposta HTTP.
-   * @returns Retorna o administrador correspondente ao ID, ou uma mensagem de erro se não encontrado.
+   * @returns O administrador correspondente ao ID ou uma mensagem de erro se não encontrado.
    */
-
   async buscarAdminPorId(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
 
@@ -46,19 +41,22 @@ export class AdminController {
 
   /**
    * Cria um novo administrador.
-   * @param req - Objeto da requisição HTTP, contendo as informações do administrador nos campos do corpo da requisição.
+   * @param req - Objeto da requisição HTTP, contendo as informações do administrador no corpo.
    * @param res - Objeto da resposta HTTP.
-   * @returns Retorna o novo administrador criado em formato JSON ou um erro em caso de falha.
+   * @returns O novo administrador criado em formato JSON.
    */
   async criarAdmin(req: Request, res: Response): Promise<Response> {
     const { apelido, email, senha, membroId } = req.body;
 
+    if (!email) {
+      return res.status(400).json({ error: 'O campo email é obrigatório.' });
+    }
+
     try {
-      const senhaCriptografada = await criptografarSenha(senha);
       const novoAdmin = await this.adminService.criarAdmin(
         apelido,
         email,
-        senhaCriptografada,
+        senha,
         Number(membroId)
       );
 
@@ -72,11 +70,15 @@ export class AdminController {
    * Atualiza um administrador existente.
    * @param req - Objeto da requisição HTTP, contendo o ID do administrador nos parâmetros e os dados atualizados no corpo.
    * @param res - Objeto da resposta HTTP.
-   * @returns Retorna o administrador atualizado em formato JSON ou um erro em caso de falha.
+   * @returns O administrador atualizado ou uma mensagem de erro se não encontrado.
    */
   async atualizarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     const { apelido, email, senha, membroId } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'O campo email é obrigatório.' });
+    }
 
     try {
       const adminAtualizado = await this.adminService.atualizarAdmin(
@@ -99,13 +101,9 @@ export class AdminController {
 
   /**
    * Exclui um administrador existente.
-   * Verifica se o usuário autenticado não está tentando excluir sua própria conta.
    * @param req - Objeto da requisição HTTP, contendo o ID do administrador nos parâmetros.
    * @param res - Objeto da resposta HTTP.
-   * @returns Retorna uma resposta sem conteúdo (204) se o administrador for excluído com sucesso.
-   *          Retorna um erro 403 se o usuário autenticado tentar excluir sua própria conta.
-   *          Retorna um erro 404 se o administrador não for encontrado.
-   *          Retorna um erro 500 se ocorrer um erro inesperado.
+   * @returns Uma resposta sem conteúdo (204) se o administrador for excluído com sucesso ou uma mensagem de erro.
    */
   async deletarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
@@ -127,36 +125,53 @@ export class AdminController {
       return res.status(500).json({ error: error.message });
     }
   }
-
   /**
    * Realiza o login de um administrador e retorna um token JWT.
-   * @param req - Objeto da requisição HTTP, contendo o email e senha do administrador nos campos do corpo da requisição.
+   * @param req - Objeto da requisição HTTP, contendo o email e senha do administrador no corpo.
    * @param res - Objeto da resposta HTTP.
-   * @returns Retorna um token JWT em formato JSON ou um erro em caso de falha.
+   * @returns O token JWT gerado em formato JSON ou uma mensagem de erro.
    */
   async login(req: Request, res: Response): Promise<Response> {
     const { email, senha } = req.body;
 
+    const erros = [];
+
+    // Valida se o email foi fornecido
+    if (!email) {
+      erros.push({ campo: 'email', erro: 'E-mail é obrigatório' });
+    } else if (!this.validarEmail(email)) {
+      erros.push({ campo: 'email', erro: 'Formato de e-mail inválido' });
+    }
+
+    // Valida se a senha foi fornecida
+    if (!senha) {
+      erros.push({ campo: 'senha', erro: 'Senha é obrigatória' });
+    }
+
+    // Se houver erros de validação, retorna com código 400
+    if (erros.length > 0) {
+      return res.status(400).json({ erros });
+    }
+
     try {
-      const adminRepository = MysqlDataSource.getRepository(Admin);
-      const admin = await adminRepository.findOne({ where: { email } });
-
-      if (!admin) {
-        return res.status(404).json({ error: 'Administrador não encontrado' });
-      }
-
-      const senhaValida = await compararSenha(senha, admin.senha);
-      if (!senhaValida) {
-        return res.status(401).json({ error: 'Senha inválida' });
-      }
-
-      const token = gerarToken({ id: admin.id, email: admin.email });
-
-      // Ajuste para retornar apenas o token
+      // Tenta realizar o login após a validação dos campos
+      const { token } = await this.adminService.login(email, senha);
       return res.json({ token });
     } catch (error) {
-      console.error('Erro ao realizar login:', error);
-      return res.status(500).json({ error: 'Erro ao realizar login' });
+      // Se as credenciais forem inválidas, retorna um erro de autenticação
+      return res
+        .status(401)
+        .json({ error: 'Seu e-mail ou senha estão incorretos.' });
     }
+  }
+
+  /**
+   * Função utilitária para validar o formato do email.
+   * @param email - O email a ser validado.
+   * @returns `true` se o formato do email for válido, `false` caso contrário.
+   */
+  private validarEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 }

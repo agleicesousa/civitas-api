@@ -2,30 +2,27 @@ import { MysqlDataSource } from '../config/database';
 import { Admin } from '../entities/adminEntities';
 import { Membros } from '../entities/membrosEntities';
 import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
-import 'dotenv/config';
-import jwt from 'jsonwebtoken';
+import { gerarToken } from '../utils/jwtUtils';
 
 export class AdminService {
+  private adminRepository = MysqlDataSource.getRepository(Admin);
+  private membrosRepository = MysqlDataSource.getRepository(Membros);
+
   /**
-   * Retorna uma lista de objetos que representam os administradores, incluindo o membro associado a cada um.
-   * @returns Uma lista de objetos que representam os administradores.
+   * Lista todos os administradores, incluindo o membro associado.
+   * @returns Uma lista de todos os administradores com seus respectivos membros.
    */
   async listarAdmins() {
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    return await adminRepository.find({ relations: ['membro'] });
+    return await this.adminRepository.find({ relations: ['membro'] });
   }
 
   /**
-   * Retorna um objeto que representa o administrador com o ID especificado,
-   * incluindo o membro associado a ele.
-   * @param id - O ID do administrador a ser buscado.
-   * @returns Um objeto que representa o administrador com o ID especificado,
-   *          ou `undefined` se o administrador com o ID especificado n o
-   *          for encontrado.
+   * Busca um administrador pelo ID.
+   * @param id - ID do administrador.
+   * @returns O administrador encontrado ou `undefined` se não encontrado.
    */
   async buscarAdminPorId(id: number) {
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    return await adminRepository.findOne({
+    return await this.adminRepository.findOne({
       where: { id },
       relations: ['membro']
     });
@@ -33,12 +30,12 @@ export class AdminService {
 
   /**
    * Cria um novo administrador.
-   * @param apelido - O apelido do administrador.
-   * @param email - O email do administrador.
-   * @param senha - A senha do administrador.
-   * @param membroId - O ID do membro associado ao administrador.
+   * @param apelido - Apelido do administrador.
+   * @param email - Email do administrador.
+   * @param senha - Senha do administrador.
+   * @param membroId - ID do membro associado.
    * @returns O novo administrador criado.
-   * @throws {Error} Se o membro com o ID especificado n o for encontrado.
+   * @throws {Error} Se o membro associado não for encontrado ou se o email for inválido.
    */
   async criarAdmin(
     apelido: string,
@@ -46,33 +43,36 @@ export class AdminService {
     senha: string,
     membroId: number
   ) {
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
-    const adminRepository = MysqlDataSource.getRepository(Admin);
+    if (!email || !this.validarEmail(email)) {
+      throw new Error('Email inválido.');
+    }
 
-    const membro = await membrosRepository.findOneBy({ id: membroId });
+    const membro = await this.membrosRepository.findOneBy({ id: membroId });
     if (!membro) {
       throw new Error('Membro não encontrado.');
     }
 
-    const novoAdmin = adminRepository.create({
+    const senhaCriptografada = await criptografarSenha(senha);
+
+    const novoAdmin = this.adminRepository.create({
       apelido,
       email,
-      senha,
+      senha: senhaCriptografada,
       membro
     });
 
-    return await adminRepository.save(novoAdmin);
+    return await this.adminRepository.save(novoAdmin);
   }
 
   /**
    * Atualiza um administrador existente.
-   * @param id - O ID do administrador a ser atualizado.
-   * @param apelido - O novo apelido do administrador.
-   * @param email - O novo email do administrador.
-   * @param senha - A nova senha do administrador, ou nulo se n o quiser atualizar a senha.
-   * @param membroId - O ID do membro associado ao administrador.
-   * @returns O administrador atualizado, ou nulo se o administrador n o for encontrado.
-   * @throws {Error} Se o membro com o ID especificado n o for encontrado.
+   * @param id - ID do administrador.
+   * @param apelido - Novo apelido.
+   * @param email - Novo email.
+   * @param senha - Nova senha (opcional).
+   * @param membroId - ID do membro associado.
+   * @returns O administrador atualizado ou `null` se não for encontrado.
+   * @throws {Error} Se o membro associado não for encontrado ou se o email for inválido.
    */
   async atualizarAdmin(
     id: number,
@@ -81,16 +81,16 @@ export class AdminService {
     senha: string | null,
     membroId: number
   ) {
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    const membro = await MysqlDataSource.getRepository(Membros).findOneBy({
-      id: membroId
-    });
+    if (!email || !this.validarEmail(email)) {
+      throw new Error('Email inválido.');
+    }
 
+    const membro = await this.membrosRepository.findOneBy({ id: membroId });
     if (!membro) {
       throw new Error('Membro não encontrado.');
     }
 
-    const admin = await adminRepository.findOneBy({ id });
+    const admin = await this.adminRepository.findOneBy({ id });
     if (!admin) {
       return null;
     }
@@ -102,32 +102,32 @@ export class AdminService {
     }
     admin.membro = membro;
 
-    return await adminRepository.save(admin);
+    return await this.adminRepository.save(admin);
   }
 
   /**
-   * Deleta um administrador existente.
-   * @param id - O ID do administrador a ser deletado.
-   * @returns Um objeto com a propriedade `affected` que indica quantos registros foram afetados.
+   * Deleta um administrador.
+   * @param id - ID do administrador a ser deletado.
+   * @returns O resultado da operação de exclusão.
    */
   async deletarAdmin(id: number) {
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    return await adminRepository.delete(id);
+    return await this.adminRepository.delete(id);
   }
 
   /**
    * Realiza o login de um administrador e retorna um token JWT.
-   * @param email - O email do administrador.
-   * @param senha - A senha do administrador.
-   * @returns Um objeto com a propriedade `token` que é o token JWT.
-   * @throws {Error} Se o administrador não for encontrado.
-   * @throws {Error} Se a senha for inválida.
+   * @param email - Email do administrador.
+   * @param senha - Senha do administrador.
+   * @returns Um objeto contendo o token JWT gerado.
+   * @throws {Error} Se o administrador não for encontrado ou a senha for inválida.
    */
   async login(email: string, senha: string) {
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    const admin = await adminRepository.findOne({ where: { email } });
+    const admin = await this.adminRepository.findOne({
+      where: { email },
+      relations: ['membro']
+    });
 
-    if (!admin) {
+    if (!admin?.membro) {
       throw new Error('Administrador não encontrado.');
     }
 
@@ -135,9 +135,24 @@ export class AdminService {
     if (!senhaValida) {
       throw new Error('Senha inválida.');
     }
-    const { id } = admin;
-    jwt.sign({ id, email }, process.env.JWT_SECRET, {
-      expiresIn: '1d'
+
+    // Gera o token JWT usando o utilitário de token
+    const token = gerarToken({
+      id: admin.id,
+      email: admin.email,
+      tipoConta: admin.membro.tipoConta
     });
+
+    return { token };
+  }
+
+  /**
+   * Valida o formato do email.
+   * @param email - O email a ser validado.
+   * @returns `true` se o email for válido, `false` caso contrário.
+   */
+  private validarEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 }

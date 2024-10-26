@@ -1,21 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   id: number;
   tipoConta: string;
-  apelido: string;
+  email: string;
 }
 
-/**
- * Middleware para autenticar usuários com base em um token JWT.
- * Verifica se o token é válido e o decodifica, adicionando os dados do
- * usuário ao req.user. Se o token for inválido, retorna um erro 403.
- * @param req - Objeto da requisição HTTP.
- * @param res - Objeto da resposta HTTP.
- * @param next - Função de callback para passar o controle para o próximo middleware.
- */
 export async function authenticateJWT(
   req: Request,
   res: Response,
@@ -37,11 +28,12 @@ export async function authenticateJWT(
     req.user = {
       id: decoded.id,
       tipoConta: decoded.tipoConta,
-      apelido: decoded.apelido
+      email: decoded.email
     };
 
     next();
   } catch (error) {
+    console.error('Erro ao verificar token:', error);
     return res.status(403).json({ error: 'Token inválido.' });
   }
 }
