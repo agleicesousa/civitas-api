@@ -2,6 +2,7 @@ import { Entity, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Turma } from './turmasEntities';
 import { Membros } from './membrosEntities';
+import { Admin } from './adminEntities';
 
 @Entity('alunos')
 export class Aluno extends BaseEntity {
@@ -21,6 +22,14 @@ export class Aluno extends BaseEntity {
   @ManyToOne(() => Membros, { eager: true })
   @JoinColumn({ name: 'responsavelId' })
   responsavel: Membros;
+
+  /**
+   * Relacionamento ManyToOne com a entidade Membros (Admin).
+   * Muitos alunos podem estar associados ao mesmo administrador.
+   */
+  @ManyToOne(() => Membros, { eager: true })
+  @JoinColumn({ name: 'adminId' })
+  admin: Admin;
 
   /**
    * Relacionamento com a entidade `Turma`, indicando a turma à qual o aluno pertence.
