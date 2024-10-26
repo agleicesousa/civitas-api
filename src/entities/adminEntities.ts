@@ -3,7 +3,7 @@ import {
   Column,
   BeforeInsert,
   BeforeUpdate,
-  ManyToOne,
+  OneToOne,
   JoinColumn
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
@@ -40,6 +40,13 @@ export class Admin extends BaseEntity {
    */
   @Column()
   senha: string;
+
+  @OneToOne(() => Membros, { eager: true })
+  @JoinColumn({ name: 'membroId' })
+  membro: Membros;
+
+  @BeforeInsert()
+  @BeforeUpdate()
 
   /**
    * Antes de inserir ou atualizar um registro de administrador, criptografa a senha.
