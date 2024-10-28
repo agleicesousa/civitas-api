@@ -3,30 +3,53 @@ import {
   Column,
   BeforeInsert,
   BeforeUpdate,
-  ManyToOne,
+  OneToOne,
   JoinColumn,
+  ManyToOne,
   OneToMany
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
-import { compararSenha, criptografarSenha } from '../utils/senhaUtils';
 import { Turma } from './turmasEntities';
+import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity()
 export class Admin extends BaseEntity {
-  @Column({ unique: true })
-  apelido: string;
-
-  @Column({ unique: true })
-  email: string;
-
-  @Column()
-  senha: string;
-
-  @ManyToOne(() => Membros, { eager: true })
+  /**
+   * Relacionamento com a entidade `Membros`, indicando que um administrador é também um membro.
+   * @type {Membros}
+   */
+  @OneToOne(() => Membros, { eager: true })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
+  /**
+   * Apelido único do administrador.
+   * @type {string}
+   */
+  @Column({ unique: true })
+  apelido: string;
+
+  /**
+   * E-mail único do administrador.
+   * @type {string}
+   */
+  @Column({ unique: true })
+  email: string;
+
+  /**
+   * Senha do administrador, armazenada de forma criptografada.
+   * @type {string}
+   */
+  @Column()
+  senha: string;
+
+   /**
+   * Relação com as turmas gerenciadas pelo administrador.
+   * Esta propriedade representa todas as turmas associadas a este administrador.
+   * 
+   * @type {Turma[]}
+   */
   @OneToMany(() => Turma, (turma) => turma.admin)
   turmas: Turma[];
 
@@ -34,30 +57,21 @@ export class Admin extends BaseEntity {
   @BeforeUpdate()
 
   /**
-   * Verifica se a senha esá em formato de texto puro e, caso esteja,
-   * a criptografa usando o algoritmo bcrypt.
+   * Antes de inserir ou atualizar um registro de administrador, criptografa a senha.
    */
+  @BeforeInsert()
+  @BeforeUpdate()
   async handleCriptografiaSenha(): Promise<void> {
-    // Evita recriptografar senhas que já foram criptografadas
     if (this.senha && this.isSenhaPlainText()) {
       this.senha = await criptografarSenha(this.senha);
     }
   }
 
   /**
-   * Faz uma verifica o simples se a senha come a com o prefixo do hash bcrypt ($2b$).
-   * @returns true se a senha for em formato de texto puro, false caso contrário.
+   * Verifica se a senha está em formato de texto puro.
+   * @returns {boolean} true se a senha estiver em texto puro, false caso contrário.
    */
   private isSenhaPlainText(): boolean {
     return !this.senha.startsWith('$2b$'); // Hash bcrypt começa com $2b$
-  }
-
-  /**
-   * Compara uma senha fornecida com a senha do administrador.
-   * @param senhaPlana - A senha em formato de texto puro fornecida pelo usuário.
-   * @returns true se as senhas correspondem, false caso contrário.
-   */
-  async compararSenha(senhaPlana: string): Promise<boolean> {
-    return await compararSenha(senhaPlana, this.senha);
   }
 }

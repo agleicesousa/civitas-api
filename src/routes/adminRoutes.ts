@@ -8,12 +8,15 @@
  *         id:
  *           type: integer
  *           description: ID do administrador
+ *           example: 1
  *         apelido:
  *           type: string
  *           description: Apelido do administrador
+ *           example: admin123
  *         email:
  *           type: string
  *           description: Email do administrador
+ *           example: admin@example.com
  *         membro:
  *           type: object
  *           description: Membro associado ao administrador
@@ -21,224 +24,340 @@
  *             id:
  *               type: integer
  *               description: ID do membro
+ *               example: 1
  *             nome:
  *               type: string
  *               description: Nome do membro
+ *               example: João Silva
  *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Data de criação do administrador
+ *           description: Data de criação do administrador adicionada automaticamente
+ *           example: '2023-10-21T12:34:56Z'
  *         updatedAt:
  *           type: string
  *           format: date-time
- *           description: Data de última atualização do administrador
+ *           description: Data de última atualização do administrador adicionada automaticamente
+ *           example: '2023-10-22T15:45:30Z'
  *
  * tags:
- *   name: Administradores
- *   description: Operações de gerenciamento de administradores
- *
- * /admin/login:
- *   post:
- *     summary: Autentica um administrador e retorna um token JWT
- *     tags: [Administradores]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - login
- *               - senha
- *             properties:
- *               login:
- *                 type: string
- *                 description: Email ou apelido do administrador
- *               senha:
- *                 type: string
- *                 description: Senha do administrador
- *     responses:
- *       200:
- *         description: Login bem-sucedido, retorna o token JWT
+ *   - name: Administradores
+ *     description: Operações de gerenciamento de administradores
+ */
+
+/**
+ * @swagger
+ * paths:
+ *   /admin/login:
+ *     post:
+ *       summary: Autentica um administrador e retorna um token JWT
+ *       tags: [Administradores]
+ *       requestBody:
+ *         required: true
  *         content:
  *           application/json:
  *             schema:
  *               type: object
+ *               required:
+ *                 - email
+ *                 - senha
  *               properties:
- *                 token:
+ *                 email:
  *                   type: string
- *                   description: Token JWT para autenticação
- *       401:
- *         description: Credenciais inválidas
+ *                   description: Email ou apelido do administrador
+ *                   example: admin@example.com
+ *                 senha:
+ *                   type: string
+ *                   description: Senha do administrador
+ *                   example: Ab12345*
+ *       responses:
+ *         200:
+ *           description: Login bem-sucedido, retorna o token JWT
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   token:
+ *                     type: string
+ *                     description: Token JWT para autenticação
+ *                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         401:
+ *           description: Credenciais inválidas
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Credenciais inválidas
  *
- * /admin:
- *   get:
- *     summary: Lista todos os administradores
- *     tags: [Administradores]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Lista de administradores
+ *   /admin:
+ *     get:
+ *       summary: Lista todos os administradores
+ *       tags: [Administradores]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         200:
+ *           description: Lista de administradores
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Admin'
+ *               example:
+ *                 - id: 1
+ *                   apelido: admin123
+ *                   email: admin@example.com
+ *                   membro:
+ *                     id: 1
+ *                     nome: João Silva
+ *                   createdAt: '2023-10-21T12:34:56Z'
+ *                   updatedAt: '2023-10-22T15:45:30Z'
+ *         401:
+ *           description: Token de autenticação não fornecido ou inválido
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Token de autenticação não fornecido ou inválido
+ *         403:
+ *           description: Acesso negado (não autorizado)
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Acesso negado
+ *     post:
+ *       summary: Cria um novo administrador
+ *       tags: [Administradores]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
+ *               type: object
+ *               required:
+ *                 - apelido
+ *                 - email
+ *                 - senha
+ *                 - membroId
+ *               properties:
+ *                 apelido:
+ *                   type: string
+ *                   description: Apelido do administrador
+ *                   example: admin123
+ *                 email:
+ *                   type: string
+ *                   description: Email do administrador
+ *                   example: admin@example.com
+ *                 senha:
+ *                   type: string
+ *                   description: Senha do administrador
+ *                   example: Ab12345*
+ *                 membroId:
+ *                   type: integer
+ *                   description: ID do membro associado ao administrador
+ *                   example: 1
+ *       responses:
+ *         201:
+ *           description: Administrador criado com sucesso
+ *           content:
+ *             application/json:
+ *               schema:
  *                 $ref: '#/components/schemas/Admin'
- *       401:
- *         description: Token de autenticação não fornecido ou inválido
- *       403:
- *         description: Acesso negado (não autorizado)
- *
- *   post:
- *     summary: Cria um novo administrador
- *     tags: [Administradores]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
+ *               example:
+ *                 id: 1
+ *                 apelido: admin123
+ *                 email: admin@example.com
+ *                 membro:
+ *                   id: 1
+ *                   nome: João Silva
+ *                 createdAt: '2023-10-21T12:34:56Z'
+ *                 updatedAt: '2023-10-21T12:34:56Z'
+ *         500:
+ *           description: Erro ao criar administrador
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Erro ao criar administrador
+ */
+
+/**
+ * @swagger
+ *   /admin/{id}:
+ *     get:
+ *       summary: Busca um administrador pelo ID
+ *       tags: [Administradores]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - name: id
+ *           in: path
+ *           required: true
  *           schema:
- *             type: object
- *             required:
- *               - apelido
- *               - email
- *               - senha
- *               - membroId
- *             properties:
- *               apelido:
- *                 type: string
- *                 description: Apelido do administrador
- *               email:
- *                 type: string
- *                 description: Email do administrador
- *               senha:
- *                 type: string
- *                 description: Senha do administrador
- *               membroId:
- *                 type: integer
- *                 description: ID do membro associado ao administrador
- *     responses:
- *       201:
- *         description: Administrador criado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Admin'
- *       500:
- *         description: Erro ao criar administrador
+ *             type: integer
+ *           description: O ID do administrador
+ *           example: 1
+ *       responses:
+ *         200:
+ *           description: Administrador encontrado
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Admin'
+ *               example:
+ *                 id: 1
+ *                 apelido: admin123
+ *                 email: admin@example.com
+ *                 membro:
+ *                   id: 1
+ *                   nome: João Silva
+ *                 createdAt: '2023-10-21T12:34:56Z'
+ *                 updatedAt: '2023-10-22T15:45:30Z'
+ *         404:
+ *           description: Administrador não encontrado
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Administrador não encontrado
+ *         401:
+ *           description: Token de autenticação não fornecido ou inválido
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Token de autenticação não fornecido ou inválido
+ *         403:
+ *           description: Acesso negado (não autorizado)
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Acesso negado
  *
- * /admin/{id}:
- *   get:
- *     summary: Busca um administrador pelo ID
- *     tags: [Administradores]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: O ID do administrador
- *     responses:
- *       200:
- *         description: Administrador encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Admin'
- *       404:
- *         description: Administrador não encontrado
- *       401:
- *         description: Token de autenticação não fornecido ou inválido
- *       403:
- *         description: Acesso negado (não autorizado)
- *
- *   put:
- *     summary: Atualiza um administrador pelo ID
- *     tags: [Administradores]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID do administrador
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
+ *     put:
+ *       summary: Atualiza um administrador pelo ID
+ *       tags: [Administradores]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - name: id
+ *           in: path
+ *           required: true
  *           schema:
- *             type: object
- *             required:
- *               - apelido
- *               - email
- *               - senha
- *               - membroId
- *             properties:
- *               apelido:
- *                 type: string
- *                 description: Apelido do administrador
- *               email:
- *                 type: string
- *                 description: Email do administrador
- *               senha:
- *                 type: string
- *                 description: Senha do administrador (opcional)
- *               membroId:
- *                 type: integer
- *                 description: ID do membro associado ao administrador
- *     responses:
- *       200:
- *         description: Administrador atualizado com sucesso
+ *             type: integer
+ *           description: O ID do administrador
+ *           example: 1
+ *       requestBody:
+ *         required: true
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Admin'
- *       404:
- *         description: Administrador não encontrado
- *       500:
- *         description: Erro ao atualizar administrador
+ *               type: object
+ *               required:
+ *                 - apelido
+ *                 - email
+ *                 - senha
+ *                 - membroId
+ *               properties:
+ *                 apelido:
+ *                   type: string
+ *                   description: Apelido do administrador
+ *                   example: admin123
+ *                 email:
+ *                   type: string
+ *                   description: Email do administrador
+ *                   example: admin@example.com
+ *                 senha:
+ *                   type: string
+ *                   description: Senha do administrador (opcional)
+ *                   example: Ab12345*
+ *                 membroId:
+ *                   type: integer
+ *                   description: ID do membro associado ao administrador
+ *                   example: 1
+ *       responses:
+ *         200:
+ *           description: Administrador atualizado com sucesso
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/Admin'
+ *               example:
+ *                 id: 1
+ *                 apelido: admin123
+ *                 email: admin@example.com
+ *                 membro:
+ *                   id: 1
+ *                   nome: João Silva
+ *                 createdAt: '2023-10-21T12:34:56Z'
+ *                 updatedAt: '2023-10-22T15:45:30Z'
+ *         404:
+ *           description: Administrador não encontrado
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Administrador não encontrado
+ *         500:
+ *           description: Erro ao atualizar administrador
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Erro ao atualizar administrador
  *
- *   delete:
- *     summary: Deleta um administrador pelo ID
- *     tags: [Administradores]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID do administrador
- *     responses:
- *       204:
- *         description: Administrador deletado com sucesso
- *       404:
- *         description: Administrador não encontrado
- *       500:
- *         description: Erro ao deletar administrador
+ *     delete:
+ *       summary: Deleta um administrador pelo ID
+ *       tags: [Administradores]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - name: id
+ *           in: path
+ *           required: true
+ *           schema:
+ *             type: integer
+ *           description: O ID do administrador
+ *           example: 1
+ *       responses:
+ *         204:
+ *           description: Administrador deletado com sucesso
+ *         404:
+ *           description: Administrador não encontrado
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Administrador não encontrado
+ *         500:
+ *           description: Erro ao deletar administrador
+ *           content:
+ *             application/json:
+ *               example:
+ *                 message: Erro ao deletar administrador
+ *
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 import { isAdmin } from '../middlewares/isAdmin';
+import { validarEmail } from '../middlewares/validarEmail';
 
 const adminRouter = Router();
 const adminController = new AdminController();
 
 /**
  * Rota para autenticar um administrador e obter um token JWT.
+ * Acesso público (não requer autenticação).
  */
 adminRouter.post('/login', (req, res) => adminController.login(req, res));
 
 /**
  * Rota para listar todos os administradores.
+ * Requer autenticação e verificação de privilégios de administrador.
  */
 adminRouter.get('/', authenticateJWT, isAdmin, (req, res) =>
   adminController.listarAdmins(req, res)
@@ -246,6 +365,7 @@ adminRouter.get('/', authenticateJWT, isAdmin, (req, res) =>
 
 /**
  * Rota para buscar um administrador específico por ID.
+ * Requer autenticação e verificação de privilégios de administrador.
  */
 adminRouter.get('/:id', authenticateJWT, isAdmin, (req, res) =>
   adminController.buscarAdminPorId(req, res)
@@ -253,18 +373,23 @@ adminRouter.get('/:id', authenticateJWT, isAdmin, (req, res) =>
 
 /**
  * Rota para criar um novo administrador.
+ * Requer autenticação, verificação de privilégios de administrador e validação de e-mail.
  */
-adminRouter.post('/', (req, res) => adminController.criarAdmin(req, res));
+adminRouter.post('/', validarEmail, authenticateJWT, isAdmin, (req, res) =>
+  adminController.criarAdmin(req, res)
+);
 
 /**
  * Rota para atualizar um administrador existente.
+ * Requer autenticação, verificação de privilégios de administrador e validação de e-mail.
  */
-adminRouter.put('/:id', authenticateJWT, isAdmin, (req, res) =>
+adminRouter.put('/:id', validarEmail, authenticateJWT, isAdmin, (req, res) =>
   adminController.atualizarAdmin(req, res)
 );
 
 /**
  * Rota para deletar um administrador específico por ID.
+ * Requer autenticação e verificação de privilégios de administrador.
  */
 adminRouter.delete('/:id', authenticateJWT, isAdmin, (req, res) =>
   adminController.deletarAdmin(req, res)

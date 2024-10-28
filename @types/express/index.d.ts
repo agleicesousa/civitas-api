@@ -6,7 +6,7 @@ declare global {
       user?: {
         id: number;
         tipoConta: string;
-        apelido: string;
+        email: string;
       };
     }
   }
