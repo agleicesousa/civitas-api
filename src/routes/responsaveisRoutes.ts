@@ -1,13 +1,19 @@
 /**
  * @swagger
  * tags:
- *   name: Responsaveis
- *   description: Gerenciamento de responsáveis
+ *   - name: Responsaveis
+ *     description: Gerenciamento de responsáveis
  */
 
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
  *   schemas:
  *     Responsavel:
  *       type: object
@@ -17,75 +23,100 @@
  *           description: O ID do responsável
  *         membroId:
  *           type: integer
- *           description: O ID do membro associado
+ *           description: ID do membro associado ao responsável
  *         adminId:
  *           type: integer
- *           description: O ID do administrador associado
+ *           description: ID do administrador responsável
  *         alunos:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Aluno'
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: ID do aluno
+ *               nome:
+ *                 type: string
+ *                 description: Nome do aluno
  *           description: Lista de alunos sob responsabilidade desse responsável
  *         dataCriacao:
  *           type: string
  *           format: date-time
- *           description: A data de criação do responsável
+ *           description: Data de criação do responsável
  *         dataAtualizacao:
  *           type: string
  *           format: date-time
- *           description: A data de atualização do responsável
- *       required:
- *         - membroId
- *         - adminId
+ *           description: Data de última atualização do responsável
+ *       example:
+ *         id: 1
+ *         membroId: 3
+ *         adminId: 1
+ *         alunos:
+ *           - id: 10
+ *             nome: "Maria Silva"
+ *           - id: 11
+ *             nome: "João Souza"
+ *         dataCriacao: "2023-01-01T12:00:00Z"
+ *         dataAtualizacao: "2023-01-10T12:00:00Z"
  *
- *     Membro:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: O ID do membro
- *         nome:
- *           type: string
- *           description: O nome do membro
- *         email:
- *           type: string
- *           description: O email do membro
- *         tipoConta:
- *           type: string
- *           enum: ['admin', 'professor', 'aluno', 'responsavel']
- *           description: O tipo de conta do membro
- *       required:
- *         - nome
- *         - email
- *         - tipoConta
+ *   responses:
+ *     UnauthorizedError:
+ *       description: Acesso negado. Token não fornecido.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: "Acesso negado. Token não fornecido."
  *
- *     Aluno:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: O ID do aluno
- *         membroId:
- *           type: integer
- *           description: O ID do membro associado ao aluno
- *         adminId:
- *           type: integer
- *           description: O ID do administrador responsável
- *         responsavelId:
- *           type: integer
- *           description: O ID do responsável pelo aluno
- *         dataCriacao:
- *           type: string
- *           format: date-time
- *           description: A data de criação do aluno
- *         dataAtualizacao:
- *           type: string
- *           format: date-time
- *           description: A data de atualização do aluno
- *       required:
- *         - membroId
- *         - adminId
- *         - responsavelId
+ *     ForbiddenError:
+ *       description: Acesso negado. Permissão insuficiente.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: "Acesso negado. Permissão insuficiente."
+ *
+ *     ValidationError:
+ *       description: Erro de validação dos dados de entrada.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               errors:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     msg:
+ *                       type: string
+ *                       example: "O campo email deve ser válido."
+ *                     param:
+ *                       type: string
+ *                       example: "email"
+ *                     location:
+ *                       type: string
+ *                       example: "body"
+ *
+ *     InternalServerError:
+ *       description: Erro interno no servidor.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: "Algo deu errado!"
+ *               error:
+ *                 type: string
+ *                 example: "Descrição detalhada do erro."
  */
 
 /**
@@ -94,6 +125,8 @@
  *   get:
  *     summary: Lista todos os responsáveis
  *     tags: [Responsaveis]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de responsáveis retornada com sucesso
@@ -103,8 +136,12 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Responsavel'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
  *       500:
- *         description: Erro ao listar responsáveis
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -113,11 +150,13 @@
  *   get:
  *     summary: Busca um responsável pelo ID
  *     tags: [Responsaveis]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: ID do responsável a ser buscado
  *     responses:
@@ -128,9 +167,13 @@
  *             schema:
  *               $ref: '#/components/schemas/Responsavel'
  *       404:
- *         description: Responsável não encontrado
+ *         description: Responsável não encontrado.
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Responsável não encontrado."
  *       500:
- *         description: Erro ao buscar responsável
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -139,6 +182,8 @@
  *   post:
  *     summary: Cria um novo responsável
  *     tags: [Responsaveis]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -152,8 +197,10 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Responsavel'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
  *       500:
- *         description: Erro ao criar responsável
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -162,11 +209,13 @@
  *   put:
  *     summary: Atualiza um responsável existente
  *     tags: [Responsaveis]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: ID do responsável a ser atualizado
  *     requestBody:
@@ -182,32 +231,44 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Responsavel'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
  *         description: Responsável não encontrado
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Responsável não encontrado."
  *       500:
- *         description: Erro ao atualizar responsável
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
  * @swagger
  * /responsaveis/{id}:
  *   delete:
- *     summary: Deleta um responsável
+ *     summary: Deleta um responsável pelo ID
  *     tags: [Responsaveis]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *         description: ID do responsável a ser deletado
  *     responses:
- *       200:
- *         description: Responsável deletado com sucesso
+ *       204:
+ *         description: Responsável deletado com sucesso.
  *       404:
- *         description: Responsável não encontrado
+ *         description: Responsável não encontrado.
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Responsável não encontrado."
  *       500:
- *         description: Erro ao deletar responsável
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 import { Router } from 'express';
@@ -246,7 +307,7 @@ responsaveisRouter.get(
 responsaveisRouter.post(
   '/',
   authenticateJWT,
-  hasPermission('MANAGE_RESPONSAVEIS'),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.criarResponsavel(req, res)
 );
 
@@ -257,7 +318,7 @@ responsaveisRouter.post(
 responsaveisRouter.put(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_RESPONSAVEIS'),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.atualizarResponsavel(req, res)
 );
 
@@ -268,7 +329,7 @@ responsaveisRouter.put(
 responsaveisRouter.delete(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_RESPONSAVEIS'),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.deletarResponsavel(req, res)
 );
 
