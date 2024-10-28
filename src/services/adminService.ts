@@ -43,10 +43,6 @@ export class AdminService {
     senha: string,
     membroId: number
   ) {
-    if (!email || !this.validarEmail(email)) {
-      throw new Error('Email inválido.');
-    }
-
     const membro = await this.membrosRepository.findOneBy({ id: membroId });
     if (!membro) {
       throw new Error('Membro não encontrado.');
@@ -81,10 +77,6 @@ export class AdminService {
     senha: string | null,
     membroId: number
   ) {
-    if (!email || !this.validarEmail(email)) {
-      throw new Error('Email inválido.');
-    }
-
     const membro = await this.membrosRepository.findOneBy({ id: membroId });
     if (!membro) {
       throw new Error('Membro não encontrado.');
@@ -144,15 +136,5 @@ export class AdminService {
     });
 
     return { token };
-  }
-
-  /**
-   * Valida o formato do email.
-   * @param email - O email a ser validado.
-   * @returns `true` se o email for válido, `false` caso contrário.
-   */
-  private validarEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 }

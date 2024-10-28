@@ -27,6 +27,11 @@ export class AdminController {
    */
   async buscarAdminPorId(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
+    const idNumber = Number(id);
+
+    if (isNaN(idNumber)) {
+      return res.status(400).json({ error: 'ID inválido' });
+    }
 
     try {
       const admin = await this.adminService.buscarAdminPorId(Number(id));
@@ -139,8 +144,6 @@ export class AdminController {
     // Valida se o email foi fornecido
     if (!email) {
       erros.push({ campo: 'email', erro: 'E-mail é obrigatório' });
-    } else if (!this.validarEmail(email)) {
-      erros.push({ campo: 'email', erro: 'Formato de e-mail inválido' });
     }
 
     // Valida se a senha foi fornecida
@@ -163,15 +166,5 @@ export class AdminController {
         .status(401)
         .json({ error: 'Seu e-mail ou senha estão incorretos.' });
     }
-  }
-
-  /**
-   * Função utilitária para validar o formato do email.
-   * @param email - O email a ser validado.
-   * @returns `true` se o formato do email for válido, `false` caso contrário.
-   */
-  private validarEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 }

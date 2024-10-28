@@ -344,6 +344,7 @@ import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 import { isAdmin } from '../middlewares/isAdmin';
+import { validarEmail } from '../middlewares/validarEmail';
 
 const adminRouter = Router();
 const adminController = new AdminController();
@@ -372,17 +373,17 @@ adminRouter.get('/:id', authenticateJWT, isAdmin, (req, res) =>
 
 /**
  * Rota para criar um novo administrador.
- * Requer autenticação e verificação de privilégios de administrador.
+ * Requer autenticação, verificação de privilégios de administrador e validação de e-mail.
  */
-adminRouter.post('/', authenticateJWT, isAdmin, (req, res) =>
+adminRouter.post('/', validarEmail, authenticateJWT, isAdmin, (req, res) =>
   adminController.criarAdmin(req, res)
 );
 
 /**
  * Rota para atualizar um administrador existente.
- * Requer autenticação e verificação de privilégios de administrador.
+ * Requer autenticação, verificação de privilégios de administrador e validação de e-mail.
  */
-adminRouter.put('/:id', authenticateJWT, isAdmin, (req, res) =>
+adminRouter.put('/:id', validarEmail, authenticateJWT, isAdmin, (req, res) =>
   adminController.atualizarAdmin(req, res)
 );
 
