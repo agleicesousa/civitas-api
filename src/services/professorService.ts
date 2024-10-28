@@ -92,7 +92,7 @@ export class ProfessorService {
     await this.professorRepository.delete(id);
     await this.membrosRepository.delete(professor.membro.id);
   }
-    /**
+  /**
    * Atualiza os dados de um professor existente.
    *
    * @param id - ID do professor que será atualizado.
