@@ -31,6 +31,12 @@ export class MembrosController {
   async buscarMembroPorId(req: Request, res: Response) {
     try {
       const id = req.params.id;
+      const idNumber = Number(id);
+
+      if (isNaN(idNumber)) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
       const membro = await this.membrosService.buscarMembroPorId(id);
       if (membro) {
         res.json(membro);

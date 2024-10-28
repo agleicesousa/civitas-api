@@ -22,7 +22,7 @@ export class Membros extends BaseEntity {
    * Data de nascimento do membro.
    * @type {Date}
    */
-  @Column()
+  @Column({ nullable: true })
   dataNascimento: Date;
 
   /**
@@ -31,7 +31,7 @@ export class Membros extends BaseEntity {
    * @type {string}
    * @unique
    */
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   rg: string;
 
   /**
@@ -40,7 +40,7 @@ export class Membros extends BaseEntity {
    * @type {string}
    * @unique
    */
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   cpf: string;
 
   /**

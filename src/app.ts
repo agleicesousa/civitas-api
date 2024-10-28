@@ -4,9 +4,11 @@ import swaggerUI from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import { MysqlDataSource } from './config/database';
 import { swaggerConfig } from './config/swagger';
+import { errorHandler } from './middlewares/errorHandler';
 
 import adminRouter from './routes/adminRoutes';
 import membrosRouter from './routes/membrosRoutes';
+import responsaveisRouter from './routes/responsaveisRoutes';
 
 MysqlDataSource.initialize()
   .then(() => {
@@ -23,6 +25,9 @@ app.use(cors({ origin: true }));
 
 app.use('/admin', adminRouter);
 app.use('/membros', membrosRouter);
+app.use('/responsaveis', responsaveisRouter);
+
+app.use(errorHandler);
 
 const swaggerSpec = swaggerJSDoc(swaggerConfig);
 
