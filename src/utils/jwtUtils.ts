@@ -25,6 +25,13 @@ const permissionsByRole = {
   responsavel: ['VIEW_OWN_CHILD_ATIVIDADES']
 };
 
+/**
+ * Gera um token JWT para um usuário com base no payload fornecido.
+ * Inclui permissões de acordo com o tipo de conta do usuário.
+ *
+ * @param payload - Dados do usuário, incluindo `id`, `numeroMatricula` e `tipoConta`.
+ * @returns O token JWT gerado como uma string.
+ */
 export function gerarToken(payload: {
   id: number;
   numeroMatricula: string;
@@ -34,6 +41,14 @@ export function gerarToken(payload: {
   return jwt.sign({ ...payload, permissions }, SECRET_KEY, { expiresIn: '1d' });
 }
 
+/**
+ * Verifica a validade de um token JWT.
+ * Decodifica o token e retorna o payload se o token for válido.
+ *
+ * @param token - Token JWT a ser verificado.
+ * @returns O payload decodificado do token.
+ * @throws {Error} Se o token for inválido ou expirado.
+ */
 export const verificarToken = (token: string): JwtPayload => {
   try {
     return jwt.verify(token, SECRET_KEY) as JwtPayload;
