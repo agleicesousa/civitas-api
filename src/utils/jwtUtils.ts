@@ -5,31 +5,35 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 export interface JwtPayload {
   id: number;
-  email: string;
+  numeroMatricula: string;
   tipoConta: string;
+  permissions: string[];
   iat?: number;
   exp?: number;
 }
 
-/**
- * Gera um token JWT com base no payload informado.
- * @param payload - O payload com informações do usuário a serem incluídas no token.
- * @returns O token JWT gerado.
- */
+// Mapeamento das permissões por tipo de conta
+const permissionsByRole = {
+  admin: [
+    'MANAGE_USERS',
+    'VIEW_MEMBERS',
+    'VIEW_RESPONSAVEIS',
+    'VIEW_ALUNOS',
+    'MANAGE_ATIVIDADES'
+  ],
+  // professor: ['VIEW_ALUNOS', 'MANAGE_OWN_ATIVIDADES'],
+  responsavel: ['VIEW_OWN_CHILD_ATIVIDADES']
+};
+
 export function gerarToken(payload: {
   id: number;
-  email: string;
+  numeroMatricula: string;
   tipoConta: string;
 }): string {
-  return jwt.sign(payload, SECRET_KEY, { expiresIn: '1d' });
+  const permissions = permissionsByRole[payload.tipoConta] || [];
+  return jwt.sign({ ...payload, permissions }, SECRET_KEY, { expiresIn: '1d' });
 }
 
-/**
- * Verifica a validade de um token JWT.
- * @param token - O token JWT a ser verificado.
- * @returns O payload decodificado do token se for válido.
- * @throws {Error} Se o token for inválido ou expirado.
- */
 export const verificarToken = (token: string): JwtPayload => {
   try {
     return jwt.verify(token, SECRET_KEY) as JwtPayload;

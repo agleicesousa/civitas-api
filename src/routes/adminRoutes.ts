@@ -342,8 +342,7 @@
 
 import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
-import { authenticateJWT } from '../middlewares/authMiddleware';
-import { isAdmin } from '../middlewares/isAdmin';
+import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 import { validarEmail } from '../middlewares/validarEmail';
 
 const adminRouter = Router();
@@ -357,42 +356,59 @@ adminRouter.post('/login', (req, res) => adminController.login(req, res));
 
 /**
  * Rota para listar todos os administradores.
- * Requer autenticação e verificação de privilégios de administrador.
+ * Requer autenticação e permissão de gerenciamento de usuários.
  */
-adminRouter.get('/', authenticateJWT, isAdmin, (req, res) =>
-  adminController.listarAdmins(req, res)
+adminRouter.get(
+  '/',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => adminController.listarAdmins(req, res)
 );
 
 /**
  * Rota para buscar um administrador específico por ID.
- * Requer autenticação e verificação de privilégios de administrador.
+ * Requer autenticação e permissão de gerenciamento de usuários.
  */
-adminRouter.get('/:id', authenticateJWT, isAdmin, (req, res) =>
-  adminController.buscarAdminPorId(req, res)
+adminRouter.get(
+  '/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => adminController.buscarAdminPorId(req, res)
 );
 
 /**
  * Rota para criar um novo administrador.
- * Requer autenticação, verificação de privilégios de administrador e validação de e-mail.
+ * Requer autenticação, permissão de gerenciamento de usuários e validação de e-mail.
  */
-adminRouter.post('/', validarEmail, authenticateJWT, isAdmin, (req, res) =>
-  adminController.criarAdmin(req, res)
+adminRouter.post(
+  '/',
+  validarEmail,
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => adminController.criarAdmin(req, res)
 );
 
 /**
  * Rota para atualizar um administrador existente.
- * Requer autenticação, verificação de privilégios de administrador e validação de e-mail.
+ * Requer autenticação, permissão de gerenciamento de usuários e validação de e-mail.
  */
-adminRouter.put('/:id', validarEmail, authenticateJWT, isAdmin, (req, res) =>
-  adminController.atualizarAdmin(req, res)
+adminRouter.put(
+  '/:id',
+  validarEmail,
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => adminController.atualizarAdmin(req, res)
 );
 
 /**
  * Rota para deletar um administrador específico por ID.
- * Requer autenticação e verificação de privilégios de administrador.
+ * Requer autenticação e permissão de gerenciamento de usuários.
  */
-adminRouter.delete('/:id', authenticateJWT, isAdmin, (req, res) =>
-  adminController.deletarAdmin(req, res)
+adminRouter.delete(
+  '/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => adminController.deletarAdmin(req, res)
 );
 
 export default adminRouter;

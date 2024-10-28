@@ -3,8 +3,8 @@ import {
   Column,
   BeforeInsert,
   BeforeUpdate,
-  OneToOne,
-  JoinColumn
+  JoinColumn,
+  ManyToOne
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
@@ -21,13 +21,6 @@ export class Admin extends BaseEntity {
   membro: Membros;
 
   /**
-   * Apelido único do administrador.
-   * @type {string}
-   */
-  @Column({ unique: true })
-  apelido: string;
-
-  /**
    * E-mail único do administrador.
    * @type {string}
    */
@@ -40,10 +33,6 @@ export class Admin extends BaseEntity {
    */
   @Column()
   senha: string;
-
-  @OneToOne(() => Membros, { eager: true })
-  @JoinColumn({ name: 'membroId' })
-  membro: Membros;
 
   @BeforeInsert()
   @BeforeUpdate()

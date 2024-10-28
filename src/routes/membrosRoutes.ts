@@ -161,39 +161,64 @@
 
 import { Router } from 'express';
 import { MembrosController } from '../controller/membrosController';
+import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 
 const membrosRouter = Router();
 const membrosController = new MembrosController();
 
 /**
  * Rota para listar todos os membros
+ * Requer autenticação e permissão de visualização de membros.
  */
-membrosRouter.get('/', (req, res) => membrosController.listarMembros(req, res));
+membrosRouter.get(
+  '/',
+  authenticateJWT,
+  hasPermission('VIEW_MEMBERS'),
+  (req, res) => membrosController.listarMembros(req, res)
+);
 
 /**
  * Rota para buscar um membro específico por ID
+ * Requer autenticação e permissão de visualização de membros.
  */
-membrosRouter.get('/:id', (req, res) =>
-  membrosController.buscarMembroPorId(req, res)
+membrosRouter.get(
+  '/:id',
+  authenticateJWT,
+  hasPermission('VIEW_MEMBERS'),
+  (req, res) => membrosController.buscarMembroPorId(req, res)
 );
 
 /**
  * Rota para criar um novo membro
+ * Requer autenticação e permissão de gerenciamento de usuários.
  */
-membrosRouter.post('/', (req, res) => membrosController.criarMembro(req, res));
+membrosRouter.post(
+  '/',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => membrosController.criarMembro(req, res)
+);
 
 /**
  * Rota para atualizar um membro existente
+ * Requer autenticação e permissão de gerenciamento de usuários.
  */
-membrosRouter.put('/:id', (req, res) =>
-  membrosController.atualizarMembro(req, res)
+membrosRouter.put(
+  '/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => membrosController.atualizarMembro(req, res)
 );
 
 /**
  * Rota para deletar um membro existente
+ * Requer autenticação e permissão de gerenciamento de usuários.
  */
-membrosRouter.delete('/:id', (req, res) =>
-  membrosController.deletarMembro(req, res)
+membrosRouter.delete(
+  '/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS'),
+  (req, res) => membrosController.deletarMembro(req, res)
 );
 
 export default membrosRouter;

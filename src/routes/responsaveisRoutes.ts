@@ -212,33 +212,64 @@
 
 import { Router } from 'express';
 import { ResponsaveisController } from '../controller/responsaveisController';
+import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 
 const responsaveisRouter = Router();
 const responsaveisController = new ResponsaveisController();
 
 /**
  * Retorna uma lista de objetos que representam os responsáveis, incluindo o membro associado a cada um.
+ * Requer autenticação e permissão de visualização de responsáveis.
  */
-responsaveisRouter.get('/', responsaveisController.listarResponsaveis);
+responsaveisRouter.get(
+  '/',
+  authenticateJWT,
+  hasPermission('VIEW_RESPONSAVEIS'),
+  (req, res) => responsaveisController.listarResponsaveis(req, res)
+);
 
 /**
  * Retorna um objeto que representa o responsável com o ID especificado.
+ * Requer autenticação e permissão de visualização de responsáveis.
  */
-responsaveisRouter.get('/:id', responsaveisController.buscarResponsavelPorId);
+responsaveisRouter.get(
+  '/:id',
+  authenticateJWT,
+  hasPermission('VIEW_RESPONSAVEIS'),
+  (req, res) => responsaveisController.buscarResponsavelPorId(req, res)
+);
 
 /**
  * Cria um novo responsável.
+ * Requer autenticação e permissão de gerenciamento de responsáveis.
  */
-responsaveisRouter.post('/', responsaveisController.criarResponsavel);
+responsaveisRouter.post(
+  '/',
+  authenticateJWT,
+  hasPermission('MANAGE_RESPONSAVEIS'),
+  (req, res) => responsaveisController.criarResponsavel(req, res)
+);
 
 /**
  * Atualiza um responsável existente.
+ * Requer autenticação e permissão de gerenciamento de responsáveis.
  */
-responsaveisRouter.put('/:id', responsaveisController.atualizarResponsavel);
+responsaveisRouter.put(
+  '/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_RESPONSAVEIS'),
+  (req, res) => responsaveisController.atualizarResponsavel(req, res)
+);
 
 /**
  * Deleta um responsável.
+ * Requer autenticação e permissão de gerenciamento de responsáveis.
  */
-responsaveisRouter.delete('/:id', responsaveisController.deletarResponsavel);
+responsaveisRouter.delete(
+  '/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_RESPONSAVEIS'),
+  (req, res) => responsaveisController.deletarResponsavel(req, res)
+);
 
 export default responsaveisRouter;
