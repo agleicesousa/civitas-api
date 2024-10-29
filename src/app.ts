@@ -8,6 +8,8 @@ import { errorHandler } from './middlewares/errorHandler';
 
 import adminRouter from './routes/adminRoutes';
 import membrosRouter from './routes/membrosRoutes';
+import turmasRouter from './routes/turmaRoutes';
+import professorRouter from './routes/professorRoutes';
 import responsaveisRouter from './routes/responsaveisRoutes';
 
 MysqlDataSource.initialize()
@@ -25,8 +27,9 @@ app.use(cors({ origin: true }));
 
 app.use('/admin', adminRouter);
 app.use('/membros', membrosRouter);
+app.use('/turmas', turmasRouter);
+app.use('/professores', professorRouter);
 app.use('/responsaveis', responsaveisRouter);
-
 app.use(errorHandler);
 
 const swaggerSpec = swaggerJSDoc(swaggerConfig);

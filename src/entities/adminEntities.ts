@@ -4,10 +4,13 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToOne,
-  JoinColumn
+  JoinColumn,
+  ManyToOne,
+  OneToMany
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
+import { Turma } from './turmasEntities';
 import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity()
@@ -16,7 +19,7 @@ export class Admin extends BaseEntity {
    * Relacionamento com a entidade `Membros`, indicando que um administrador é também um membro.
    * @type {Membros}
    */
-  @ManyToOne(() => Membros, { eager: true })
+  @OneToOne(() => Membros, { eager: true })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
@@ -41,9 +44,14 @@ export class Admin extends BaseEntity {
   @Column()
   senha: string;
 
-  @OneToOne(() => Membros, { eager: true })
-  @JoinColumn({ name: 'membroId' })
-  membro: Membros;
+   /**
+   * Relação com as turmas gerenciadas pelo administrador.
+   * Esta propriedade representa todas as turmas associadas a este administrador.
+   * 
+   * @type {Turma[]}
+   */
+  @OneToMany(() => Turma, (turma) => turma.admin)
+  turmas: Turma[];
 
   @BeforeInsert()
   @BeforeUpdate()

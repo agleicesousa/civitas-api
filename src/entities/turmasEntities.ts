@@ -1,6 +1,8 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './baseEntity';
-
+import { Admin } from './adminEntities';
+import { Aluno } from './alunoEntities';
+import { Professor } from './professorEntities';
 /**
  * Enum para representar os anos letivos disponíveis.
  * @enum {string}
@@ -59,4 +61,13 @@ export class Turma extends BaseEntity {
     length: 20
   })
   turmaApelido: string;
+
+  @ManyToOne(() => Admin, { eager: true })
+  admin: Admin;
+
+  @OneToMany(() => Aluno, (aluno) => aluno.turma)
+  alunos: Aluno[];
+
+  @ManyToMany(() => Professor, (professor) => professor.turmas)
+  professores: Professor[];
 }
