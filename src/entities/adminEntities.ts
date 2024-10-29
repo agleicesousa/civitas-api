@@ -24,13 +24,6 @@ export class Admin extends BaseEntity {
   membro: Membros;
 
   /**
-   * Apelido único do administrador.
-   * @type {string}
-   */
-  @Column({ unique: true })
-  apelido: string;
-
-  /**
    * E-mail único do administrador.
    * @type {string}
    */
