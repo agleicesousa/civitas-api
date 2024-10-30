@@ -37,12 +37,7 @@ export class AdminService {
    * @returns O novo administrador criado.
    * @throws {Error} Se o membro associado não for encontrado ou se o email for inválido.
    */
-  async criarAdmin(
-    apelido: string,
-    email: string,
-    senha: string,
-    membroId: number
-  ) {
+  async criarAdmin(email: string, senha: string, membroId: number) {
     const membro = await this.membrosRepository.findOneBy({ id: membroId });
     if (!membro) {
       throw new Error('Membro não encontrado.');
@@ -51,7 +46,6 @@ export class AdminService {
     const senhaCriptografada = await criptografarSenha(senha);
 
     const novoAdmin = this.adminRepository.create({
-      apelido,
       email,
       senha: senhaCriptografada,
       membro
@@ -63,7 +57,6 @@ export class AdminService {
   /**
    * Atualiza um administrador existente.
    * @param id - ID do administrador.
-   * @param apelido - Novo apelido.
    * @param email - Novo email.
    * @param senha - Nova senha (opcional).
    * @param membroId - ID do membro associado.
@@ -72,7 +65,6 @@ export class AdminService {
    */
   async atualizarAdmin(
     id: number,
-    apelido: string,
     email: string,
     senha: string | null,
     membroId: number
@@ -87,7 +79,6 @@ export class AdminService {
       return null;
     }
 
-    admin.apelido = apelido;
     admin.email = email;
     if (senha) {
       admin.senha = await criptografarSenha(senha);
@@ -131,7 +122,7 @@ export class AdminService {
     // Gera o token JWT usando o utilitário de token
     const token = gerarToken({
       id: admin.id,
-      email: admin.email,
+      numeroMatricula: admin.membro.numeroMatricula,
       tipoConta: admin.membro.tipoConta
     });
 
