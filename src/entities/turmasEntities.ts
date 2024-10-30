@@ -37,24 +37,45 @@ export enum TipoEnsino {
 
 @Entity('turmas')
 export class Turma extends BaseEntity {
+   /**
+   * Ano letivo da turma, representado pelo enum `AnoLetivo`.
+   * Define o ano escolar da turma.
+   * @type {AnoLetivo}
+   */
   @Column({
     type: 'enum',
     enum: AnoLetivo
   })
   anoLetivo: AnoLetivo;
 
+  /**
+   * Período letivo da turma, representado pelo enum `PeriodoLetivo`.
+   * Especifica o turno da turma (manhã, tarde, ou noite).
+   * @type {PeriodoLetivo}
+   */
   @Column({
     type: 'enum',
     enum: PeriodoLetivo
   })
   periodoLetivo: PeriodoLetivo;
 
+
+   /**
+   * Tipo de ensino da turma, representado pelo enum `TipoEnsino`.
+   * Determina o nível de ensino oferecido pela turma.
+   * @type {TipoEnsino}
+   */
   @Column({
     type: 'enum',
     enum: TipoEnsino
   })
   ensino: TipoEnsino;
 
+   /**
+   * Apelido ou código único da turma.
+   * Usado para identificar a turma de maneira simplificada.
+   * @type {string}
+   */
   @Column({
     unique: true,
     type: 'varchar',
@@ -62,12 +83,27 @@ export class Turma extends BaseEntity {
   })
   turmaApelido: string;
 
+  /**
+   * Relacionamento ManyToOne com a entidade `Admin`.
+   * Cada turma está associada a um administrador responsável.
+   * @type {Admin}
+   */
   @ManyToOne(() => Admin, { eager: true })
   admin: Admin;
 
+  /**
+   * Relacionamento OneToMany com a entidade `Alunos`.
+   * Uma turma pode ter vários alunos associados.
+   * @type {Alunos[]}
+   */
   @OneToMany(() => Alunos, (aluno) => aluno.turma)
   alunos: Alunos[];
-
+  
+  /**
+   * Relacionamento ManyToMany com a entidade `Professor`.
+   * Uma turma pode ter vários professores associados, e um professor pode estar em várias turmas.
+   * @type {Professor[]}
+   */
   @ManyToMany(() => Professor, (professor) => professor.turmas)
   professores: Professor[];
 }
