@@ -37,7 +37,7 @@ export enum TipoEnsino {
 
 @Entity('turmas')
 export class Turma extends BaseEntity {
-   /**
+  /**
    * Ano letivo da turma, representado pelo enum `AnoLetivo`.
    * Define o ano escolar da turma.
    * @type {AnoLetivo}
@@ -59,8 +59,7 @@ export class Turma extends BaseEntity {
   })
   periodoLetivo: PeriodoLetivo;
 
-
-   /**
+  /**
    * Tipo de ensino da turma, representado pelo enum `TipoEnsino`.
    * Determina o nível de ensino oferecido pela turma.
    * @type {TipoEnsino}
@@ -71,7 +70,7 @@ export class Turma extends BaseEntity {
   })
   ensino: TipoEnsino;
 
-   /**
+  /**
    * Apelido ou código único da turma.
    * Usado para identificar a turma de maneira simplificada.
    * @type {string}
@@ -98,7 +97,7 @@ export class Turma extends BaseEntity {
    */
   @OneToMany(() => Alunos, (aluno) => aluno.turma)
   alunos: Alunos[];
-  
+
   /**
    * Relacionamento ManyToMany com a entidade `Professor`.
    * Uma turma pode ter vários professores associados, e um professor pode estar em várias turmas.
