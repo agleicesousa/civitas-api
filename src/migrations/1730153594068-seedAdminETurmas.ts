@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { criptografarSenha } from '../utils/senhaUtils';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import {
