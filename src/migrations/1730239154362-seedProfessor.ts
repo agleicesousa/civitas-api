@@ -1,6 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { TipoConta } from '../entities/baseEntity';
 import { criptografarSenha } from '../utils/senhaUtils';
+import 'dotenv/config';
 
 export class SeedProfessor1730239154362 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -31,7 +32,7 @@ export class SeedProfessor1730239154362 implements MigrationInterface {
         SELECT id FROM admin WHERE email ='admin.principal12310@gmail.com'
     `);
 
-    const hashedPassword = await criptografarSenha('senha321');
+    const hashedPassword = await criptografarSenha(process.env.PROFESSOR_PASSWORD);
     const professorResult = await queryRunner.query(`
             INSERT INTO professores (
                 membroId,
