@@ -17,10 +17,7 @@ const permissionsByRole = {
   admin: [
     'MANAGE_USERS', // Gerenciar todos os usuários
     'VIEW_MEMBERS', // Visualizar todos os membros
-    'VIEW_RESPONSAVEIS', // Visualizar todos os responsáveis
-    'VIEW_ALUNOS', // Visualizar todos os alunos
-    'VIEW_TURMAS', // Visualizar todas as turmas
-    // TODO: 'MANAGE_ATIVIDADES' // Gerenciar todas as atividades - ainda não foi implementada!
+    'VIEW_TURMAS' // Visualizar todas as turmas
   ],
   professor: [
     'VIEW_OWN_TURMAS', // Ver apenas as turmas às quais está associado
@@ -30,7 +27,7 @@ const permissionsByRole = {
     'VIEW_ALUNOS_IN_TURMA' // Ver alunos associados à própria turma
   ],
   responsavel: [
-    // TODO: 'VIEW_OWN_CHILD_ATIVIDADES' // Ver as atividades de apenas um aluno associado a ele - ainda não foi implementada!
+    'VIEW_OWN_ALUNOS' // Ver apenas os alunos às quais está associado
   ],
   aluno: [] // Alunos não possuem permissões de visualização
 };
