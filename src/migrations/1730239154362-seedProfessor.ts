@@ -32,7 +32,9 @@ export class SeedProfessor1730239154362 implements MigrationInterface {
         SELECT id FROM admin WHERE email ='admin.principal12310@gmail.com'
     `);
 
-    const hashedPassword = await criptografarSenha(process.env.PROFESSOR_PASSWORD);
+    const hashedPassword = await criptografarSenha(
+      process.env.PROFESSOR_PASSWORD
+    );
     const professorResult = await queryRunner.query(`
             INSERT INTO professores (
                 membroId,
