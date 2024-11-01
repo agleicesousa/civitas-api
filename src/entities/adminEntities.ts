@@ -5,7 +5,7 @@ import {
   BeforeUpdate,
   OneToOne,
   JoinColumn,
-  ManyToOne,
+  // ManyToOne,
   OneToMany
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
@@ -37,10 +37,10 @@ export class Admin extends BaseEntity {
   @Column()
   senha: string;
 
-   /**
+  /**
    * Relação com as turmas gerenciadas pelo administrador.
    * Esta propriedade representa todas as turmas associadas a este administrador.
-   * 
+   *
    * @type {Turma[]}
    */
   @OneToMany(() => Turma, (turma) => turma.admin)

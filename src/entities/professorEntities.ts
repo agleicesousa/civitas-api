@@ -11,6 +11,7 @@ import {
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Turma } from './turmasEntities';
+import { Admin } from './adminEntities';
 import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
 
 @Entity('professores')
@@ -30,6 +31,10 @@ export class Professor extends BaseEntity {
   @ManyToMany(() => Turma, { eager: true })
   @JoinTable({ name: 'professoresTurma' })
   turmas: Turma[];
+
+  @OneToOne(() => Admin, { eager: true })
+  @JoinColumn({ name: 'adminId' })
+  adminId: Admin;
 
   @Column()
   senha: string;

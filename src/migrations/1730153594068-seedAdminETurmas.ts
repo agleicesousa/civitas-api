@@ -1,17 +1,16 @@
-import { criptografarSenha } from "../utils/senhaUtils";
-import { MigrationInterface, QueryRunner } from "typeorm";
-import { 
-  AnoLetivo, 
-  PeriodoLetivo, 
-  TipoEnsino 
-} from "../entities/turmasEntities";
-import { TipoConta } from "../entities/baseEntity";
-
+import 'dotenv/config';
+import { criptografarSenha } from '../utils/senhaUtils';
+import { MigrationInterface, QueryRunner } from 'typeorm';
+import {
+  AnoLetivo,
+  PeriodoLetivo,
+  TipoEnsino
+} from '../entities/turmasEntities';
+import { TipoConta } from '../entities/baseEntity';
 
 export class Migrations1730153594068 implements MigrationInterface {
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        // Create admin member
-        const membroResult = await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    const membroResult = await queryRunner.query(`
             INSERT INTO membros (
                 numeroMatricula,
                 nomeCompleto,
@@ -33,20 +32,18 @@ export class Migrations1730153594068 implements MigrationInterface {
             )
         `);
 
-        const membroId = membroResult.insertId;
+    const membroId = membroResult.insertId;
 
-        const hashedPassword = await criptografarSenha("senhaSimples10");
+    const hashedPassword = await criptografarSenha(process.env.ADMIN_PASSWORD);
 
-        const adminResult = await queryRunner.query(`
+    const adminResult = await queryRunner.query(`
             INSERT INTO admin (
-                apelido,
                 email,
                 senha,
                 membroId,
                 dataCriacao,
                 dataAtualizacao
             ) VALUES (
-                'AdminPrincipal10',
                 'admin.principal12310@gmail.com',
                 '${hashedPassword}',
                 ${membroId},
@@ -55,9 +52,9 @@ export class Migrations1730153594068 implements MigrationInterface {
             )
         `);
 
-        const adminId = adminResult.insertId;
+    const adminId = adminResult.insertId;
 
-        await queryRunner.query(`
+    await queryRunner.query(`
             INSERT INTO turmas (
                 anoLetivo,
                 periodoLetivo,
@@ -86,11 +83,11 @@ export class Migrations1730153594068 implements MigrationInterface {
                 CURRENT_TIMESTAMP
             )
         `);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DELETE FROM turmas`);
-        await queryRunner.query(`DELETE FROM admin`);
-        await queryRunner.query(`DELETE FROM membros`);
-    }
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DELETE FROM turmas`);
+    await queryRunner.query(`DELETE FROM admin`);
+    await queryRunner.query(`DELETE FROM membros`);
+  }
 }

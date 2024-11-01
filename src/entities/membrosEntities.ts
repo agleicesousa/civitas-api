@@ -1,7 +1,7 @@
 import { Entity, Column } from 'typeorm';
 import { BaseEntity, TipoConta } from './baseEntity';
 
-@Entity()
+@Entity('membros')
 export class Membros extends BaseEntity {
   /**
    * Número de matrícula único associado ao membro.

@@ -10,7 +10,9 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "test": "jest",
     "migration:generate": "typeorm-ts-node-commonjs -d ./src/config/database.ts migration:generate ./src/migrations/default",
-    "migration:run": "typeorm-ts-node-commonjs -d ./src/config/database.ts migration:run"
+    "migration:run": "typeorm-ts-node-commonjs -d ./src/config/database.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d ./src/config/database.ts migration:revert"
+    
   },
   "devDependencies": {
     "@types/cors": "2.8.14",

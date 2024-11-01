@@ -49,9 +49,7 @@ export class ProfessorService {
    * @returns Uma lista de professores.
    */
   async listarProfessores(): Promise<Professor[]> {
-    return await this.professorRepository.find({
-      relations: ['membro', 'turmas']
-    });
+    return await this.professorRepository.find();
   }
   /**
    * Busca um professor pelo seu ID.
@@ -62,8 +60,7 @@ export class ProfessorService {
    */
   async buscarProfessorPorId(id: number): Promise<Professor> {
     const professor = await this.professorRepository.findOne({
-      where: { id },
-      relations: ['membro', 'turmas']
+      where: { id }
     });
 
     if (!professor) {
@@ -82,8 +79,7 @@ export class ProfessorService {
    */
   async deletarProfessor(id: number) {
     const professor = await this.professorRepository.findOne({
-      where: { id },
-      relations: ['membro']
+      where: { id }
     });
 
     if (!professor) {

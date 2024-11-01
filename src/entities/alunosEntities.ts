@@ -2,7 +2,7 @@ import { Entity, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Responsaveis } from './responsaveisEntities';
-
+import { Turma } from './turmasEntities';
 /**
  * Entidade que representa um Aluno no sistema.
  * Um aluno está associado a um membro (OneToOne),
@@ -33,4 +33,12 @@ export class Alunos extends BaseEntity {
   @ManyToOne(() => Responsaveis, (responsavel) => responsavel.alunos)
   @JoinColumn({ name: 'responsavelId' })
   responsavel: Responsaveis;
+
+  /**
+   * Relacionamento com a entidade `Turma`, indicando a turma à qual o aluno pertence.
+   * @type {Turma}
+   */
+  @ManyToOne(() => Turma, (turma) => turma.alunos)
+  @JoinColumn({ name: 'turmaId' })
+  turma: Turma;
 }
