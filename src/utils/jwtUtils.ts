@@ -15,14 +15,24 @@ export interface JwtPayload {
 // Mapeamento das permissões por tipo de conta
 const permissionsByRole = {
   admin: [
-    'MANAGE_USERS',
-    'VIEW_MEMBERS',
-    'VIEW_RESPONSAVEIS',
-    'VIEW_ALUNOS',
-    'MANAGE_ATIVIDADES'
+    'MANAGE_USERS', // Gerenciar todos os usuários
+    'VIEW_MEMBERS', // Visualizar todos os membros
+    'VIEW_RESPONSAVEIS', // Visualizar todos os responsáveis
+    'VIEW_ALUNOS', // Visualizar todos os alunos
+    'VIEW_TURMAS', // Visualizar todas as turmas
+    // TODO: 'MANAGE_ATIVIDADES' // Gerenciar todas as atividades - ainda não foi implementada!
   ],
-  // professor: ['VIEW_ALUNOS', 'MANAGE_OWN_ATIVIDADES'],
-  responsavel: ['VIEW_OWN_CHILD_ATIVIDADES']
+  professor: [
+    'VIEW_OWN_TURMAS', // Ver apenas as turmas às quais está associado
+    'VIEW_ALUNOS_IN_OWN_TURMAS' // Ver alunos associados apenas às suas turmas
+  ],
+  turma: [
+    'VIEW_ALUNOS_IN_TURMA' // Ver alunos associados à própria turma
+  ],
+  responsavel: [
+    // TODO: 'VIEW_OWN_CHILD_ATIVIDADES' // Ver as atividades de apenas um aluno associado a ele - ainda não foi implementada!
+  ],
+  aluno: [] // Alunos não possuem permissões de visualização
 };
 
 /**
