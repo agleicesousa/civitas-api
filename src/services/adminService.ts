@@ -30,7 +30,6 @@ export class AdminService {
 
   /**
    * Cria um novo administrador.
-   * @param apelido - Apelido do administrador.
    * @param email - Email do administrador.
    * @param senha - Senha do administrador.
    * @param membroId - ID do membro associado.

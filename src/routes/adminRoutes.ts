@@ -21,12 +21,12 @@
  *         id:
  *           type: integer
  *           description: O ID do administrador
- *         apelido:
- *           type: string
- *           description: Apelido do administrador
  *         email:
  *           type: string
  *           description: Email do administrador
+ *         senha:
+ *           type: string
+ *           description: Senha do administrador
  *         membroId:
  *           type: integer
  *           description: ID do membro associado ao administrador
@@ -40,8 +40,8 @@
  *           description: Data de última atualização do registro
  *       example:
  *         id: 1
- *         apelido: admin123
  *         email: admin@example.com
+ *         senha: Aa12345*
  *         membroId: 1
  *         dataCriacao: '2023-01-01T12:00:00Z'
  *         dataAtualizacao: '2023-01-10T12:00:00Z'
