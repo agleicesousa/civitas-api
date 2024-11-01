@@ -78,7 +78,7 @@ export class AdminController {
    */
   async atualizarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    const { apelido, email, senha, membroId } = req.body;
+    const { email, senha, membroId } = req.body;
 
     if (!email) {
       return res.status(400).json({ error: 'O campo email é obrigatório.' });
