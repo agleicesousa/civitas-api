@@ -10,6 +10,17 @@ export class AlunosService {
   private alunosRepository = MysqlDataSource.getRepository(Alunos);
   private turmasRepository = MysqlDataSource.getRepository(Turma);
   private responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
+
+  /**
+   * Cria um novo aluno no sistema.
+   * @param nomeCompleto - O nome completo do aluno.
+   * @param rg - O RG do aluno.
+   * @param numeroMatricula - O número de matrícula do aluno.
+   * @param turmaId - O ID da turma à qual o aluno pertence.
+   * @param responsavelCpf - O CPF do responsável associado ao aluno.
+   *
+   * @returns Uma promessa que resolve para o objeto Alunos criado.
+   */
   async criarAluno(
     nomeCompleto: string,
     rg: string,
@@ -45,12 +56,23 @@ export class AlunosService {
 
     return await this.alunosRepository.save(aluno);
   }
-
+  /**
+   * Lista todos os alunos no sistema, incluindo suas turmas, membros e responsáveis.
+   *
+   * @returns Uma promessa que resolve para uma lista de alunos com suas respectivas turmas, membros e responsáveis.
+   */
   async listarAlunos(): Promise<Alunos[]> {
     return await this.alunosRepository.find({
       relations: ['membro', 'turma', 'responsavel']
     });
   }
+
+  /**
+   * Busca um aluno pelo seu ID.
+   *
+   * @param id - O ID do aluno a ser buscado.
+   * @returns Uma promessa que resolve para o aluno encontrado.
+   */
   async buscarAlunoPorId(id: number): Promise<Alunos> {
     return await this.alunosRepository.findOne({
       where: { id },
@@ -58,6 +80,11 @@ export class AlunosService {
     });
   }
 
+  /**
+   * Deleta um aluno e seu membro associado pelo ID.
+   *
+   * @param id - O ID do aluno a ser deletado.
+   */
   async deletarAluno(id: number) {
     const aluno = await this.alunosRepository.findOne({
       where: { id },
@@ -67,6 +94,19 @@ export class AlunosService {
     await this.membrosRepository.delete(aluno.membro.id);
     return await this.alunosRepository.delete(id);
   }
+
+  /**
+   * Edita as informações de um aluno existente.
+   *
+   * @param id - O ID do aluno a ser editado.
+   * @param nomeCompleto - Novo nome completo do aluno.
+   * @param rg - Novo RG do aluno.
+   * @param numeroMatricula - Novo número de matrícula do aluno.
+   * @param turmaId - ID da nova turma do aluno.
+   * @param responsavelCpf - CPF do responsável associado.
+   * @returns Uma promessa que resolve para o aluno atualizado.
+   * @throws Error se o aluno, turma ou responsável não forem encontrados.
+   */
   async editarAluno(
     id: number,
     nomeCompleto: string,
@@ -111,6 +151,9 @@ export class AlunosService {
       responsavel
     });
 
-    return await this.alunosRepository.findOneBy({ id });
+    return await this.alunosRepository.findOne({
+      where: { id },
+      relations: ['membro', 'turma', 'responsavel']
+    });
   }
 }
