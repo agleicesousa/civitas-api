@@ -51,7 +51,7 @@ export class AdminController {
    * @returns O novo administrador criado em formato JSON.
    */
   async criarAdmin(req: Request, res: Response): Promise<Response> {
-    const { apelido, email, senha, membroId } = req.body;
+    const { email, senha, membroId } = req.body;
 
     if (!email) {
       return res.status(400).json({ error: 'O campo email é obrigatório.' });
@@ -59,7 +59,6 @@ export class AdminController {
 
     try {
       const novoAdmin = await this.adminService.criarAdmin(
-        apelido,
         email,
         senha,
         Number(membroId)
@@ -79,7 +78,7 @@ export class AdminController {
    */
   async atualizarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    const { apelido, email, senha, membroId } = req.body;
+    const { email, senha, membroId } = req.body;
 
     if (!email) {
       return res.status(400).json({ error: 'O campo email é obrigatório.' });
@@ -88,7 +87,6 @@ export class AdminController {
     try {
       const adminAtualizado = await this.adminService.atualizarAdmin(
         Number(id),
-        apelido,
         email,
         senha,
         Number(membroId)
@@ -140,7 +138,6 @@ export class AdminController {
     const { email, senha } = req.body;
 
     const erros = [];
-
     // Valida se o email foi fornecido
     if (!email) {
       erros.push({ campo: 'email', erro: 'E-mail é obrigatório' });

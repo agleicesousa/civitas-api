@@ -1,19 +1,20 @@
-import AlunoController from '../controller/alunosController';
+import { AlunosController } from '../controller/alunosController';
 import { Router } from 'express';
 
 const alunoRouter = Router();
+const alunosController = new AlunosController();
 
-alunoRouter.post('/', (req, res) => AlunoController.criarAluno(req, res));
-alunoRouter.get('/', (req, res) => AlunoController.listarAlunos(req, res));
+alunoRouter.post('/', (req, res) => alunosController.criarAluno(req, res));
+alunoRouter.get('/', (req, res) => alunosController.listarAlunos(req, res));
 
 alunoRouter.get('/:id', (req, res) =>
-  AlunoController.buscarAlunosPorId(req, res)
+  alunosController.buscarAlunosPorId(req, res)
 );
 
-alunoRouter.put('/:id', (req, res) => AlunoController.editarAluno(req, res));
+alunoRouter.put('/:id', (req, res) => alunosController.editarAluno(req, res));
 
 alunoRouter.delete('/:id', (req, res) =>
-  AlunoController.deletarAluno(req, res)
+  alunosController.deletarAluno(req, res)
 );
 
 export default alunoRouter;
