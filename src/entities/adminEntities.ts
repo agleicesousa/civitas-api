@@ -5,7 +5,6 @@ import {
   BeforeUpdate,
   OneToOne,
   JoinColumn,
-  // ManyToOne,
   OneToMany
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
@@ -45,9 +44,6 @@ export class Admin extends BaseEntity {
    */
   @OneToMany(() => Turma, (turma) => turma.admin)
   turmas: Turma[];
-
-  @BeforeInsert()
-  @BeforeUpdate()
 
   /**
    * Antes de inserir ou atualizar um registro de administrador, criptografa a senha.
