@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { AlunosService } from '../services/alunosService';
+import { ConflictError } from '../errors/ConflitctError';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class AlunosController {
   private alunosService = new AlunosService();
@@ -14,7 +16,7 @@ export class AlunosController {
     try {
       const { nomeCompleto, rg, numeroMatricula, turmaId, responsavelCpf } =
         req.body;
-      const novoAluno = await this.alunosService.criarAluno(
+      await this.alunosService.criarAluno(
         nomeCompleto,
         rg,
         numeroMatricula,
@@ -23,11 +25,10 @@ export class AlunosController {
       );
 
       return res.status(201).json({
-        sucess: true,
-        message: 'Estudante criado com sucesso',
+        message: 'Estudante criado com sucesso'
       });
     } catch (error) {
-      if (error.name === 'Conflito') {
+      if (error instanceof ConflictError) {
         return res.status(409).json({ message: error.message });
       }
       return res.status(400).json({ message: 'Erro ao criar aluno', error });
@@ -43,9 +44,9 @@ export class AlunosController {
   async listarAlunos(req: Request, res: Response) {
     try {
       const alunos = await this.alunosService.listarAlunos();
-      res.json(alunos);
+      return res.status(200).json(alunos);
     } catch (error) {
-      res.status(500).json({ message: 'Erro ao listar alunos', error });
+      return res.status(500).json({ message: 'Erro ao listar alunos', error });
     }
   }
 
@@ -62,7 +63,10 @@ export class AlunosController {
       const aluno = await this.alunosService.buscarAlunoPorId(Number(id));
       return res.json(aluno);
     } catch (error) {
-      return res.status(500).json({ message: 'Erro ao buscar aluno', error });
+      if (error instanceof NotFoundError) {
+        return res.status(404).json({ message: error.message });
+      }
+      return res.status(500).json({ message: 'Erro ao listar alunos', error });
     }
   }
   /**
@@ -75,9 +79,15 @@ export class AlunosController {
     try {
       const { id } = req.params;
       await this.alunosService.deletarAluno(Number(id));
-      return res.status(204).send();
+      return res.status(204).json({ message: 'Aluno excluído com sucesso' });
     } catch (error) {
-      return res.status(500).json({ message: 'Erro ao deletar aluno', error });
+      console.error('Caught error:', error);
+      if (error instanceof NotFoundError) {
+        return res.status(404).json({ message: error.message });
+      }
+      return res
+        .status(500)
+        .json({ message: 'Erro interno do servidor', error });
     }
   }
   /**
@@ -103,7 +113,9 @@ export class AlunosController {
 
       return res.json(alunoAtualizado);
     } catch (error) {
-      console.error('Erro ao editar professor:', error);
+      if (error instanceof NotFoundError) {
+        return res.status(404).json({ message: error.message });
+      }
       return res.status(500).json({ error: error.message });
     }
   }

@@ -4,6 +4,8 @@ import { Membros } from '../entities/membrosEntities';
 import { Alunos } from '../entities/alunosEntities';
 import { TipoConta } from '../entities/baseEntity';
 import { Responsaveis } from '../entities/responsaveisEntities';
+import { NotFoundError } from '../errors/NotFoundError';
+import { ConflictError } from '../errors/ConflitctError';
 
 export class AlunosService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -29,12 +31,12 @@ export class AlunosService {
     responsavelCpf: string
   ): Promise<Alunos> {
     const membroEstudante = await this.membrosRepository.findOne({
-      where: [{ numeroMatricula }]
+      where: {
+        numeroMatricula
+      }
     });
     if (membroEstudante) {
-      const error = new Error('Estudante já existe nos cadastros');
-      error.name = 'Conflito';
-      throw error;
+      throw new ConflictError('Estudante já existe nos cadastros');
     }
 
     const membro = this.membrosRepository.create({
@@ -83,10 +85,16 @@ export class AlunosService {
    * @returns Uma promessa que resolve para o aluno encontrado.
    */
   async buscarAlunoPorId(id: number): Promise<Alunos> {
-    return await this.alunosRepository.findOne({
+    const aluno = await this.alunosRepository.findOne({
       where: { id },
       relations: ['membro', 'turma', 'responsavel']
     });
+
+    if (!aluno) {
+      throw new NotFoundError('Aluno não encontrado.');
+    }
+
+    return aluno;
   }
 
   /**
@@ -100,8 +108,12 @@ export class AlunosService {
       relations: ['membro']
     });
 
+    if (!aluno) {
+      throw new NotFoundError('Aluno não encontrado.');
+    }
+
+    await this.alunosRepository.delete(id);
     await this.membrosRepository.delete(aluno.membro.id);
-    return await this.alunosRepository.delete(id);
   }
 
   /**
@@ -125,8 +137,9 @@ export class AlunosService {
     responsavelCpf: string
   ): Promise<Alunos> {
     const aluno = await this.alunosRepository.findOneBy({ id });
+
     if (!aluno) {
-      throw new Error('Aluno não encontrado');
+      throw new NotFoundError('Aluno não encontrado.');
     }
 
     await this.membrosRepository.update(aluno.membro.id, {
