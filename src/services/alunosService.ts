@@ -28,6 +28,15 @@ export class AlunosService {
     turmaId: number,
     responsavelCpf: string
   ): Promise<Alunos> {
+    const membroEstudante = await this.membrosRepository.findOne({
+      where: [{ numeroMatricula }]
+    });
+    if (membroEstudante) {
+      const error = new Error('Estudante já existe nos cadastros');
+      error.name = 'Conflito';
+      throw error;
+    }
+
     const membro = this.membrosRepository.create({
       nomeCompleto,
       rg,

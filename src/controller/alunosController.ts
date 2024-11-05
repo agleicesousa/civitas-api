@@ -22,9 +22,15 @@ export class AlunosController {
         responsavelCpf
       );
 
-      res.status(201).json(novoAluno);
+      return res.status(201).json({
+        sucess: true,
+        message: 'Estudante criado com sucesso',
+      });
     } catch (error) {
-      res.status(400).json({ message: 'Erro ao criar aluno', error });
+      if (error.name === 'Conflito') {
+        return res.status(409).json({ message: error.message });
+      }
+      return res.status(400).json({ message: 'Erro ao criar aluno', error });
     }
   }
 
