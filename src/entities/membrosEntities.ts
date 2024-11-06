@@ -8,7 +8,7 @@ export class Membros extends BaseEntity {
    * @type {string}
    * @unique
    */
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   numeroMatricula: string;
 
   /**

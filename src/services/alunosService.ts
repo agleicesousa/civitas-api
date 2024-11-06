@@ -6,7 +6,7 @@ import { TipoConta } from '../entities/baseEntity';
 import { Responsaveis } from '../entities/responsaveisEntities';
 import { NotFoundError } from '../errors/NotFoundError';
 import { ConflictError } from '../errors/ConflitctError';
-
+import { Like } from 'typeorm';
 export class AlunosService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
   private alunosRepository = MysqlDataSource.getRepository(Alunos);
@@ -72,10 +72,43 @@ export class AlunosService {
    *
    * @returns Uma promessa que resolve para uma lista de alunos com suas respectivas turmas, membros e responsáveis.
    */
-  async listarAlunos(): Promise<Alunos[]> {
-    return await this.alunosRepository.find({
-      relations: ['membro', 'turma', 'responsavel']
-    });
+  async listarAlunos(
+    paginaNumero: number,
+    paginaTamanho: number,
+    termoDeBusca: string
+  ) {
+    const pular = (paginaNumero - 1) * paginaTamanho;
+
+    try {
+      const [alunos, total] = await this.alunosRepository.findAndCount({
+        relations: ['membro'],
+        where: {
+          membro: {
+            nomeCompleto: Like(`%${termoDeBusca}%`)
+          }
+        },
+        order: {
+          membro: {
+            nomeCompleto: 'ASC'
+          }
+        },
+        skip: pular,
+        take: paginaTamanho
+      });
+
+      const alunosMap = alunos.map((aluno) => ({
+        id: aluno.id,
+        name: aluno.membro.nomeCompleto,
+        enrollmentNumber: aluno.membro.numeroMatricula
+      }));
+
+      return {
+        data: alunosMap,
+        total
+      };
+    } catch (error) {
+      throw new NotFoundError('Error ao buscar alunos');
+    }
   }
 
   /**

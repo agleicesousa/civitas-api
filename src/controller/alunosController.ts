@@ -42,11 +42,18 @@ export class AlunosController {
    * @param res - A resposta a ser enviada ao cliente com a lista de alunos.
    */
   async listarAlunos(req: Request, res: Response) {
+    const page = Math.max(1, parseInt((req.query.page as string) ?? '1'));
+    const perPage = Math.max(1, parseInt((req.query.perPage as string) ?? '5'));
+    const searchTerm = req.query.searchTerm ?? '';
     try {
-      const alunos = await this.alunosService.listarAlunos();
-      return res.status(200).json(alunos);
+      const { data, total } = await this.alunosService.listarAlunos(
+        page,
+        perPage,
+        searchTerm as string
+      );
+      return res.status(200).json({ page, perPage, total, data });
     } catch (error) {
-      return res.status(500).json({ message: 'Erro ao listar alunos', error });
+      return res.status(404).json({ message: error.message });
     }
   }
 
