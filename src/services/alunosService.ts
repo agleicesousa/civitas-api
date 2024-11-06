@@ -30,41 +30,62 @@ export class AlunosService {
     turmaId: number,
     responsavelCpf: string
   ): Promise<Alunos> {
+    //Mudar depois
+    if (!numeroMatricula) {
+      throw new Error('Mátricula é obrigatória');
+    }
+    //Se estudante já foi cadastrado retorna um error
     const membroEstudante = await this.membrosRepository.findOne({
       where: {
         numeroMatricula
       }
     });
     if (membroEstudante) {
-      throw new ConflictError('Estudante já existe nos cadastros');
+      throw new ConflictError('Aluno já existe nos cadastros');
     }
 
-    const membro = this.membrosRepository.create({
+    const dadosEstudante = this.membrosRepository.create({
       nomeCompleto,
       rg,
       numeroMatricula,
       tipoConta: TipoConta.ALUNO
     });
-    await this.membrosRepository.save(membro);
+    await this.membrosRepository.save(dadosEstudante);
 
     const turma = await this.turmasRepository.findOne({
       where: { id: turmaId }
     });
 
-    const responsavel = await this.responsaveisRepository.findOne({
+    //Checa se responsavel pelo aluno já exite
+    let responsavel = await this.responsaveisRepository.findOne({
       where: {
         membro: {
           cpf: responsavelCpf
         }
       }
     });
+    //Mudar depois
+    //Se não existe, cria um responsavel no momento do cadastro do aluno
+    if (!responsavel) {
+      const dadosResponsavel = await this.membrosRepository.create({
+        cpf: responsavelCpf,
+        tipoConta: TipoConta.RESPONSAVEL,
+        nomeCompleto: ''
+      });
+
+      await this.membrosRepository.save(dadosResponsavel);
+      responsavel = await this.responsaveisRepository.create({
+        membro: dadosResponsavel
+      });
+      await this.responsaveisRepository.save(responsavel);
+    }
 
     const aluno = this.alunosRepository.create({
-      membro,
+      membro: dadosEstudante,
       turma,
       responsavel
     });
-
+    console.log(aluno);
     return await this.alunosRepository.save(aluno);
   }
   /**
