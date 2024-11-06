@@ -138,7 +138,6 @@ export class AdminController {
     const { email, senha } = req.body;
 
     const erros = [];
-
     // Valida se o email foi fornecido
     if (!email) {
       erros.push({ campo: 'email', erro: 'E-mail é obrigatório' });
