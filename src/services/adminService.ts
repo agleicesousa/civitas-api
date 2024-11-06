@@ -30,7 +30,6 @@ export class AdminService {
 
   /**
    * Cria um novo administrador.
-   * @param apelido - Apelido do administrador.
    * @param email - Email do administrador.
    * @param senha - Senha do administrador.
    * @param membroId - ID do membro associado.
@@ -122,7 +121,7 @@ export class AdminService {
     // Gera o token JWT usando o utilitário de token
     const token = gerarToken({
       id: admin.id,
-      numeroMatricula: admin.email,
+      numeroMatricula: admin.membro.numeroMatricula,
       tipoConta: admin.membro.tipoConta
     });
 
