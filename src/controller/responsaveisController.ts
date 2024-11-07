@@ -5,6 +5,33 @@ const responsaveisService = new ResponsaveisService();
 
 export class ResponsaveisController {
   /**
+   * Cria um novo responsável.
+   *
+   * @param req - Objeto de solicitação HTTP contendo os dados do responsável no corpo.
+   * @param res - Objeto de resposta HTTP.
+   * @returns Retorna o responsável criado ou uma mensagem de erro.
+   */
+  async criarResponsavel(req: Request, res: Response) {
+    try {
+      const dadosResponsavel = req.body;
+
+      // Verifica se o CPF já existe antes de criar o responsável
+      const cpfExistente = await responsaveisService.buscarResponsavelPorCpf(
+        dadosResponsavel.cpf
+      );
+      if (cpfExistente) {
+        return res.status(409).json({ error: 'CPF já cadastrado' });
+      }
+
+      const responsavelCriado =
+        await responsaveisService.criarResponsavel(dadosResponsavel);
+      return res.status(201).json(responsavelCriado);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao criar responsável' });
+    }
+  }
+
+  /**
    * Lista todos os responsáveis cadastrados.
    *
    * @param req - Objeto de solicitação HTTP.
@@ -79,19 +106,6 @@ export class ResponsaveisController {
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao buscar responsável' });
     }
-  }
-
-  /**
-   * Cria um novo responsável no sistema.
-   * @param {Request} req - O objeto de requisição HTTP contendo os dados do responsável.
-   * @param {Response} res - O objeto de resposta HTTP.
-   * @returns {Promise<Response>} Uma resposta com o responsável recém-criado.
-   */
-  async criarResponsavel(req: Request, res: Response) {
-    const dadosResponsavel = req.body;
-    const responsavelCriado =
-      await responsaveisService.criarResponsavel(dadosResponsavel);
-    return res.json(responsavelCriado);
   }
 
   /**

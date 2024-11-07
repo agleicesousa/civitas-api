@@ -13,6 +13,18 @@ export class ResponsaveisService {
   }
 
   /**
+   * Cria um novo responsável no banco de dados.
+   * @param responsavelData - Dados do responsável a ser criado.
+   * @returns O responsável recém-criado.
+   */
+  async criarResponsavel(responsavelData: Partial<Responsaveis>) {
+    await this.iniciarDatabase();
+    const responsavelRepository = MysqlDataSource.getRepository(Responsaveis);
+    const novoResponsavel = responsavelRepository.create(responsavelData);
+    return await responsavelRepository.save(novoResponsavel);
+  }
+
+  /**
    * Lista todos os responsáveis cadastrados no banco de dados.
    * @returns Uma lista de responsáveis.
    */
@@ -46,21 +58,6 @@ export class ResponsaveisService {
     return await responsavelRepository.findOne({
       where: { membro: { cpf: cpf } }
     });
-  }
-
-  /**
-   * Cria um novo responsável no banco de dados.
-   * @param {Partial<Responsaveis>} dadosResponsavel - Um objeto parcial contendo os dados do novo responsável.
-   * @returns {Promise<Responsaveis>} Uma promessa que resolve no responsável recém-criado.
-   */
-  async criarResponsavel(dadosResponsavel: Partial<Responsaveis>) {
-    if (!MysqlDataSource.isInitialized) {
-      await MysqlDataSource.initialize();
-    }
-
-    const responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
-    const novoResponsavel = responsaveisRepository.create(dadosResponsavel);
-    return await responsaveisRepository.save(novoResponsavel);
   }
 
   /**
