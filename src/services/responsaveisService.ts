@@ -23,17 +23,14 @@ export class ResponsaveisService {
   }
 
   /**
-   * Busca um responsável específico pelo seu ID.
-   * @param {string} id - O ID do responsável a ser buscado.
-   * @returns {Promise<Responsaveis | null>} Uma promessa que resolve no responsável encontrado ou `null` se não existir.
+   * Busca um responsável pelo ID.
+   * @param id - ID do responsável a ser buscado.
+   * @returns O responsável encontrado ou `null` se não encontrado.
    */
-  async buscarResponsavelPorId(id: string) {
-    if (!MysqlDataSource.isInitialized) {
-      await MysqlDataSource.initialize();
-    }
-
-    const responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
-    return await responsaveisRepository.findOneBy({ id: Number(id) });
+  async buscarResponsavelPorId(id: number) {
+    await this.iniciarDatabase();
+    const responsavelRepository = MysqlDataSource.getRepository(Responsaveis);
+    return await responsavelRepository.findOneBy({ id });
   }
 
   /**

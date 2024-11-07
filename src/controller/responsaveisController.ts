@@ -21,15 +21,33 @@ export class ResponsaveisController {
   }
 
   /**
-   * Busca um responsável específico pelo seu ID.
-   * @param {Request} req - O objeto de requisição HTTP.
-   * @param {Response} res - O objeto de resposta HTTP.
-   * @returns {Promise<Response>} Uma resposta com os dados do responsável ou `null` se não encontrado.
+   * Busca um responsável pelo ID fornecido.
+   *
+   * @param req - Objeto de solicitação HTTP com o ID do responsável nos parâmetros.
+   * @param res - Objeto de resposta HTTP.
+   * @returns Retorna o responsável encontrado ou uma mensagem de erro.
    */
   async buscarResponsavelPorId(req: Request, res: Response) {
-    const { id } = req.params;
-    const responsavel = await responsaveisService.buscarResponsavelPorId(id);
-    return res.json(responsavel);
+    try {
+      const { id } = req.params;
+
+      // Verifica se o ID é um número válido
+      const idParsed = Number(id);
+      if (isNaN(idParsed)) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      const responsavel =
+        await responsaveisService.buscarResponsavelPorId(idParsed);
+
+      if (!responsavel) {
+        return res.status(404).json({ error: 'Responsável não encontrado' });
+      }
+
+      return res.status(200).json(responsavel);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao buscar responsável' });
+    }
   }
 
   /**
