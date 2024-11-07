@@ -85,16 +85,20 @@ export class ResponsaveisService {
   }
 
   /**
-   * Deleta um responsável existente no banco de dados.
-   * @param {string} id - O ID do responsável a ser deletado.
-   * @returns {Promise<void>} Uma promessa que resolve após a conclusão da operação de exclusão.
+   * Exclui um responsável pelo ID.
+   * @param id - ID do responsável a ser excluído.
+   * @returns `true` se a exclusão for bem-sucedida ou `null` se o responsável não for encontrado.
    */
-  async deletarResponsavel(id: string) {
-    if (!MysqlDataSource.isInitialized) {
-      await MysqlDataSource.initialize();
+  async deletarResponsavel(id: number) {
+    await this.iniciarDatabase();
+    const responsavelRepository = MysqlDataSource.getRepository(Responsaveis);
+    const responsavel = await responsavelRepository.findOne({ where: { id } });
+
+    if (!responsavel) {
+      return null;
     }
 
-    const responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
-    return await responsaveisRepository.delete(Number(id));
+    await responsavelRepository.delete({ id });
+    return true;
   }
 }

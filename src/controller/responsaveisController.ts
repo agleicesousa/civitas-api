@@ -158,14 +158,33 @@ export class ResponsaveisController {
   }
 
   /**
-   * Deleta um responsável do sistema.
-   * @param {Request} req - O objeto de requisição HTTP contendo o ID do responsável a ser deletado.
-   * @param {Response} res - O objeto de resposta HTTP.
-   * @returns {Promise<Response>} Uma resposta com uma mensagem de sucesso e o resultado da operação.
+   * Deleta um responsável pelo ID fornecido.
+   *
+   * @param req - Objeto de solicitação HTTP com o ID do responsável nos parâmetros.
+   * @param res - Objeto de resposta HTTP.
+   * @returns Retorna uma mensagem de sucesso ou erro.
    */
   async deletarResponsavel(req: Request, res: Response) {
-    const { id } = req.params;
-    const resultado = await responsaveisService.deletarResponsavel(id);
-    return res.json({ message: 'Responsável deletado com sucesso', resultado });
+    try {
+      const { id } = req.params;
+
+      const idParsed = Number(id);
+      if (isNaN(idParsed)) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      const responsavelExistente =
+        await responsaveisService.buscarResponsavelPorId(idParsed);
+      if (!responsavelExistente) {
+        return res.status(404).json({ error: 'Responsável não encontrado' });
+      }
+
+      await responsaveisService.deletarResponsavel(idParsed);
+      return res
+        .status(200)
+        .json({ message: 'Responsável deletado com sucesso' });
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao deletar responsável' });
+    }
   }
 }
