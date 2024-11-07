@@ -61,22 +61,27 @@ export class ResponsaveisService {
   }
 
   /**
-   * Atualiza um responsável existente no banco de dados.
-   * @param {string} id - O ID do responsável a ser atualizado.
-   * @param {Partial<Responsaveis>} dadosResponsavel - Um objeto parcial contendo os dados a serem atualizados.
-   * @returns {Promise<Responsaveis | null>} Uma promessa que resolve no responsável atualizado ou `null` se o responsável não for encontrado.
+   * Atualiza as informações de um responsável.
+   * @param id - ID do responsável a ser atualizado.
+   * @param responsavelData - Dados atualizados do responsável.
+   * @returns O responsável atualizado ou `null` se não encontrado.
    */
   async atualizarResponsavel(
-    id: string,
-    dadosResponsavel: Partial<Responsaveis>
+    id: number,
+    responsavelData: Partial<Responsaveis>
   ) {
-    if (!MysqlDataSource.isInitialized) {
-      await MysqlDataSource.initialize();
+    await this.iniciarDatabase();
+    const responsavelRepository = MysqlDataSource.getRepository(Responsaveis);
+    const responsavel = await responsavelRepository.findOne({ where: { id } });
+
+    if (!responsavel) {
+      return null;
     }
 
-    const responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
-    await responsaveisRepository.update(id, dadosResponsavel);
-    return await responsaveisRepository.findOneBy({ id: Number(id) });
+    return await responsavelRepository.save({
+      ...responsavel,
+      ...responsavelData
+    });
   }
 
   /**

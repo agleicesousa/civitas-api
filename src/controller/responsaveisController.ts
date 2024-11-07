@@ -109,17 +109,52 @@ export class ResponsaveisController {
   }
 
   /**
-   * Atualiza um responsável existente no sistema.
-   * @param {Request} req - O objeto de requisição HTTP contendo o ID do responsável e os dados a serem atualizados.
-   * @param {Response} res - O objeto de resposta HTTP.
-   * @returns {Promise<Response>} Uma resposta com os dados do responsável atualizado ou `null` se não encontrado.
+   * Atualiza um responsável pelo ID fornecido.
+   *
+   * @param req - Objeto de solicitação HTTP contendo o ID do responsável e os dados atualizados no corpo.
+   * @param res - Objeto de resposta HTTP.
+   * @returns Retorna o responsável atualizado ou uma mensagem de erro.
    */
   async atualizarResponsavel(req: Request, res: Response) {
-    const { id } = req.params;
-    const dadosResponsavel = req.body;
-    const responsavelAtualizado =
-      await responsaveisService.atualizarResponsavel(id, dadosResponsavel);
-    return res.json(responsavelAtualizado);
+    try {
+      const { id } = req.params;
+      const dadosResponsavel = req.body;
+
+      const idParsed = Number(id);
+      if (isNaN(idParsed)) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      const responsavelExistente =
+        await responsaveisService.buscarResponsavelPorId(idParsed);
+      if (!responsavelExistente) {
+        return res.status(404).json({ error: 'Responsável não encontrado' });
+      }
+
+      // Verifica se o CPF foi alterado e se já pertence a outro responsável
+      if (
+        dadosResponsavel.cpf &&
+        dadosResponsavel.cpf !== responsavelExistente.membro.cpf
+      ) {
+        const cpfExistente = await responsaveisService.buscarResponsavelPorCpf(
+          dadosResponsavel.cpf
+        );
+        if (cpfExistente) {
+          return res
+            .status(409)
+            .json({ error: 'CPF já cadastrado para outro responsável' });
+        }
+      }
+
+      const responsavelAtualizado =
+        await responsaveisService.atualizarResponsavel(
+          idParsed,
+          dadosResponsavel
+        );
+      return res.status(200).json(responsavelAtualizado);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao atualizar responsável' });
+    }
   }
 
   /**
