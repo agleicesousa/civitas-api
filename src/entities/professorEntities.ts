@@ -6,7 +6,8 @@ import {
   BeforeInsert,
   BeforeUpdate,
   JoinTable,
-  JoinColumn
+  JoinColumn,
+  ManyToOne
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
@@ -29,12 +30,22 @@ export class Professor extends BaseEntity {
    * Permite atribuir múltiplas turmas a um professor.
    */
   @ManyToMany(() => Turma, { eager: true })
-  @JoinTable({ name: 'professoresTurma' })
+  @JoinTable({
+    name: 'professoresTurma',
+    joinColumn: {
+      name: 'professorId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'turmaId',
+      referencedColumnName: 'id'
+    }
+  })
   turmas: Turma[];
 
-  @OneToOne(() => Admin, { eager: true })
+  @ManyToOne(() => Admin, { eager: true })
   @JoinColumn({ name: 'adminId' })
-  adminId: Admin;
+  admin: Admin;
 
   @Column()
   senha: string;

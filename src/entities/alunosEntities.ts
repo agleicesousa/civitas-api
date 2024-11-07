@@ -3,6 +3,7 @@ import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Responsaveis } from './responsaveisEntities';
 import { Turma } from './turmasEntities';
+import { Admin } from './adminEntities';
 /**
  * Entidade que representa um Aluno no sistema.
  * Um aluno está associado a um membro (OneToOne),
@@ -24,7 +25,7 @@ export class Alunos extends BaseEntity {
    */
   @ManyToOne(() => Membros, { eager: true })
   @JoinColumn({ name: 'adminId' })
-  admin: Membros;
+  admin: Admin;
 
   /**
    * Relacionamento ManyToOne com a entidade Responsaveis.

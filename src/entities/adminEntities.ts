@@ -5,12 +5,13 @@ import {
   BeforeUpdate,
   OneToOne,
   JoinColumn,
-  // ManyToOne,
   OneToMany
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Turma } from './turmasEntities';
+import { Professor } from './professorEntities';
+import { Alunos } from './alunosEntities';
 import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity()
@@ -45,6 +46,12 @@ export class Admin extends BaseEntity {
    */
   @OneToMany(() => Turma, (turma) => turma.admin)
   turmas: Turma[];
+
+  @OneToMany(() => Professor, (professor) => professor.admin)
+  professores: Professor[];
+
+  @OneToMany(() => Alunos, (aluno) => aluno.admin)
+  alunos: Alunos[];
 
   @BeforeInsert()
   @BeforeUpdate()
