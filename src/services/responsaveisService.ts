@@ -34,6 +34,21 @@ export class ResponsaveisService {
   }
 
   /**
+   * Busca um responsável pelo CPF.
+   * @param cpf - CPF do responsável a ser buscado.
+   * @returns O responsável encontrado ou `null` se não encontrado.
+   */
+  async buscarResponsavelPorCpf(cpf: string) {
+    await this.iniciarDatabase();
+    const responsavelRepository = MysqlDataSource.getRepository(Responsaveis);
+
+    // Realizando a busca exata pelo CPF na entidade `Membros` dentro de `Responsaveis`
+    return await responsavelRepository.findOne({
+      where: { membro: { cpf: cpf } }
+    });
+  }
+
+  /**
    * Cria um novo responsável no banco de dados.
    * @param {Partial<Responsaveis>} dadosResponsavel - Um objeto parcial contendo os dados do novo responsável.
    * @returns {Promise<Responsaveis>} Uma promessa que resolve no responsável recém-criado.

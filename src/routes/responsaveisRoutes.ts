@@ -301,6 +301,17 @@ responsaveisRouter.get(
 );
 
 /**
+ * Retorna um objeto que representa o responsável com o CPF especificado.
+ * Requer autenticação e permissão de visualização de responsáveis.
+ */
+responsaveisRouter.get(
+  '/cpf/:cpf',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS', ''),
+  (req, res) => responsaveisController.buscarResponsavelPorCpf(req, res)
+);
+
+/**
  * Cria um novo responsável.
  * Requer autenticação e permissão de gerenciamento de responsáveis.
  */

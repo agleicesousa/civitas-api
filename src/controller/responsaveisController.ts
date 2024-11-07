@@ -51,6 +51,37 @@ export class ResponsaveisController {
   }
 
   /**
+   * Busca um responsável pelo CPF fornecido.
+   *
+   * @param req - Objeto de solicitação HTTP com o CPF do responsável nos parâmetros.
+   * @param res - Objeto de resposta HTTP.
+   * @returns Retorna o responsável encontrado ou uma mensagem de erro.
+   */
+  async buscarResponsavelPorCpf(req: Request, res: Response) {
+    try {
+      const { cpf } = req.params;
+
+      // Validação do CPF, garantindo que tenha 11 dígitos numéricos
+      if (!cpf || cpf.length !== 11 || !/^\d{11}$/.test(cpf)) {
+        return res.status(400).json({ error: 'CPF inválido' });
+      }
+
+      const responsavel =
+        await responsaveisService.buscarResponsavelPorCpf(cpf);
+
+      if (!responsavel) {
+        return res
+          .status(404)
+          .json({ error: 'Responsável com o CPF fornecido não encontrado' });
+      }
+
+      return res.status(200).json(responsavel);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao buscar responsável' });
+    }
+  }
+
+  /**
    * Cria um novo responsável no sistema.
    * @param {Request} req - O objeto de requisição HTTP contendo os dados do responsável.
    * @param {Response} res - O objeto de resposta HTTP.
