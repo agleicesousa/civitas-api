@@ -48,7 +48,7 @@ export async function authenticateJWT(
  * @param permission - Permissão necessária para acessar a rota.
  * @returns Middleware que responde com 403 se o usuário não tiver a permissão.
  */
-export function hasPermission(permission: string) {
+export function hasPermission(permission: string, p0: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (user && user.permissions.includes(permission)) {
