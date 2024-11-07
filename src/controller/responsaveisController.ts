@@ -6,13 +6,18 @@ const responsaveisService = new ResponsaveisService();
 export class ResponsaveisController {
   /**
    * Lista todos os responsáveis cadastrados.
-   * @param {Request} req - O objeto de requisição HTTP.
-   * @param {Response} res - O objeto de resposta HTTP.
-   * @returns {Promise<Response>} Uma resposta com a lista de responsáveis.
+   *
+   * @param req - Objeto de solicitação HTTP.
+   * @param res - Objeto de resposta HTTP.
+   * @returns Retorna a lista de responsáveis no formato JSON.
    */
   async listarResponsaveis(req: Request, res: Response) {
-    const responsaveis = await responsaveisService.listarResponsaveis();
-    return res.json(responsaveis);
+    try {
+      const responsaveis = await responsaveisService.listarResponsaveis();
+      return res.status(200).json(responsaveis);
+    } catch (error) {
+      return res.status(500).json({ error: 'Erro ao listar responsáveis' });
+    }
   }
 
   /**

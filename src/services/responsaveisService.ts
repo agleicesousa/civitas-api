@@ -3,16 +3,23 @@ import { Responsaveis } from '../entities/responsaveisEntities';
 
 export class ResponsaveisService {
   /**
-   * Lista todos os responsáveis cadastrados no banco de dados.
-   * @returns {Promise<Responsaveis[]>} Uma promessa que resolve em uma lista de responsáveis.
+   * Inicializa o banco de dados, se ainda não estiver inicializado.
+   * @private
    */
-  async listarResponsaveis() {
+  private async iniciarDatabase() {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
     }
+  }
 
-    const responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
-    return await responsaveisRepository.find();
+  /**
+   * Lista todos os responsáveis cadastrados no banco de dados.
+   * @returns Uma lista de responsáveis.
+   */
+  async listarResponsaveis() {
+    await this.iniciarDatabase();
+    const responsavelRepository = MysqlDataSource.getRepository(Responsaveis);
+    return await responsavelRepository.find();
   }
 
   /**
