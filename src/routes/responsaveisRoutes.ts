@@ -199,6 +199,12 @@
  *               $ref: '#/components/schemas/Responsavel'
  *       400:
  *         $ref: '#/components/responses/ValidationError'
+ *       409:
+ *         description: CPF já cadastrado para outro responsável
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "CPF já cadastrado"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -239,6 +245,12 @@
  *           application/json:
  *             example:
  *               error: "Responsável não encontrado."
+ *       409:
+ *         description: CPF já cadastrado para outro responsável
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "CPF já cadastrado"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
