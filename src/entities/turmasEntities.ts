@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  JoinTable
+} from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Admin } from './adminEntities';
 import { Alunos } from './alunosEntities';
@@ -104,5 +111,16 @@ export class Turma extends BaseEntity {
    * @type {Professor[]}
    */
   @ManyToMany(() => Professor, (professor) => professor.turmas)
+  @JoinTable({
+    name: 'professoresTurma',
+    joinColumn: {
+      name: 'turmaId',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'professorId',
+      referencedColumnName: 'id'
+    }
+  })
   professores: Professor[];
 }
