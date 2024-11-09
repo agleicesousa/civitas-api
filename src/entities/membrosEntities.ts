@@ -15,7 +15,7 @@ export class Membros extends BaseEntity {
    * Nome completo do membro.
    * @type {string}
    */
-  @Column()
+  @Column({ nullable: true })
   nomeCompleto: string;
 
   /**

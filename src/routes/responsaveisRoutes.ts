@@ -199,6 +199,12 @@
  *               $ref: '#/components/schemas/Responsavel'
  *       400:
  *         $ref: '#/components/responses/ValidationError'
+ *       409:
+ *         description: CPF já cadastrado para outro responsável
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "CPF já cadastrado"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -239,6 +245,12 @@
  *           application/json:
  *             example:
  *               error: "Responsável não encontrado."
+ *       409:
+ *         description: CPF já cadastrado para outro responsável
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "CPF já cadastrado"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -298,6 +310,17 @@ responsaveisRouter.get(
   authenticateJWT,
   hasPermission('MANAGE_USERS', ''),
   (req, res) => responsaveisController.buscarResponsavelPorId(req, res)
+);
+
+/**
+ * Retorna um objeto que representa o responsável com o CPF especificado.
+ * Requer autenticação e permissão de visualização de responsáveis.
+ */
+responsaveisRouter.get(
+  '/cpf/:cpf',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS', ''),
+  (req, res) => responsaveisController.buscarResponsavelPorCpf(req, res)
 );
 
 /**
