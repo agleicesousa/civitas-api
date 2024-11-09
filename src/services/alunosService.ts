@@ -13,6 +13,14 @@ export class AlunosService {
   private turmasRepository = MysqlDataSource.getRepository(Turma);
   private responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
 
+  private mapAluno(aluno: Alunos) {
+    return {
+      id: aluno.id,
+      name: aluno.membro.nomeCompleto,
+      enrollmentNumber: aluno.membro.numeroMatricula
+    };
+  }
+
   /**
    * Cria um novo aluno no sistema.
    * @param nomeCompleto - O nome completo do aluno.
@@ -117,11 +125,7 @@ export class AlunosService {
         take: paginaTamanho
       });
 
-      const alunosMap = alunos.map((aluno) => ({
-        id: aluno.id,
-        name: aluno.membro.nomeCompleto,
-        enrollmentNumber: aluno.membro.numeroMatricula
-      }));
+      const alunosMap = alunos.map(this.mapAluno);
 
       return {
         data: alunosMap,

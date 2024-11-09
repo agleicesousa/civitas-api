@@ -65,6 +65,16 @@ export class TurmasController {
     }
   }
 
+  async buscarPorAdmin(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const turmas = await this.turmasService.listarPorAdmin(Number(id));
+      return res.status(200).json(turmas);
+    } catch (error) {
+      return res.status(404).json({ error: 'Error ao buscar turma' });
+    }
+  }
+
   /**
    * Atualiza uma turma existente.
    *

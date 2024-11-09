@@ -16,6 +16,16 @@ import { MysqlDataSource } from '../config/database';
 export class TurmasService {
   private turmasRepository = MysqlDataSource.getRepository(Turma);
   private adminRepository = MysqlDataSource.getRepository(Admin);
+
+  private mapTurma(turma: Turma) {
+    return {
+      id: turma.id,
+      turmaApelido: turma.turmaApelido,
+      anoLetivo: turma.anoLetivo,
+      periodoLetivo: turma.periodoLetivo
+    };
+  }
+
   // private professorRepository = MysqlDataSource.getRepository(Professor);
   // private alunoRepository = MysqlDataSource.getRepository(Aluno);
 
@@ -57,8 +67,29 @@ export class TurmasService {
    *
    * @returns Uma promessa que resolve para um array de turmas.
    */
-  async listar(): Promise<Turma[]> {
-    return await this.turmasRepository.find();
+  async listar() {
+    const turmas = await this.turmasRepository.find();
+    const turmasMap = turmas.map(this.mapTurma);
+    return {
+      data: turmasMap
+    };
+  }
+
+  async listarPorAdmin(adminId: number) {
+    const turmas = await this.turmasRepository.findBy({
+      admin: { id: adminId }
+    });
+
+    const turmasMap = turmas.map((turma) => ({
+      id: turma.id,
+      turmaApelido: turma.turmaApelido,
+      anoLetivo: turma.anoLetivo,
+      periodoLetivo: turma.periodoLetivo
+    }));
+
+    return {
+      data: turmasMap
+    };
   }
 
   /**

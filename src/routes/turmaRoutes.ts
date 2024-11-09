@@ -40,4 +40,11 @@ turmasRouter.delete(
   (req, res) => turmaController.deletarTurma(req, res)
 );
 
+turmasRouter.get(
+  '/admin/:id',
+  authenticateJWT,
+  hasPermission('MANAGE_USERS', ''),
+  (req, res) => turmaController.buscarPorAdmin(req, res)
+);
+
 export default turmasRouter;
