@@ -290,7 +290,7 @@ const membrosController = new MembrosController();
 membrosRouter.get(
   '/',
   authenticateJWT,
-  hasPermission('VIEW_MEMBERS', ''),
+  hasPermission('VIEW_MEMBERS'),
   (req, res) => membrosController.listarMembros(req, res)
 );
 
@@ -301,7 +301,7 @@ membrosRouter.get(
 membrosRouter.get(
   '/:id',
   authenticateJWT,
-  hasPermission('VIEW_MEMBERS', ''),
+  hasPermission('VIEW_MEMBERS'),
   (req, res) => membrosController.buscarMembroPorId(req, res)
 );
 
@@ -312,7 +312,7 @@ membrosRouter.get(
 membrosRouter.post(
   '/',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => membrosController.criarMembro(req, res)
 );
 
@@ -323,7 +323,7 @@ membrosRouter.post(
 membrosRouter.put(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => membrosController.atualizarMembro(req, res)
 );
 
@@ -334,7 +334,7 @@ membrosRouter.put(
 membrosRouter.delete(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => membrosController.deletarMembro(req, res)
 );
 
