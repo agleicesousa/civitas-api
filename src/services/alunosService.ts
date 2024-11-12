@@ -16,7 +16,7 @@ export class AlunosService {
   private mapAluno(aluno: Alunos) {
     return {
       id: aluno.id,
-      name: aluno.membro.nomeCompleto,
+      nomeCompleto: aluno.membro.nomeCompleto,
       numeroMatricula: aluno.membro.numeroMatricula
     };
   }
