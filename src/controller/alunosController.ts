@@ -97,7 +97,7 @@ export class AlunosController {
     } catch (error) {
       console.error('Caught error:', error);
       if (error instanceof NotFoundError) {
-        return res.status(404).json({ message: error.message });
+        return res.status(404).json({ message: 'Aluno não encontrado' });
       }
       return res
         .status(500)
@@ -130,7 +130,7 @@ export class AlunosController {
       if (error instanceof NotFoundError) {
         return res.status(404).json({ message: error.message });
       }
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ message: error.message });
     }
   }
 }

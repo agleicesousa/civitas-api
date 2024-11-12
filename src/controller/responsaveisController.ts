@@ -20,14 +20,14 @@ export class ResponsaveisController {
         dadosResponsavel.cpf
       );
       if (cpfExistente) {
-        return res.status(409).json({ error: 'CPF já cadastrado' });
+        return res.status(409).json({ message: 'CPF já cadastrado' });
       }
 
       const responsavelCriado =
         await responsaveisService.criarResponsavel(dadosResponsavel);
       return res.status(201).json(responsavelCriado);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao criar responsável' });
+      return res.status(500).json({ message: 'Erro ao criar responsável' });
     }
   }
 
@@ -43,7 +43,7 @@ export class ResponsaveisController {
       const responsaveis = await responsaveisService.listarResponsaveis();
       return res.status(200).json(responsaveis);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao listar responsáveis' });
+      return res.status(500).json({ message: 'Erro ao listar responsáveis' });
     }
   }
 
@@ -61,19 +61,19 @@ export class ResponsaveisController {
       // Verifica se o ID é um número válido
       const idParsed = Number(id);
       if (isNaN(idParsed)) {
-        return res.status(400).json({ error: 'ID inválido' });
+        return res.status(400).json({ message: 'ID inválido' });
       }
 
       const responsavel =
         await responsaveisService.buscarResponsavelPorId(idParsed);
 
       if (!responsavel) {
-        return res.status(404).json({ error: 'Responsável não encontrado' });
+        return res.status(404).json({ message: 'Responsável não encontrado' });
       }
 
       return res.status(200).json(responsavel);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao buscar responsável' });
+      return res.status(500).json({ message: 'Erro ao buscar responsável' });
     }
   }
 
@@ -90,7 +90,7 @@ export class ResponsaveisController {
 
       // Validação do CPF, garantindo que tenha 11 dígitos numéricos
       if (!cpf || cpf.length !== 11 || !/^\d{11}$/.test(cpf)) {
-        return res.status(400).json({ error: 'CPF inválido' });
+        return res.status(400).json({ message: 'CPF inválido' });
       }
 
       const responsavel =
@@ -104,7 +104,7 @@ export class ResponsaveisController {
 
       return res.status(200).json(responsavel);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao buscar responsável' });
+      return res.status(500).json({ message: 'Erro ao buscar responsável' });
     }
   }
 
@@ -122,13 +122,13 @@ export class ResponsaveisController {
 
       const idParsed = Number(id);
       if (isNaN(idParsed)) {
-        return res.status(400).json({ error: 'ID inválido' });
+        return res.status(400).json({ message: 'ID inválido' });
       }
 
       const responsavelExistente =
         await responsaveisService.buscarResponsavelPorId(idParsed);
       if (!responsavelExistente) {
-        return res.status(404).json({ error: 'Responsável não encontrado' });
+        return res.status(404).json({ message: 'Responsável não encontrado' });
       }
 
       // Verifica se o CPF foi alterado e se já pertence a outro responsável
@@ -153,7 +153,7 @@ export class ResponsaveisController {
         );
       return res.status(200).json(responsavelAtualizado);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao atualizar responsável' });
+      return res.status(500).json({ message: 'Erro ao atualizar responsável' });
     }
   }
 
@@ -170,13 +170,13 @@ export class ResponsaveisController {
 
       const idParsed = Number(id);
       if (isNaN(idParsed)) {
-        return res.status(400).json({ error: 'ID inválido' });
+        return res.status(400).json({ message: 'ID inválido' });
       }
 
       const responsavelExistente =
         await responsaveisService.buscarResponsavelPorId(idParsed);
       if (!responsavelExistente) {
-        return res.status(404).json({ error: 'Responsável não encontrado' });
+        return res.status(404).json({ message: 'Responsável não encontrado' });
       }
 
       await responsaveisService.deletarResponsavel(idParsed);
@@ -184,7 +184,7 @@ export class ResponsaveisController {
         .status(200)
         .json({ message: 'Responsável deletado com sucesso' });
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao deletar responsável' });
+      return res.status(500).json({ message: 'Erro ao deletar responsável' });
     }
   }
 }
