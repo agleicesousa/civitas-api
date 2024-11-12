@@ -44,9 +44,7 @@ export class AlunosService {
     }
     //Se estudante já foi cadastrado retorna um error
     const membroEstudante = await this.membrosRepository.findOne({
-      where: {
-        numeroMatricula
-      }
+      where: [{ numeroMatricula }, { rg }]
     });
     if (membroEstudante) {
       throw new ConflictError('Aluno já existe nos cadastros');
