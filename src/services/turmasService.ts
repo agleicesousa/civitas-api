@@ -8,6 +8,7 @@ import {
 import { Admin } from '../entities/adminEntities';
 // import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
+import { ConflictError } from '../errors/ConflitctError';
 // import { In } from 'typeorm';
 
 /**
@@ -47,7 +48,7 @@ export class TurmasService {
     });
 
     if (turmaExistente) {
-      throw new Error(`Já existe uma turma com o apelido ${turmaApelido}`);
+      throw new ConflictError('Turma já foi cadastrada');
     }
 
     const admin = await this.adminRepository.findOneBy({ id: adminId });

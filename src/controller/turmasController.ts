@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { TurmasService } from '../services/turmasService';
-
+import { ConflictError } from '../errors/ConflitctError';
 /**
  * Controlador para gerenciar as rotas relacionadas a turmas.
  */
@@ -16,18 +16,24 @@ export class TurmasController {
    */
   async criarTurma(req: Request, res: Response): Promise<Response> {
     try {
-      const { turmaApelido, periodoLetivo, anoLetivo, ensino, adminId } =
-        req.body;
+      const { turmaApelido, periodoLetivo, anoLetivo, ensino } = req.body;
+
+      const adminId = Number(req.user.id);
 
       const novaTurma = await this.turmasService.criar(
         anoLetivo,
         periodoLetivo,
         ensino,
         turmaApelido,
-        Number(adminId)
+        adminId
       );
-      return res.status(201).json(novaTurma);
+      return res.status(201).json({message: 'Turma criada com sucesso', turma: novaTurma});
     } catch (error) {
+      if (error instanceof ConflictError) {
+        return res.status(409).json({
+          message: error.message
+        });
+      }
       return res.status(404).json({ error: 'Erro ao criar turma' });
     }
   }
