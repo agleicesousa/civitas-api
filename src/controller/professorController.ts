@@ -70,7 +70,9 @@ export class ProfessorController {
     try {
       const { id } = req.params;
       await this.professorService.deletarProfessor(Number(id));
-      return res.status(204).send();
+      return res
+        .status(200)
+        .json({ message: 'Professor excluído com sucesso' });
     } catch (error) {
       return res
         .status(404)
@@ -89,14 +91,16 @@ export class ProfessorController {
       const id = req.params.id;
       const { turmasApelidos, senha, membroId } = req.body;
 
-      const professorAtualizado = await this.professorService.editarProfessor(
+      await this.professorService.editarProfessor(
         Number(id),
         turmasApelidos,
         senha,
         Number(membroId)
       );
 
-      return res.json(professorAtualizado);
+      return res
+        .status(200)
+        .json({ message: 'Professor atualizado com sucesso' });
     } catch (error) {
       console.error('Erro ao editar professor:', error);
       return res.status(404).json({ error: error.message });

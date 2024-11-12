@@ -43,13 +43,17 @@ export class AlunosController {
    */
   async listarAlunos(req: Request, res: Response) {
     const page = Math.max(1, parseInt((req.query.page as string) ?? '1'));
-    const perPage = Math.max(1, parseInt((req.query.perPage as string) ?? '5'));
+    const perPage = req.query.perPage
+      ? parseInt(req.query.perPage as string)
+      : 0;
     const searchTerm = req.query.searchTerm ?? '';
+    const adminId = Number(req.user.id);
     try {
       const { data, total } = await this.alunosService.listarAlunos(
         page,
         perPage,
-        searchTerm as string
+        searchTerm as string,
+        adminId
       );
       return res.status(200).json({ page, perPage, total, data });
     } catch (error) {
@@ -86,7 +90,7 @@ export class AlunosController {
     try {
       const { id } = req.params;
       await this.alunosService.deletarAluno(Number(id));
-      return res.status(204).json({ message: 'Aluno excluído com sucesso' });
+      return res.status(200).json({ message: 'Aluno excluído com sucesso' });
     } catch (error) {
       console.error('Caught error:', error);
       if (error instanceof NotFoundError) {
@@ -109,7 +113,7 @@ export class AlunosController {
       const { turmaId, rg, nomeCompleto, numeroMatricula, responsavelCpf } =
         req.body;
 
-      const alunoAtualizado = await this.alunosService.editarAluno(
+      await this.alunosService.editarAluno(
         id,
         nomeCompleto,
         rg,
@@ -118,7 +122,7 @@ export class AlunosController {
         responsavelCpf
       );
 
-      return res.json(alunoAtualizado);
+      return res.status(200).json({ message: 'Aluno atualizada com sucesso' });
     } catch (error) {
       if (error instanceof NotFoundError) {
         return res.status(404).json({ message: error.message });

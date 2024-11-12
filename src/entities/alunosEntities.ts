@@ -23,7 +23,7 @@ export class Alunos extends BaseEntity {
    * Relacionamento ManyToOne com a entidade Membros (Admin).
    * Muitos alunos podem estar associados ao mesmo administrador.
    */
-  @ManyToOne(() => Membros, { eager: true })
+  @ManyToOne(() => Admin, { eager: true })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
 

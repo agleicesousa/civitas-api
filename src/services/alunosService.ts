@@ -6,7 +6,7 @@ import { TipoConta } from '../entities/baseEntity';
 import { Responsaveis } from '../entities/responsaveisEntities';
 import { NotFoundError } from '../errors/NotFoundError';
 import { ConflictError } from '../errors/ConflitctError';
-import { Like } from 'typeorm';
+import { FindManyOptions, Like } from 'typeorm';
 export class AlunosService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
   private alunosRepository = MysqlDataSource.getRepository(Alunos);
@@ -17,7 +17,7 @@ export class AlunosService {
     return {
       id: aluno.id,
       name: aluno.membro.nomeCompleto,
-      enrollmentNumber: aluno.membro.numeroMatricula
+      numeroMatricula: aluno.membro.numeroMatricula
     };
   }
 
@@ -104,27 +104,34 @@ export class AlunosService {
   async listarAlunos(
     paginaNumero: number,
     paginaTamanho: number,
-    termoDeBusca: string
+    termoDeBusca: string,
+    adminId: number
   ) {
     const pular = (paginaNumero - 1) * paginaTamanho;
 
     try {
-      const [alunos, total] = await this.alunosRepository.findAndCount({
+      const opcoesBusca: FindManyOptions<Alunos> = {
         relations: ['membro'],
         where: {
-          membro: {
-            nomeCompleto: Like(`%${termoDeBusca}%`)
-          }
+          admin: { id: adminId },
+          ...(termoDeBusca && {
+            membro: { nomeCompleto: Like(`%${termoDeBusca}%`) }
+          })
         },
         order: {
           membro: {
             nomeCompleto: 'ASC'
           }
-        },
-        skip: pular,
-        take: paginaTamanho
-      });
+        }
+      };
 
+      if (paginaTamanho && paginaTamanho > 0) {
+        opcoesBusca.skip = pular;
+        opcoesBusca.take = paginaTamanho;
+      }
+
+      const [alunos, total] =
+        await this.alunosRepository.findAndCount(opcoesBusca);
       const alunosMap = alunos.map(this.mapAluno);
 
       return {
@@ -142,7 +149,7 @@ export class AlunosService {
    * @param id - O ID do aluno a ser buscado.
    * @returns Uma promessa que resolve para o aluno encontrado.
    */
-  async buscarAlunoPorId(id: number): Promise<Alunos> {
+  async buscarAlunoPorId(id: number) {
     const aluno = await this.alunosRepository.findOne({
       where: { id },
       relations: ['membro', 'turma', 'responsavel']
@@ -152,7 +159,16 @@ export class AlunosService {
       throw new NotFoundError('Aluno não encontrado.');
     }
 
-    return aluno;
+    const alunoMap = {
+      id: aluno.id,
+      numeroMatricula: aluno.membro.numeroMatricula,
+      nomeCompleto: aluno.membro.nomeCompleto,
+      rg: aluno.membro.rg,
+      turmaId: aluno.turma?.id ?? null,
+      responsavelCpf: aluno.responsavel?.membro?.cpf ?? null
+    };
+
+    return alunoMap;
   }
 
   /**

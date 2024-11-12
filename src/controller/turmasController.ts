@@ -41,7 +41,8 @@ export class TurmasController {
    */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
     try {
-      const turmas = await this.turmasService.listar();
+      const adminId = Number(req.user.id);
+      const turmas = await this.turmasService.listar(adminId);
       return res.status(200).json(turmas);
     } catch (error) {
       return res.status(404).json({ error: 'Erro ao buscar turmas' });
@@ -65,16 +66,6 @@ export class TurmasController {
     }
   }
 
-  async buscarPorAdmin(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      const turmas = await this.turmasService.listarPorAdmin(Number(id));
-      return res.status(200).json(turmas);
-    } catch (error) {
-      return res.status(404).json({ error: 'Error ao buscar turma' });
-    }
-  }
-
   /**
    * Atualiza uma turma existente.
    *
@@ -85,11 +76,8 @@ export class TurmasController {
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const turmaAtualizada = await this.turmasService.editar(
-        Number(id),
-        req.body
-      );
-      return res.status(200).json(turmaAtualizada);
+      await this.turmasService.editar(Number(id), req.body);
+      return res.status(200).json({ message: 'Turma atualizada com sucesso' });
     } catch (error) {
       return res.status(404).json({ error: error.message });
     }
@@ -106,7 +94,7 @@ export class TurmasController {
     try {
       const { id } = req.params;
       await this.turmasService.deletar(Number(id));
-      return res.status(204).send();
+      return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
       return res.status(404).json({ error: 'Erro ao deletar turma' });
     }

@@ -67,31 +67,15 @@ export class TurmasService {
    *
    * @returns Uma promessa que resolve para um array de turmas.
    */
-  async listar() {
-    const turmas = await this.turmasRepository.find();
+  async listar(adminId: number) {
+    const turmas = await this.turmasRepository.findBy({
+      admin: { id: adminId }
+    });
     const turmasMap = turmas.map(this.mapTurma);
     return {
       data: turmasMap
     };
   }
-
-  async listarPorAdmin(adminId: number) {
-    const turmas = await this.turmasRepository.findBy({
-      admin: { id: adminId }
-    });
-
-    const turmasMap = turmas.map((turma) => ({
-      id: turma.id,
-      turmaApelido: turma.turmaApelido,
-      anoLetivo: turma.anoLetivo,
-      periodoLetivo: turma.periodoLetivo
-    }));
-
-    return {
-      data: turmasMap
-    };
-  }
-
   /**
    * Atualiza uma turma existente.
    *
