@@ -2,8 +2,10 @@ import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
 import { Turma } from '../entities/turmasEntities';
 import { Membros } from '../entities/membrosEntities';
+import { BaseEntity, TipoConta } from '../entities/baseEntity';
 import { In } from 'typeorm';
 import { criptografarSenha } from '../utils/senhaUtils';
+
 /**
  * Classe responsável por gerenciar operações relacionadas a Professores.
  */
@@ -11,38 +13,62 @@ export class ProfessorService {
   private professorRepository = MysqlDataSource.getRepository(Professor);
   private membrosRepository = MysqlDataSource.getRepository(Membros);
   private turmasRepository = MysqlDataSource.getRepository(Turma);
+  private baseRepository = MysqlDataSource.getRepository(BaseEntity);
 
   /**
-   * Cria um novo professor.
-   *
-   * @param senha - A senha do professor.
-   * @param turmasApelido - Array de apelidos das turmas associadas ao professor.
-   * @param membroId - ID do membro associado ao professor.
-   * @throws Error se o membro não for encontrado
-   * @returns O professor criado.
+   * Cria um novo professor e, se necessário, cria um novo membro associado.
+   * @param nomeMembro - Nome completo do membro.
+   * @param cpf - CPF do membro.
+   * @param dataNascimento - Data de nascimento do membro.
+   * @param numeroMatricula - Número de matrícula do membro.
+   * @param senha - Senha para o professor.
+   * @param turmaApelido - Lista de apelidos das turmas associadas ao professor.
+   * @param membroId - (Opcional) ID de um membro existente.
+   * @returns O professor criado com o membro e turmas associados.
    */
   async criarProfessor(
+    nomeMembro: string,
+    cpf: string,
+    dataNascimento: Date,
+    numeroMatricula: string,
     senha: string,
-    membroId: number,
-    turmaApelido: string[]
+    turmaApelido: string[],
+    membroId?: number
   ): Promise<Professor> {
-    const membro = await this.membrosRepository.findOneBy({ id: membroId });
+    let membro: Membros | null = null;
 
-    if (!membro) {
-      throw new Error(`Membro com ID ${membroId} não encontrado`);
+    // Verifica se um ID de membro foi fornecido e tenta encontrar o membro associado.
+    if (membroId) {
+      membro = await this.membrosRepository.findOneBy({ id: membroId });
     }
 
+    // Se o membro não for encontrado ou o ID não for fornecido, cria um novo membro.
+    if (!membro) {
+      membro = this.membrosRepository.create({
+        nomeCompleto: nomeMembro,
+        numeroMatricula,
+        dataNascimento,
+        cpf,
+        tipoConta: TipoConta.PROFESSOR
+      });
+      membro = await this.membrosRepository.save(membro);
+    }
+
+    // Busca as turmas associadas pelos apelidos fornecidos.
     const turmas = await this.turmasRepository.findBy({
       turmaApelido: In(turmaApelido)
     });
 
+    // Cria e salva o novo professor com as informações de membro e turmas.
     const novoProfessor = this.professorRepository.create({
-      senha,
+      senha: await criptografarSenha(senha),
       membro,
       turmas
     });
+
     return await this.professorRepository.save(novoProfessor);
   }
+
   /**
    * Lista todos os professores.
    *

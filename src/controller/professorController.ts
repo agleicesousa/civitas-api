@@ -6,27 +6,40 @@ import { ProfessorService } from '../services/professorService';
  */
 export class ProfessorController {
   private professorService = new ProfessorService();
+
   /**
    * Cria um novo professor.
-   *
-   * @param req - O  objeto da requisão contendo os dados do professor.
+   * @param req - O objeto da requisição contendo os dados do professor.
    * @param res - A resposta HTTP para ser enviada ao cliente.
    */
   async criarProfessor(req: Request, res: Response) {
     try {
-      const { senha, membroId, turmasApelido } = req.body;
+      const {
+        nomeMembro,
+        cpf,
+        dataNascimento,
+        numeroMatricula,
+        senha,
+        turmasApelido,
+        membroId
+      } = req.body;
 
       const novoProfessor = await this.professorService.criarProfessor(
+        nomeMembro,
+        cpf,
+        new Date(dataNascimento),
+        numeroMatricula,
         senha,
-        Number(membroId),
-        turmasApelido
+        turmasApelido,
+        membroId ? Number(membroId) : null
       );
 
       res.status(201).json(novoProfessor);
     } catch (error) {
-      res.status(404).json({ message: 'Erro ao criar professor', error });
+      res.status(500).json({ message: 'Erro ao criar professor', error });
     }
   }
+
   /**
    * Lista todos os professores.
    *
@@ -41,6 +54,7 @@ export class ProfessorController {
       res.status(404).json({ message: 'Erro ao listar professores', error });
     }
   }
+
   /**
    * Busca um professor pelo ID.
    *
@@ -60,6 +74,7 @@ export class ProfessorController {
         .json({ message: 'Erro ao buscar professor', error });
     }
   }
+
   /**
    * Deleta um professor pelo ID.
    *
@@ -77,6 +92,7 @@ export class ProfessorController {
         .json({ message: 'Erro ao deletar professor', error });
     }
   }
+
   /**
    * Edita os detalhes de um professor existente.
    *
