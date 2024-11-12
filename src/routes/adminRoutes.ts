@@ -329,7 +329,7 @@ adminRouter.post('/login', (req, res) => adminController.login(req, res));
 adminRouter.get(
   '/',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => adminController.listarAdmins(req, res)
 );
 
@@ -340,7 +340,7 @@ adminRouter.get(
 adminRouter.get(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => adminController.buscarAdminPorId(req, res)
 );
 
@@ -352,7 +352,7 @@ adminRouter.post(
   '/',
   validarEmail,
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => adminController.criarAdmin(req, res)
 );
 
@@ -364,7 +364,7 @@ adminRouter.put(
   '/:id',
   validarEmail,
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => adminController.atualizarAdmin(req, res)
 );
 
@@ -375,7 +375,7 @@ adminRouter.put(
 adminRouter.delete(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => adminController.deletarAdmin(req, res)
 );
 
