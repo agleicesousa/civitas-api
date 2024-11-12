@@ -29,9 +29,12 @@ export class AlunosController {
       });
     } catch (error) {
       if (error instanceof ConflictError) {
-        return res.status(409).json({ message: error.message });
+        return res.status(409).json({
+          message:
+            'Estudante já existe nos cadastros. Verifique as informações.'
+        });
       }
-      return res.status(400).json({ message: 'Erro ao criar aluno', error });
+      return res.status(400).json({ message: 'Erro ao criar aluno' });
     }
   }
 
