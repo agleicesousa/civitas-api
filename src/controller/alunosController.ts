@@ -125,7 +125,7 @@ export class AlunosController {
         responsavelCpf
       );
 
-      return res.status(200).json({ message: 'Aluno atualizada com sucesso' });
+      return res.status(200).json({ message: 'Aluno atualizado com sucesso' });
     } catch (error) {
       if (error instanceof NotFoundError) {
         return res.status(404).json({ message: error.message });
