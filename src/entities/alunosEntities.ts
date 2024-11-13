@@ -39,7 +39,7 @@ export class Alunos extends BaseEntity {
    * Relacionamento com a entidade `Turma`, indicando a turma à qual o aluno pertence.
    * @type {Turma}
    */
-  @ManyToOne(() => Turma, (turma) => turma.alunos)
+  @ManyToOne(() => Turma, (turma) => turma.alunos, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'turmaId' })
   turma: Turma;
 }

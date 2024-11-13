@@ -91,7 +91,6 @@ export class AlunosService {
       turma,
       responsavel
     });
-    console.log(aluno);
     return await this.alunosRepository.save(aluno);
   }
   /**

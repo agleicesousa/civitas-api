@@ -27,14 +27,16 @@ export class TurmasController {
         turmaApelido,
         adminId
       );
-      return res.status(201).json({message: 'Turma criada com sucesso', turma: novaTurma});
+      return res
+        .status(201)
+        .json({ message: 'Turma criada com sucesso', turma: novaTurma });
     } catch (error) {
       if (error instanceof ConflictError) {
         return res.status(409).json({
           message: error.message
         });
       }
-      return res.status(404).json({ error: 'Erro ao criar turma' });
+      return res.status(404).json({ message: 'Erro ao criar turma' });
     }
   }
 
@@ -51,7 +53,7 @@ export class TurmasController {
       const turmas = await this.turmasService.listar(adminId);
       return res.status(200).json(turmas);
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao buscar turmas' });
+      return res.status(404).json({ message: 'Erro ao buscar turmas' });
     }
   }
 
@@ -68,7 +70,7 @@ export class TurmasController {
       const turma = await this.turmasService.buscarPorId(Number(id));
       return res.status(200).json(turma);
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao buscar turma' });
+      return res.status(404).json({ message: 'Erro ao buscar turma' });
     }
   }
 
@@ -85,7 +87,7 @@ export class TurmasController {
       await this.turmasService.editar(Number(id), req.body);
       return res.status(200).json({ message: 'Turma atualizada com sucesso' });
     } catch (error) {
-      return res.status(404).json({ error: error.message });
+      return res.status(404).json({ message: error.message });
     }
   }
 
@@ -102,7 +104,7 @@ export class TurmasController {
       await this.turmasService.deletar(Number(id));
       return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao deletar turma' });
+      return res.status(404).json({ message: 'Erro ao deletar turma' });
     }
   }
 }
