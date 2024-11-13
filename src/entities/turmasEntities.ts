@@ -83,7 +83,6 @@ export class Turma extends BaseEntity {
    * @type {string}
    */
   @Column({
-    unique: true,
     type: 'varchar',
     length: 20
   })

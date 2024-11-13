@@ -6,6 +6,7 @@ import {
 } from '../entities/turmasEntities';
 // import { Aluno } from '../entities/alunoEntities';
 import { Admin } from '../entities/adminEntities';
+import { Like } from 'typeorm';
 // import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
 import { ConflictError } from '../errors/ConflitctError';
@@ -68,12 +69,28 @@ export class TurmasService {
    *
    * @returns Uma promessa que resolve para um array de turmas.
    */
-  async listar(adminId: number) {
-    const turmas = await this.turmasRepository.findBy({
-      admin: { id: adminId }
+  async listar(
+    adminId: number,
+    paginaNumero: number,
+    paginaTamanho: number | null,
+    searchTerm: string
+  ) {
+    const offset = (paginaNumero - 1) * (paginaTamanho ?? 0);
+    const [turmas, total] = await this.turmasRepository.findAndCount({
+      where: {
+        admin: {
+          id: adminId
+        },
+        turmaApelido: Like(`%${searchTerm}%`)
+      },
+      skip: paginaTamanho ? offset : undefined,
+      take: paginaTamanho || undefined
     });
     const turmasMap = turmas.map(this.mapTurma);
     return {
+      paginaNumero,
+      paginaTamanho,
+      total,
       data: turmasMap
     };
   }

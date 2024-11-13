@@ -48,9 +48,20 @@ export class TurmasController {
    * @returns Uma promessa que resolve para um objeto JSON contendo todas as turmas ou um erro, se ocorrer.
    */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
+    const page = Math.max(1, parseInt((req.query.page as string) ?? '1'));
+    const perPage = req.query.perPage
+      ? parseInt(req.query.perPage as string)
+      : null;
+    const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
+    const adminId = Number(req.user.id);
+
     try {
-      const adminId = Number(req.user.id);
-      const turmas = await this.turmasService.listar(adminId);
+      const turmas = await this.turmasService.listar(
+        adminId,
+        page,
+        perPage,
+        searchTerm
+      );
       return res.status(200).json(turmas);
     } catch (error) {
       return res.status(404).json({ message: 'Erro ao buscar turmas' });
