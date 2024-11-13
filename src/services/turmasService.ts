@@ -45,7 +45,12 @@ export class TurmasService {
     adminId: number
   ): Promise<Turma> {
     const turmaExistente = await this.turmasRepository.findOne({
-      where: { turmaApelido }
+      where: {
+        turmaApelido,
+        admin: {
+          id: adminId
+        }
+      }
     });
 
     if (turmaExistente) {
