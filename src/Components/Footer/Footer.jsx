@@ -5,5 +5,5 @@ export default function Footer() {
             <p>Copyright © 2022 VNW React Aula. All rights reserved.</p>
         </footer>
         </>
-    )
+    );
 }
