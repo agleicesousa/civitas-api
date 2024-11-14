@@ -5,7 +5,6 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import { MysqlDataSource } from './config/database';
 import { swaggerConfig } from './config/swagger';
 import { errorHandler } from './middlewares/errorHandler';
-
 import adminRouter from './routes/adminRoutes';
 import membrosRouter from './routes/membrosRoutes';
 import turmasRouter from './routes/turmaRoutes';

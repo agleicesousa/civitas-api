@@ -297,7 +297,7 @@ const responsaveisController = new ResponsaveisController();
 responsaveisRouter.get(
   '/',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.listarResponsaveis(req, res)
 );
 
@@ -308,7 +308,7 @@ responsaveisRouter.get(
 responsaveisRouter.get(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.buscarResponsavelPorId(req, res)
 );
 
@@ -319,7 +319,7 @@ responsaveisRouter.get(
 responsaveisRouter.get(
   '/cpf/:cpf',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.buscarResponsavelPorCpf(req, res)
 );
 
@@ -330,7 +330,7 @@ responsaveisRouter.get(
 responsaveisRouter.post(
   '/',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.criarResponsavel(req, res)
 );
 
@@ -341,7 +341,7 @@ responsaveisRouter.post(
 responsaveisRouter.put(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.atualizarResponsavel(req, res)
 );
 
@@ -352,7 +352,7 @@ responsaveisRouter.put(
 responsaveisRouter.delete(
   '/:id',
   authenticateJWT,
-  hasPermission('MANAGE_USERS', ''),
+  hasPermission('MANAGE_USERS'),
   (req, res) => responsaveisController.deletarResponsavel(req, res)
 );
 

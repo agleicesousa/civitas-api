@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Faker, pt_BR } from '@faker-js/faker';
 import { setSeederFactory } from 'typeorm-extension';
 import { Admin } from '../entities/adminEntities';
@@ -79,15 +80,17 @@ const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
 
 const professorFabrica = setSeederFactory(Professor, () => {
   const professor = new Professor();
-  professor.senha = '123123';
+  const senhaProfessor = process.env.PROF_PASSWORD;
+  professor.senha = senhaProfessor;
 
   return professor;
 });
 
 const adminFabrica = setSeederFactory(Admin, () => {
   const admin = new Admin();
+  const senhaAdmin = process.env.ADMIN_PASSWORD;
   admin.email = fakerBR.internet.email();
-  admin.senha = '123123';
+  admin.senha = senhaAdmin;
 
   return admin;
 });
