@@ -42,8 +42,7 @@ const membrosFabrica = setSeederFactory(Membros, () => {
  */
 const alunosFabrica = setSeederFactory(Alunos, () => {
   const aluno = new Alunos();
-  const membro = membrosFabrica();
-  aluno.membro = membro;
+  aluno.membro = new Membros();
   return aluno;
 });
 
@@ -52,8 +51,7 @@ const alunosFabrica = setSeederFactory(Alunos, () => {
  */
 const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
   const responsavel = new Responsaveis();
-  const membro = membrosFabrica();
-  responsavel.membro = membro;
+  responsavel.membro = new Membros();
   return responsavel;
 });
 
@@ -62,8 +60,7 @@ const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
  */
 const professorFabrica = setSeederFactory(Professor, () => {
   const professor = new Professor();
-  const membro = membrosFabrica();
-  professor.membro = membro;
+  professor.membro = new Membros();
   return professor;
 });
 
@@ -72,8 +69,7 @@ const professorFabrica = setSeederFactory(Professor, () => {
  */
 const adminFabrica = setSeederFactory(Admin, () => {
   const admin = new Admin();
-  const membro = membrosFabrica();
-  admin.membro = membro;
+  admin.membro = new Membros();
   return admin;
 });
 
