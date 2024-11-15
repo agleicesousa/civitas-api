@@ -1,7 +1,7 @@
 import { hash, compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
-import { prisma } from '../prisma';
-import { ErrorHandler } from '../utils/errorHandler';
+import { prisma } from '../utils/prismaUtils';
+import { ErrorHandler } from '../errors/ErrorHandler';
 
 interface NovoAdminData {
   email: string;
