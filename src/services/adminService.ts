@@ -1,162 +1,171 @@
-import { MysqlDataSource } from '../config/database';
-import { Membros } from '../entities/membrosEntities';
-import { Admin } from '../entities/adminEntities';
-import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
-import { gerarToken } from '../utils/jwtUtils';
-import { TipoConta } from '../entities/baseEntity';
+import { hash, compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
+import { prisma } from '../prisma';
+import { ErrorHandler } from '../utils/errorHandler';
 
-/**
- * Serviço para gerenciar as operações de login e autenticação de administradores.
- */
+interface NovoAdminData {
+  email: string;
+  senha: string;
+  nomeCompleto: string;
+  tipoConta: string;
+}
+
 export class AdminService {
-  private membrosRepository = MysqlDataSource.getRepository(Membros);
-  private adminRepository = MysqlDataSource.getRepository(Admin)
   /**
-   * Realiza a criação de um novo administrador, associando um membro e criando o administrador.
-   * @param membroData - Dados do membro a ser criado.
-   * @returns O administrador recém-criado.
-   */
-  async criarAdmin(membroData: {
-    email: string;
-    senha: string;
-    nomeCompleto: string;
-    tipoConta: TipoConta;
-  }) {
-    if (membroData.tipoConta !== TipoConta.ADMIN) {
-      throw new Error('Tipo de conta inválido. Apenas "admin" é permitido.');
-    }
-
-    // Criação do novo Membro
-    const membro = this.membrosRepository.create({
-      email: membroData.email,
-      senha: await criptografarSenha(membroData.senha),
-      nomeCompleto: membroData.nomeCompleto,
-      tipoConta: membroData.tipoConta
-    });
-    await this.membrosRepository.save(membro);
-
-    const admin = this.adminRepository.create({
-      membro,
-    });
-    await this.adminRepository.save(admin);
-
-    return admin;
-  }
-
-  /**
-   * Obtém todos os administradores com seus membros associados.
-   * @returns Lista de administradores.
+   * Lista todos os administradores cadastrados.
    */
   async listarAdmins() {
-    const admins = await this.adminRepository.find({
-      relations: ['membro'],
+    return prisma.membros.findMany({
+      where: { tipoConta: 'ADMIN' },
+      select: {
+        id: true,
+        nomeCompleto: true,
+        email: true,
+        tipoConta: true,
+      },
     });
-
-    return admins;
   }
 
   /**
-   * Obtém um administrador específico pelo seu ID.
-   * @param id - ID do administrador.
-   * @returns O administrador encontrado.
-   * @throws {Error} Se o administrador não for encontrado.
+   * Obtém um administrador pelo ID.
+   * @param id ID do administrador.
    */
   async obterAdminPorId(id: number) {
-    const admin = await this.adminRepository.findOne({
+    const admin = await prisma.membros.findUnique({
       where: { id },
-      relations: ['membro'],
+      select: {
+        id: true,
+        nomeCompleto: true,
+        email: true,
+        tipoConta: true,
+      },
     });
 
-    if (!admin) {
-      throw new Error('Administrador não encontrado.');
+    if (!admin || admin.tipoConta !== 'ADMIN') {
+      throw new ErrorHandler(404, 'Administrador não encontrado.');
     }
 
     return admin;
+  }
+
+  /**
+   * Cria um novo administrador.
+   * @param dados Dados do novo administrador.
+   */
+  async criarAdmin(dados: NovoAdminData) {
+    const { email, senha, nomeCompleto, tipoConta } = dados;
+
+    const emailExistente = await prisma.membros.findUnique({
+      where: { email },
+    });
+
+    if (emailExistente) {
+      throw new ErrorHandler(400, 'E-mail já está em uso.');
+    }
+
+    const senhaCriptografada = await hash(senha, 10);
+
+    const novoAdmin = await prisma.membros.create({
+      data: {
+        email,
+        senha: senhaCriptografada,
+        nomeCompleto,
+        tipoConta,
+      },
+    });
+
+    return {
+      id: novoAdmin.id,
+      nomeCompleto: novoAdmin.nomeCompleto,
+      email: novoAdmin.email,
+      tipoConta: novoAdmin.tipoConta,
+    };
   }
 
   /**
    * Atualiza os dados de um administrador.
-   * @param id - ID do administrador a ser atualizado.
-   * @param novoMembroData - Dados atualizados do membro.
-   * @returns O administrador atualizado.
-   * @throws {Error} Se o administrador não for encontrado.
+   * @param id ID do administrador a ser atualizado.
+   * @param dados Dados para atualização.
    */
-  async atualizarAdmin(id: number, novoMembroData: {
-    email?: string;
-    senha?: string;
-    nomeCompleto?: string;
-    tipoConta?: TipoConta;
-  }) {
-    const admin = await this.adminRepository.findOne({
+  async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
+    const adminExistente = await prisma.membros.findUnique({
       where: { id },
-      relations: ['membro'],
     });
 
-    if (!admin) {
-      throw new Error('Administrador não encontrado.');
+    if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
+      throw new ErrorHandler(404, 'Administrador não encontrado.');
     }
 
-    // Atualiza os dados do membro
-    const membro = admin.membro;
-    if (novoMembroData.email) membro.email = novoMembroData.email;
-    if (novoMembroData.nomeCompleto) membro.nomeCompleto = novoMembroData.nomeCompleto;
-    if (novoMembroData.tipoConta) membro.tipoConta = novoMembroData.tipoConta;
+    if (dados.email) {
+      const emailEmUso = await prisma.membros.findUnique({
+        where: { email: dados.email },
+      });
 
-    if (novoMembroData.senha) {
-      membro.senha = await criptografarSenha(novoMembroData.senha);
+      if (emailEmUso && emailEmUso.id !== id) {
+        throw new ErrorHandler(400, 'E-mail já está em uso.');
+      }
     }
 
-    // Salvar as alterações no membro
-    await this.membrosRepository.save(membro);
-    return await this.adminRepository.save(admin); 
+    if (dados.senha) {
+      dados.senha = await hash(dados.senha, 10);
+    }
+
+    const adminAtualizado = await prisma.membros.update({
+      where: { id },
+      data: dados,
+    });
+
+    return {
+      id: adminAtualizado.id,
+      nomeCompleto: adminAtualizado.nomeCompleto,
+      email: adminAtualizado.email,
+      tipoConta: adminAtualizado.tipoConta,
+    };
   }
 
   /**
-   * Remove um administrador e o membro associado.
-   * @param id - ID do administrador a ser removido.
-   * @throws {Error} Se o administrador não for encontrado.
+   * Deleta um administrador pelo ID.
+   * @param id ID do administrador a ser deletado.
    */
   async deletaAdmin(id: number) {
-    const admin = await this.adminRepository.findOne({
+    const adminExistente = await prisma.membros.findUnique({
       where: { id },
-      relations: ['membro'],
     });
 
-    if (!admin) {
-      throw new Error('Administrador não encontrado.');
+    if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
+      throw new ErrorHandler(404, 'Administrador não encontrado.');
     }
 
-    await this.adminRepository.remove(admin);
-    await this.membrosRepository.remove(admin.membro);
+    await prisma.membros.delete({
+      where: { id },
+    });
   }
 
   /**
-   * Realiza o login de um administrador e retorna um token JWT.
-   * @param email - Email do administrador.
-   * @param senha - Senha do administrador.
-   * @returns Um objeto contendo o token JWT gerado.
-   * @throws {Error} Se o administrador não for encontrado ou a senha for inválida.
+   * Realiza o login de um administrador.
+   * @param email E-mail do administrador.
+   * @param senha Senha do administrador.
    */
   async login(email: string, senha: string) {
-    const membro = await this.membrosRepository.findOne({
+    const admin = await prisma.membros.findUnique({
       where: { email },
-      relations: ['admin'],
     });
 
-    if (!membro || membro.tipoConta !== TipoConta.ADMIN) {
-      throw new Error('Administrador não encontrado.');
+    if (!admin || admin.tipoConta !== 'ADMIN') {
+      throw new ErrorHandler(401, 'Seu e-mail ou senha estão incorretos.');
     }
-    const senhaValida = await compararSenha(senha, membro.senha);
+
+    const senhaValida = await compare(senha, admin.senha);
+
     if (!senhaValida) {
-      throw new Error('Senha inválida.');
+      throw new ErrorHandler(401, 'Seu e-mail ou senha estão incorretos.');
     }
 
-    // Gera o token JWT usando o ID do Membro (que é um administrador)
-    const token = gerarToken({
-      id: membro.id,
-      tipoConta: membro.tipoConta,
-      numeroMatricula: membro.numeroMatricula
-    });
+    const token = sign(
+      { id: admin.id, email: admin.email, tipoConta: admin.tipoConta },
+      process.env.JWT_SECRET || 'default_secret',
+      { expiresIn: '1d' }
+    );
 
     return { token };
   }
