@@ -1,7 +1,7 @@
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import { Admin } from '../entities/adminEntities';
-import { compararSenha } from '../utils/senhaUtils';
+import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
 import { gerarToken } from '../utils/jwtUtils';
 
 /**
@@ -25,18 +25,21 @@ export class AdminService {
       throw new Error('Tipo de conta inválido. Apenas "admin" é permitido.');
     }
 
+    // Criação do novo Membro
     const membro = this.membrosRepository.create({
       ...membroData,
     });
 
-    membro.senha = await compararSenha(membroData.senha, membro.senha);
+    // Criptografar a senha do membro (não comparação aqui)
+    membro.senha = await criptografarSenha(membroData.senha);
 
+    // Salvar o Membro
     await this.membrosRepository.save(membro);
 
+    // Criação do Admin e associação com o Membro
     const admin = this.adminRepository.create({
       membro,
     });
-
     await this.adminRepository.save(admin);
 
     return admin;
@@ -48,7 +51,7 @@ export class AdminService {
    */
   async listarAdmins() {
     const admins = await this.adminRepository.find({
-      relations: ['membro'],  // Inclui a entidade Membro relacionada
+      relations: ['membro'], 
     });
 
     return admins;
@@ -60,7 +63,7 @@ export class AdminService {
    * @returns O administrador encontrado.
    * @throws {Error} Se o administrador não for encontrado.
    */
-  async buscarAdminPorId(id: number) {
+  async obterAdminPorId(id: number) {
     const admin = await this.adminRepository.findOne({
       where: { id },
       relations: ['membro'],
@@ -95,17 +98,17 @@ export class AdminService {
       throw new Error('Administrador não encontrado.');
     }
 
-    // Atualiza os dados do membro
     const membro = admin.membro;
-    Object.assign(membro, novoMembroData);
+    if (novoMembroData.email) membro.email = novoMembroData.email;
+    if (novoMembroData.nomeCompleto) membro.nomeCompleto = novoMembroData.nomeCompleto;
+    if (novoMembroData.tipoConta) membro.tipoConta = novoMembroData.tipoConta;
 
     if (novoMembroData.senha) {
-      membro.senha = await compararSenha(novoMembroData.senha, membro.senha);
+      membro.senha = await criptografarSenha(novoMembroData.senha);
     }
-
     await this.membrosRepository.save(membro);
 
-    return await this.adminRepository.save(admin); // Atualiza o admin
+    return await this.adminRepository.save(admin);
   }
 
   /**
@@ -122,37 +125,41 @@ export class AdminService {
     if (!admin) {
       throw new Error('Administrador não encontrado.');
     }
+
+    // Remove o admin e o membro associado
     await this.adminRepository.remove(admin);
     await this.membrosRepository.remove(admin.membro);
   }
 
+  /**
+   * Realiza o login de um administrador e retorna um token JWT.
+   * @param email - Email do administrador.
+   * @param senha - Senha do administrador.
+   * @returns Um objeto contendo o token JWT gerado.
+   * @throws {Error} Se o administrador não for encontrado ou a senha for inválida.
+   */
+  async login(email: string, senha: string) {
+    // Buscar o Membro e carregar o Admin associado
+    const membro = await this.membrosRepository.findOne({
+      where: { email },
+      relations: ['admin'],
+    });
 
-/**
- * Realiza o login de um administrador e retorna um token JWT.
- * @param email - Email do administrador.
- * @param senha - Senha do administrador.
- * @returns Um objeto contendo o token JWT gerado.
- * @throws {Error} Se o administrador não for encontrado ou a senha for inválida.
- */
-async login(email: string, senha: string) {
-  const membro = await this.membrosRepository.findOne({
-    where: { email },
-    relations: ['admin'],  // Carregar o relacionamento com 'Admin'
-  });
+    if (!membro || membro.tipoConta !== 'admin') {
+      throw new Error('Administrador não encontrado.');
+    }
 
-  if (!membro || membro.tipoConta !== 'admin') {
-    throw new Error('Administrador não encontrado.');
-  }
+    const senhaValida = await compararSenha(senha, membro.senha);
+    if (!senhaValida) {
+      throw new Error('Senha inválida.');
+    }
 
-  const senhaValida = await compararSenha(senha, membro.senha);
-  if (!senhaValida) {
-    throw new Error('Senha inválida.');
-  }
+    // Gera o token JWT usando o ID do Membro (que é um administrador)
+    const token = gerarToken({
+      id: membro.id,
+      tipoConta: membro.tipoConta,
+    });
 
-  const token = gerarToken({
-    id: membro.id,
-    tipoConta: membro.tipoConta
-  });
     return { token };
   }
 }
