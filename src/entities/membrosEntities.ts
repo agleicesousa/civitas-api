@@ -23,7 +23,7 @@ export class Membros extends BaseEntity {
    * Senha do membro, armazena de forma criptografada.
    * @type {string}
    */
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true })
   senha: string;
 
   /**
