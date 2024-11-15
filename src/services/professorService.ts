@@ -31,7 +31,6 @@ export class ProfessorService {
     cpf: string,
     dataNascimento: Date,
     numeroMatricula: string,
-    senha: string,
     turmaApelido: string[],
     membroId?: number
   ): Promise<Professor> {
@@ -61,7 +60,6 @@ export class ProfessorService {
 
     // Cria e salva o novo professor com as informações de membro e turmas.
     const novoProfessor = this.professorRepository.create({
-      senha: await criptografarSenha(senha),
       membro,
       turmas
     });
@@ -127,7 +125,6 @@ export class ProfessorService {
   async editarProfessor(
     id: number,
     turmasApelidos: string[],
-    senha: string,
     membroId: number
   ) {
     const membro = await this.membrosRepository.findOneBy({ id: membroId });
@@ -145,8 +142,6 @@ export class ProfessorService {
     const turmas = await this.turmasRepository.findBy({
       turmaApelido: In(turmasApelidos)
     });
-
-    professorExistente.senha = await criptografarSenha(senha);
 
     Object.assign(professorExistente, {
       membro,

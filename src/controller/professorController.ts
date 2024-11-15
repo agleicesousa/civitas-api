@@ -19,7 +19,6 @@ export class ProfessorController {
         cpf,
         dataNascimento,
         numeroMatricula,
-        senha,
         turmasApelido,
         membroId
       } = req.body;
@@ -29,7 +28,6 @@ export class ProfessorController {
         cpf,
         new Date(dataNascimento),
         numeroMatricula,
-        senha,
         turmasApelido,
         membroId ? Number(membroId) : null
       );
@@ -108,7 +106,6 @@ export class ProfessorController {
       const professorAtualizado = await this.professorService.editarProfessor(
         Number(id),
         turmasApelidos,
-        senha,
         Number(membroId)
       );
 
