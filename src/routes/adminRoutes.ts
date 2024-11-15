@@ -378,7 +378,8 @@ adminRouter.delete(
   (req, res) => adminController.deletarAdmin(req, res)
 );
 
-export default adminRouter;import { Router } from 'express';
+export default adminRouter;
+import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
 import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 import { validarEmail } from '../middlewares/validarEmail';

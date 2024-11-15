@@ -37,7 +37,8 @@ export async function compararSenha(
   senhaCriptografada: string
 ): Promise<boolean> {
   return await bcrypt.compare(senhaPlana, senhaCriptografada);
-}import * as bcrypt from 'bcrypt';
+}
+import * as bcrypt from 'bcrypt';
 
 /**
  * Valida se a senha atende aos critérios de segurança:

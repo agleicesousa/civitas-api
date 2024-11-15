@@ -11,7 +11,7 @@ import {
   AnoLetivo,
   PeriodoLetivo,
   TipoEnsino,
-  Turma,
+  Turma
 } from '../entities/turmasEntities';
 
 const fakerBR = new Faker({ locale: [pt_BR] });
@@ -24,15 +24,19 @@ const membrosFabrica = setSeederFactory(Membros, () => {
   membro.email = fakerBR.internet.email();
   membro.senha = process.env.MEMBRO_PASSWORD;
   membro.nomeCompleto = fakerBR.person.fullName();
-  membro.numeroMatricula = fakerBR.number.int({ min: 1000, max: 999999 }).toString();
+  membro.numeroMatricula = fakerBR.number
+    .int({ min: 1000, max: 999999 })
+    .toString();
   membro.dataNascimento = fakerBR.date.birthdate();
   membro.rg = fakerBR.number.int({ min: 100000000, max: 999999999 }).toString();
-  membro.cpf = fakerBR.number.int({ min: 10000000000, max: 99999999999 }).toString();
+  membro.cpf = fakerBR.number
+    .int({ min: 10000000000, max: 99999999999 })
+    .toString();
   membro.tipoConta = fakerBR.helpers.arrayElement([
     TipoConta.ADMIN,
     TipoConta.ALUNO,
     TipoConta.PROFESSOR,
-    TipoConta.RESPONSAVEL,
+    TipoConta.RESPONSAVEL
   ]);
   return membro;
 });
@@ -84,17 +88,17 @@ const turmaFabrica = setSeederFactory(Turma, () => {
     AnoLetivo.ANO_3,
     AnoLetivo.ANO_4,
     AnoLetivo.ANO_5,
-    AnoLetivo.ANO_6,
+    AnoLetivo.ANO_6
   ]);
   turma.periodoLetivo = fakerBR.helpers.arrayElement([
     PeriodoLetivo.MANHA,
     PeriodoLetivo.TARDE,
-    PeriodoLetivo.NOITE,
+    PeriodoLetivo.NOITE
   ]);
   turma.ensino = fakerBR.helpers.arrayElement([
     TipoEnsino.MATERNAL,
     TipoEnsino.PRE_ESCOLA,
-    TipoEnsino.ENSINO_FUNDAMENTAL_1,
+    TipoEnsino.ENSINO_FUNDAMENTAL_1
   ]);
   const letraClasse = fakerBR.helpers.arrayElement(['A', 'B', 'C', 'D', 'E']);
   turma.turmaApelido = `${turma.anoLetivo} ${letraClasse}`;
@@ -110,5 +114,5 @@ export default [
   alunosFabrica,
   responsaveisFabrica,
   professorFabrica,
-  adminFabrica,
+  adminFabrica
 ];

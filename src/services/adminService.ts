@@ -21,8 +21,8 @@ export class AdminService {
         id: true,
         nomeCompleto: true,
         email: true,
-        tipoConta: true,
-      },
+        tipoConta: true
+      }
     });
   }
 
@@ -37,8 +37,8 @@ export class AdminService {
         id: true,
         nomeCompleto: true,
         email: true,
-        tipoConta: true,
-      },
+        tipoConta: true
+      }
     });
 
     if (!admin || admin.tipoConta !== 'ADMIN') {
@@ -56,7 +56,7 @@ export class AdminService {
     const { email, senha, nomeCompleto, tipoConta } = dados;
 
     const emailExistente = await prisma.membros.findUnique({
-      where: { email },
+      where: { email }
     });
 
     if (emailExistente) {
@@ -70,15 +70,15 @@ export class AdminService {
         email,
         senha: senhaCriptografada,
         nomeCompleto,
-        tipoConta,
-      },
+        tipoConta
+      }
     });
 
     return {
       id: novoAdmin.id,
       nomeCompleto: novoAdmin.nomeCompleto,
       email: novoAdmin.email,
-      tipoConta: novoAdmin.tipoConta,
+      tipoConta: novoAdmin.tipoConta
     };
   }
 
@@ -89,7 +89,7 @@ export class AdminService {
    */
   async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
     const adminExistente = await prisma.membros.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
@@ -98,7 +98,7 @@ export class AdminService {
 
     if (dados.email) {
       const emailEmUso = await prisma.membros.findUnique({
-        where: { email: dados.email },
+        where: { email: dados.email }
       });
 
       if (emailEmUso && emailEmUso.id !== id) {
@@ -112,14 +112,14 @@ export class AdminService {
 
     const adminAtualizado = await prisma.membros.update({
       where: { id },
-      data: dados,
+      data: dados
     });
 
     return {
       id: adminAtualizado.id,
       nomeCompleto: adminAtualizado.nomeCompleto,
       email: adminAtualizado.email,
-      tipoConta: adminAtualizado.tipoConta,
+      tipoConta: adminAtualizado.tipoConta
     };
   }
 
@@ -129,7 +129,7 @@ export class AdminService {
    */
   async deletaAdmin(id: number) {
     const adminExistente = await prisma.membros.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
@@ -137,7 +137,7 @@ export class AdminService {
     }
 
     await prisma.membros.delete({
-      where: { id },
+      where: { id }
     });
   }
 
@@ -148,7 +148,7 @@ export class AdminService {
    */
   async login(email: string, senha: string) {
     const admin = await prisma.membros.findUnique({
-      where: { email },
+      where: { email }
     });
 
     if (!admin || admin.tipoConta !== 'ADMIN') {

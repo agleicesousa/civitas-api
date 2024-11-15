@@ -25,7 +25,9 @@ export class AdminController {
       const admin = await this.adminService.obterAdminPorId(idNumber); // Corrigido o nome do método
       return res.json(admin);
     } catch (error) {
-      return res.status(404).json({ error: error.message || 'Administrador não encontrado.' });
+      return res
+        .status(404)
+        .json({ error: error.message || 'Administrador não encontrado.' });
     }
   }
 
@@ -37,7 +39,7 @@ export class AdminController {
         email,
         senha,
         nomeCompleto,
-        tipoConta,
+        tipoConta
       });
       return res.status(201).json(novoAdmin);
     } catch (error) {
@@ -56,7 +58,9 @@ export class AdminController {
       );
       return res.json(adminAtualizado);
     } catch (error) {
-      return res.status(404).json({ error: error.message || 'Erro ao atualizar administrador.' });
+      return res
+        .status(404)
+        .json({ error: error.message || 'Erro ao atualizar administrador.' });
     }
   }
 
@@ -74,7 +78,9 @@ export class AdminController {
       await this.adminService.deletaAdmin(Number(id));
       return res.status(204).send();
     } catch (error) {
-      return res.status(404).json({ error: error.message || 'Administrador não encontrado.' });
+      return res
+        .status(404)
+        .json({ error: error.message || 'Administrador não encontrado.' });
     }
   }
 
@@ -96,7 +102,9 @@ export class AdminController {
       const { token } = await this.adminService.login(email, senha);
       return res.json({ token });
     } catch (error) {
-      return res.status(401).json({ error: error.message || 'Seu e-mail ou senha estão incorretos.' });
+      return res.status(401).json({
+        error: error.message || 'Seu e-mail ou senha estão incorretos.'
+      });
     }
   }
 }
