@@ -155,8 +155,7 @@ export class AdminService {
     const token = gerarToken({
       id: membro.id,
       tipoConta: membro.tipoConta,
-      numeroMatricula: membro.numeroMatricula,
-      email: membro.email
+      numeroMatricula: membro.numeroMatricula
     });
 
     return { token };
