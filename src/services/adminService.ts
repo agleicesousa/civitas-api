@@ -13,6 +13,7 @@ interface NovoAdminData {
 export class AdminService {
   /**
    * Lista todos os administradores cadastrados.
+   * @returns Lista de administradores.
    */
   async listarAdmins() {
     return PrismaClient.membros.findMany({
@@ -29,6 +30,8 @@ export class AdminService {
   /**
    * Obtém um administrador pelo ID.
    * @param id ID do administrador.
+   * @returns Administrador encontrado.
+   * @throws Error se não encontrar o administrador ou se não for um admin.
    */
   async obterAdminPorId(id: number) {
     const admin = await PrismaClient.membros.findUnique({
@@ -42,7 +45,7 @@ export class AdminService {
     });
 
     if (!admin || admin.tipoConta !== 'ADMIN') {
-      throw new ErrorHandler(404, 'Administrador não encontrado.');
+      throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
     return admin;
@@ -51,6 +54,8 @@ export class AdminService {
   /**
    * Cria um novo administrador.
    * @param dados Dados do novo administrador.
+   * @returns Dados do administrador criado.
+   * @throws Error se o e-mail já estiver em uso.
    */
   async criarAdmin(dados: NovoAdminData) {
     const { email, senha, nomeCompleto, tipoConta } = dados;
@@ -60,7 +65,7 @@ export class AdminService {
     });
 
     if (emailExistente) {
-      throw new ErrorHandler(400, 'E-mail já está em uso.');
+      throw ErrorHandler.badRequest('E-mail já está em uso.');
     }
 
     const senhaCriptografada = await hash(senha, 10);
@@ -85,7 +90,9 @@ export class AdminService {
   /**
    * Atualiza os dados de um administrador.
    * @param id ID do administrador a ser atualizado.
-   * @param dados Dados para atualização.
+   * @param dados Dados a serem atualizados.
+   * @returns Dados do administrador atualizado.
+   * @throws Error se o administrador não for encontrado ou o e-mail já estiver em uso.
    */
   async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
     const adminExistente = await PrismaClient.membros.findUnique({
@@ -93,7 +100,7 @@ export class AdminService {
     });
 
     if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
-      throw new ErrorHandler(404, 'Administrador não encontrado.');
+      throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
     if (dados.email) {
@@ -102,7 +109,7 @@ export class AdminService {
       });
 
       if (emailEmUso && emailEmUso.id !== id) {
-        throw new ErrorHandler(400, 'E-mail já está em uso.');
+        throw ErrorHandler.badRequest('E-mail já está em uso.');
       }
     }
 
@@ -126,6 +133,7 @@ export class AdminService {
   /**
    * Deleta um administrador pelo ID.
    * @param id ID do administrador a ser deletado.
+   * @throws Error se o administrador não for encontrado.
    */
   async deletaAdmin(id: number) {
     const adminExistente = await PrismaClient.membros.findUnique({
@@ -133,7 +141,7 @@ export class AdminService {
     });
 
     if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
-      throw new ErrorHandler(404, 'Administrador não encontrado.');
+      throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
     await PrismaClient.membros.delete({
@@ -145,6 +153,8 @@ export class AdminService {
    * Realiza o login de um administrador.
    * @param email E-mail do administrador.
    * @param senha Senha do administrador.
+   * @returns Token JWT para o administrador.
+   * @throws Error se o e-mail ou senha estiverem incorretos.
    */
   async login(email: string, senha: string) {
     const admin = await PrismaClient.membros.findUnique({
@@ -152,13 +162,13 @@ export class AdminService {
     });
 
     if (!admin || admin.tipoConta !== 'ADMIN') {
-      throw new ErrorHandler(401, 'Seu e-mail ou senha estão incorretos.');
+      throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
     }
 
     const senhaValida = await compare(senha, admin.senha);
 
     if (!senhaValida) {
-      throw new ErrorHandler(401, 'Seu e-mail ou senha estão incorretos.');
+      throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
     }
 
     const token = sign(
