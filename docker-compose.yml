@@ -20,7 +20,7 @@ services:
     env_file: .env
     networks:
       - orion-connect
-      
+
   orion-mysql:
     container_name: orion-mysql
     image: mysql
