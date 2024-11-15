@@ -20,11 +20,12 @@ export class TurmasService {
   private adminRepository = MysqlDataSource.getRepository(Admin);
 
   private mapTurma(turma: Turma) {
+    const { id, turmaApelido, anoLetivo, periodoLetivo } = turma;
     return {
-      id: turma.id,
-      turmaApelido: turma.turmaApelido,
-      anoLetivo: turma.anoLetivo,
-      periodoLetivo: turma.periodoLetivo
+      id,
+      turmaApelido,
+      anoLetivo,
+      periodoLetivo
     };
   }
 
