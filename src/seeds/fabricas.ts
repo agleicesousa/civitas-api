@@ -49,6 +49,9 @@ const turmaFabrica = setSeederFactory(Turma, () => {
 
 const membrosFabrica = setSeederFactory(Membros, () => {
   const membro = new Membros();
+  membro.email = fakerBR.internet.email();
+  const senhaMembro = process.env.MEMBRO_PASSWORD;
+  membro.senha = senhaMembro;
   membro.nomeCompleto = fakerBR.person.fullName();
   membro.numeroMatricula = fakerBR.number
     .int({ min: 1_000, max: 999_999 })
@@ -79,20 +82,11 @@ const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
 });
 
 const professorFabrica = setSeederFactory(Professor, () => {
-  const professor = new Professor();
-  const senhaProfessor = process.env.PROF_PASSWORD;
-  professor.senha = senhaProfessor;
-
-  return professor;
+  return new Professor();
 });
 
 const adminFabrica = setSeederFactory(Admin, () => {
-  const admin = new Admin();
-  const senhaAdmin = process.env.ADMIN_PASSWORD;
-  admin.email = fakerBR.internet.email();
-  admin.senha = senhaAdmin;
-
-  return admin;
+  return new Admin();
 });
 
 export default [
