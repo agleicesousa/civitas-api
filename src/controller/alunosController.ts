@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { AlunosService } from '../services/alunosService';
 import { ConflictError } from '../errors/ConflitctError';
 import { NotFoundError } from '../errors/NotFoundError';
-
+import { getPaginationParams } from '../utils/paramsPagination';
 export class AlunosController {
   private alunosService = new AlunosService();
 
@@ -45,10 +45,7 @@ export class AlunosController {
    * @param res - A resposta a ser enviada ao cliente com a lista de alunos.
    */
   async listarAlunos(req: Request, res: Response) {
-    const page = Math.max(1, parseInt((req.query.page as string) ?? '1'));
-    const perPage = req.query.perPage
-      ? parseInt(req.query.perPage as string)
-      : 0;
+    const { page, perPage } = getPaginationParams(req);
     const searchTerm = req.query.searchTerm ?? '';
     const adminId = Number(req.user.id);
     try {

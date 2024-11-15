@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { TurmasService } from '../services/turmasService';
 import { ConflictError } from '../errors/ConflitctError';
+import { getPaginationParams } from '../utils/paramsPagination';
 /**
  * Controlador para gerenciar as rotas relacionadas a turmas.
  */
@@ -48,13 +49,9 @@ export class TurmasController {
    * @returns Uma promessa que resolve para um objeto JSON contendo todas as turmas ou um erro, se ocorrer.
    */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
-    const page = Math.max(1, parseInt((req.query.page as string) ?? '1'));
-    const perPage = req.query.perPage
-      ? parseInt(req.query.perPage as string)
-      : null;
+    const { page, perPage } = getPaginationParams(req);
     const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
     const adminId = Number(req.user.id);
-
     try {
       const turmas = await this.turmasService.listar(
         adminId,
