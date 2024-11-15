@@ -1,7 +1,7 @@
 import { hash, compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
-import { prisma } from '../utils/prismaUtils';
-import { ErrorHandler } from '../errors/ErrorHandler';
+import { PrismaClient } from '@prisma/client';
+import ErrorHandler from '../errors/errorHandler';
 
 interface NovoAdminData {
   email: string;
@@ -15,7 +15,7 @@ export class AdminService {
    * Lista todos os administradores cadastrados.
    */
   async listarAdmins() {
-    return prisma.membros.findMany({
+    return PrismaClient.membros.findMany({
       where: { tipoConta: 'ADMIN' },
       select: {
         id: true,
@@ -31,7 +31,7 @@ export class AdminService {
    * @param id ID do administrador.
    */
   async obterAdminPorId(id: number) {
-    const admin = await prisma.membros.findUnique({
+    const admin = await PrismaClient.membros.findUnique({
       where: { id },
       select: {
         id: true,
@@ -55,7 +55,7 @@ export class AdminService {
   async criarAdmin(dados: NovoAdminData) {
     const { email, senha, nomeCompleto, tipoConta } = dados;
 
-    const emailExistente = await prisma.membros.findUnique({
+    const emailExistente = await PrismaClient.membros.findUnique({
       where: { email }
     });
 
@@ -65,7 +65,7 @@ export class AdminService {
 
     const senhaCriptografada = await hash(senha, 10);
 
-    const novoAdmin = await prisma.membros.create({
+    const novoAdmin = await PrismaClient.membros.create({
       data: {
         email,
         senha: senhaCriptografada,
@@ -88,7 +88,7 @@ export class AdminService {
    * @param dados Dados para atualização.
    */
   async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
-    const adminExistente = await prisma.membros.findUnique({
+    const adminExistente = await PrismaClient.membros.findUnique({
       where: { id }
     });
 
@@ -97,7 +97,7 @@ export class AdminService {
     }
 
     if (dados.email) {
-      const emailEmUso = await prisma.membros.findUnique({
+      const emailEmUso = await PrismaClient.membros.findUnique({
         where: { email: dados.email }
       });
 
@@ -110,7 +110,7 @@ export class AdminService {
       dados.senha = await hash(dados.senha, 10);
     }
 
-    const adminAtualizado = await prisma.membros.update({
+    const adminAtualizado = await PrismaClient.membros.update({
       where: { id },
       data: dados
     });
@@ -128,7 +128,7 @@ export class AdminService {
    * @param id ID do administrador a ser deletado.
    */
   async deletaAdmin(id: number) {
-    const adminExistente = await prisma.membros.findUnique({
+    const adminExistente = await PrismaClient.membros.findUnique({
       where: { id }
     });
 
@@ -136,7 +136,7 @@ export class AdminService {
       throw new ErrorHandler(404, 'Administrador não encontrado.');
     }
 
-    await prisma.membros.delete({
+    await PrismaClient.membros.delete({
       where: { id }
     });
   }
@@ -147,7 +147,7 @@ export class AdminService {
    * @param senha Senha do administrador.
    */
   async login(email: string, senha: string) {
-    const admin = await prisma.membros.findUnique({
+    const admin = await PrismaClient.membros.findUnique({
       where: { email }
     });
 
