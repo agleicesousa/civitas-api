@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from "express";
+
 export default class ErrorHandler extends Error {
   statusCode: number;
 
@@ -26,3 +28,17 @@ export default class ErrorHandler extends Error {
     return new ErrorHandler(message, 500);
   }
 }
+
+export const errorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  console.error(err.stack);
+
+  res.status(500).json({
+    message: 'Algo deu errado!',
+    error: err.message
+  });
+};
