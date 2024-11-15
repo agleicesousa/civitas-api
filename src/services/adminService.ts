@@ -3,13 +3,14 @@ import { Membros } from '../entities/membrosEntities';
 import { Admin } from '../entities/adminEntities';
 import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
 import { gerarToken } from '../utils/jwtUtils';
+import { TipoConta } from '../entities/baseEntity';
 
 /**
  * Serviço para gerenciar as operações de login e autenticação de administradores.
  */
 export class AdminService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
-  private adminRepository = MysqlDataSource.getRepository(Admin);
+  private adminRepository = MysqlDataSource.getRepository(Admin)
   /**
    * Realiza a criação de um novo administrador, associando um membro e criando o administrador.
    * @param membroData - Dados do membro a ser criado.
@@ -19,24 +20,21 @@ export class AdminService {
     email: string;
     senha: string;
     nomeCompleto: string;
-    tipoConta: string;
+    tipoConta: TipoConta;
   }) {
-    if (membroData.tipoConta !== 'admin') {
+    if (membroData.tipoConta !== TipoConta.ADMIN) {
       throw new Error('Tipo de conta inválido. Apenas "admin" é permitido.');
     }
 
     // Criação do novo Membro
     const membro = this.membrosRepository.create({
-      ...membroData,
+      email: membroData.email,
+      senha: await criptografarSenha(membroData.senha),
+      nomeCompleto: membroData.nomeCompleto,
+      tipoConta: membroData.tipoConta
     });
-
-    // Criptografar a senha do membro (não comparação aqui)
-    membro.senha = await criptografarSenha(membroData.senha);
-
-    // Salvar o Membro
     await this.membrosRepository.save(membro);
 
-    // Criação do Admin e associação com o Membro
     const admin = this.adminRepository.create({
       membro,
     });
@@ -51,7 +49,7 @@ export class AdminService {
    */
   async listarAdmins() {
     const admins = await this.adminRepository.find({
-      relations: ['membro'], 
+      relations: ['membro'],
     });
 
     return admins;
@@ -87,7 +85,7 @@ export class AdminService {
     email?: string;
     senha?: string;
     nomeCompleto?: string;
-    tipoConta?: string;
+    tipoConta?: TipoConta;
   }) {
     const admin = await this.adminRepository.findOne({
       where: { id },
@@ -98,6 +96,7 @@ export class AdminService {
       throw new Error('Administrador não encontrado.');
     }
 
+    // Atualiza os dados do membro
     const membro = admin.membro;
     if (novoMembroData.email) membro.email = novoMembroData.email;
     if (novoMembroData.nomeCompleto) membro.nomeCompleto = novoMembroData.nomeCompleto;
@@ -106,9 +105,10 @@ export class AdminService {
     if (novoMembroData.senha) {
       membro.senha = await criptografarSenha(novoMembroData.senha);
     }
-    await this.membrosRepository.save(membro);
 
-    return await this.adminRepository.save(admin);
+    // Salvar as alterações no membro
+    await this.membrosRepository.save(membro);
+    return await this.adminRepository.save(admin); 
   }
 
   /**
@@ -116,7 +116,7 @@ export class AdminService {
    * @param id - ID do administrador a ser removido.
    * @throws {Error} Se o administrador não for encontrado.
    */
-  async deletarAdmin(id: number) {
+  async deletaAdmin(id: number) {
     const admin = await this.adminRepository.findOne({
       where: { id },
       relations: ['membro'],
@@ -126,7 +126,6 @@ export class AdminService {
       throw new Error('Administrador não encontrado.');
     }
 
-    // Remove o admin e o membro associado
     await this.adminRepository.remove(admin);
     await this.membrosRepository.remove(admin.membro);
   }
@@ -139,16 +138,14 @@ export class AdminService {
    * @throws {Error} Se o administrador não for encontrado ou a senha for inválida.
    */
   async login(email: string, senha: string) {
-    // Buscar o Membro e carregar o Admin associado
     const membro = await this.membrosRepository.findOne({
       where: { email },
       relations: ['admin'],
     });
 
-    if (!membro || membro.tipoConta !== 'admin') {
+    if (!membro || membro.tipoConta !== TipoConta.ADMIN) {
       throw new Error('Administrador não encontrado.');
     }
-
     const senhaValida = await compararSenha(senha, membro.senha);
     if (!senhaValida) {
       throw new Error('Senha inválida.');
@@ -158,6 +155,8 @@ export class AdminService {
     const token = gerarToken({
       id: membro.id,
       tipoConta: membro.tipoConta,
+      numeroMatricula: membro.numeroMatricula,
+      email: membro.email
     });
 
     return { token };
