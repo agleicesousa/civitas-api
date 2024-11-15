@@ -17,34 +17,6 @@ import {
 const fakerBR = new Faker({ locale: [pt_BR] });
 
 /**
- * Fábrica para gerar dados de Turmas.
- */
-const turmaFabrica = setSeederFactory(Turma, () => {
-  const turma = new Turma();
-  turma.anoLetivo = fakerBR.helpers.arrayElement([
-    AnoLetivo.ANO_1,
-    AnoLetivo.ANO_2,
-    AnoLetivo.ANO_3,
-    AnoLetivo.ANO_4,
-    AnoLetivo.ANO_5,
-    AnoLetivo.ANO_6,
-  ]);
-  turma.periodoLetivo = fakerBR.helpers.arrayElement([
-    PeriodoLetivo.MANHA,
-    PeriodoLetivo.TARDE,
-    PeriodoLetivo.NOITE,
-  ]);
-  turma.ensino = fakerBR.helpers.arrayElement([
-    TipoEnsino.MATERNAL,
-    TipoEnsino.PRE_ESCOLA,
-    TipoEnsino.ENSINO_FUNDAMENTAL_1,
-  ]);
-  const letraClasse = fakerBR.helpers.arrayElement(['A', 'B', 'C', 'D', 'E']);
-  turma.turmaApelido = `${turma.anoLetivo} ${letraClasse}`;
-  return turma;
-});
-
-/**
  * Fábrica para gerar dados de Membros.
  */
 const membrosFabrica = setSeederFactory(Membros, () => {
@@ -70,7 +42,8 @@ const membrosFabrica = setSeederFactory(Membros, () => {
  */
 const alunosFabrica = setSeederFactory(Alunos, () => {
   const aluno = new Alunos();
-  aluno.membro = membrosFabrica.make();
+  const membro = membrosFabrica();
+  aluno.membro = membro;
   return aluno;
 });
 
@@ -79,7 +52,8 @@ const alunosFabrica = setSeederFactory(Alunos, () => {
  */
 const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
   const responsavel = new Responsaveis();
-  responsavel.membro = membrosFabrica.make();
+  const membro = membrosFabrica();
+  responsavel.membro = membro;
   return responsavel;
 });
 
@@ -88,7 +62,8 @@ const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
  */
 const professorFabrica = setSeederFactory(Professor, () => {
   const professor = new Professor();
-  professor.membro = membrosFabrica.make();
+  const membro = membrosFabrica();
+  professor.membro = membro;
   return professor;
 });
 
@@ -97,8 +72,37 @@ const professorFabrica = setSeederFactory(Professor, () => {
  */
 const adminFabrica = setSeederFactory(Admin, () => {
   const admin = new Admin();
-  admin.membro = membrosFabrica.make();
+  const membro = membrosFabrica();
+  admin.membro = membro;
   return admin;
+});
+
+/**
+ * Fábrica para gerar dados de Turmas.
+ */
+const turmaFabrica = setSeederFactory(Turma, () => {
+  const turma = new Turma();
+  turma.anoLetivo = fakerBR.helpers.arrayElement([
+    AnoLetivo.ANO_1,
+    AnoLetivo.ANO_2,
+    AnoLetivo.ANO_3,
+    AnoLetivo.ANO_4,
+    AnoLetivo.ANO_5,
+    AnoLetivo.ANO_6,
+  ]);
+  turma.periodoLetivo = fakerBR.helpers.arrayElement([
+    PeriodoLetivo.MANHA,
+    PeriodoLetivo.TARDE,
+    PeriodoLetivo.NOITE,
+  ]);
+  turma.ensino = fakerBR.helpers.arrayElement([
+    TipoEnsino.MATERNAL,
+    TipoEnsino.PRE_ESCOLA,
+    TipoEnsino.ENSINO_FUNDAMENTAL_1,
+  ]);
+  const letraClasse = fakerBR.helpers.arrayElement(['A', 'B', 'C', 'D', 'E']);
+  turma.turmaApelido = `${turma.anoLetivo} ${letraClasse}`;
+  return turma;
 });
 
 /**
