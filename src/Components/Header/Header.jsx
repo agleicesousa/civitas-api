@@ -1,7 +1,11 @@
-// import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import logoLivro from '../../assets/logoLivro.png';
+import lupa from '../../assets/lupa.png';
 
-import logoLivro from '../../assets/logoLivro.png'
-import lupa from '../../assets/lupa.png'
+import Home from '../../Pages/Home'
+import QueroDoar from '../../Pages/QueroDoar/QueroDoar'
+import LivrosDoados from '../../Pages/LivrosDoados/LivrosDoados'
+import { Link } from 'react-router-dom';
 
 export default function Header() {
     return (
@@ -13,9 +17,9 @@ export default function Header() {
                 </section>
                 <nav>
                     <ul>
-                        <li><a href="#">Inicio</a></li>
-                        <li><a href="#">Livros Doados</a></li>
-                        <li><a href="#">Quero doar</a></li>
+                        <li><Link to='/'>Inicio</Link></li>
+                        <li><Link to='/LivrosDoados'>Livros Doados</Link></li>
+                        <li><Link to='/QueroDoar'>Quero doar</Link></li>
                     </ul>
                 </nav>
                 <section>
@@ -25,6 +29,13 @@ export default function Header() {
                     </button>
                 </section>
             </header>
+            <BrowserRouter>
+                <Routes>
+                    <Route path='/' element={ <Home/> } />
+                    <Route path='/novosLivros' element={ <LivrosDoados/> } />
+                    <Route path='/queroDoar' element={ <QueroDoar/> } />
+                </Routes>
+            </BrowserRouter>
         </>
     );
 }
