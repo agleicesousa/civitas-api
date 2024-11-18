@@ -1,6 +1,8 @@
 import { hash, compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { Repository } from 'typeorm';
+import { MysqlDataSource } from '../config/database';
+import { Membro } from '../entities/membrosEntities';
 import ErrorHandler from '../errors/errorHandler';
 
 interface NovoAdminData {
@@ -11,19 +13,20 @@ interface NovoAdminData {
 }
 
 export class AdminService {
+  private membroRepository: Repository<Membro>;
+
+  constructor() {
+    this.membroRepository = MysqlDataSource.getRepository(Membro);
+  }
+
   /**
    * Lista todos os administradores cadastrados.
    * @returns Lista de administradores.
    */
   async listarAdmins() {
-    return PrismaClient.membros.findMany({
+    return this.membroRepository.find({
       where: { tipoConta: 'ADMIN' },
-      select: {
-        id: true,
-        nomeCompleto: true,
-        email: true,
-        tipoConta: true
-      }
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta'],
     });
   }
 
@@ -34,17 +37,12 @@ export class AdminService {
    * @throws Error se não encontrar o administrador ou se não for um admin.
    */
   async obterAdminPorId(id: number) {
-    const admin = await PrismaClient.membros.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        nomeCompleto: true,
-        email: true,
-        tipoConta: true
-      }
+    const admin = await this.membroRepository.findOne({
+      where: { id, tipoConta: 'ADMIN' },
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta'],
     });
 
-    if (!admin || admin.tipoConta !== 'ADMIN') {
+    if (!admin) {
       throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
@@ -60,9 +58,7 @@ export class AdminService {
   async criarAdmin(dados: NovoAdminData) {
     const { email, senha, nomeCompleto, tipoConta } = dados;
 
-    const emailExistente = await PrismaClient.membros.findUnique({
-      where: { email }
-    });
+    const emailExistente = await this.membroRepository.findOne({ where: { email } });
 
     if (emailExistente) {
       throw ErrorHandler.badRequest('E-mail já está em uso.');
@@ -70,20 +66,20 @@ export class AdminService {
 
     const senhaCriptografada = await hash(senha, 10);
 
-    const novoAdmin = await PrismaClient.membros.create({
-      data: {
-        email,
-        senha: senhaCriptografada,
-        nomeCompleto,
-        tipoConta
-      }
+    const novoAdmin = this.membroRepository.create({
+      email,
+      senha: senhaCriptografada,
+      nomeCompleto,
+      tipoConta,
     });
+
+    await this.membroRepository.save(novoAdmin);
 
     return {
       id: novoAdmin.id,
       nomeCompleto: novoAdmin.nomeCompleto,
       email: novoAdmin.email,
-      tipoConta: novoAdmin.tipoConta
+      tipoConta: novoAdmin.tipoConta,
     };
   }
 
@@ -95,18 +91,14 @@ export class AdminService {
    * @throws Error se o administrador não for encontrado ou o e-mail já estiver em uso.
    */
   async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
-    const adminExistente = await PrismaClient.membros.findUnique({
-      where: { id }
-    });
+    const adminExistente = await this.membroRepository.findOne({ where: { id, tipoConta: 'ADMIN' } });
 
-    if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
+    if (!adminExistente) {
       throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
     if (dados.email) {
-      const emailEmUso = await PrismaClient.membros.findUnique({
-        where: { email: dados.email }
-      });
+      const emailEmUso = await this.membroRepository.findOne({ where: { email: dados.email } });
 
       if (emailEmUso && emailEmUso.id !== id) {
         throw ErrorHandler.badRequest('E-mail já está em uso.');
@@ -117,17 +109,14 @@ export class AdminService {
       dados.senha = await hash(dados.senha, 10);
     }
 
-    const adminAtualizado = await PrismaClient.membros.update({
+    await this.membroRepository.update(id, dados);
+
+    const adminAtualizado = await this.membroRepository.findOne({
       where: { id },
-      data: dados
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta'],
     });
 
-    return {
-      id: adminAtualizado.id,
-      nomeCompleto: adminAtualizado.nomeCompleto,
-      email: adminAtualizado.email,
-      tipoConta: adminAtualizado.tipoConta
-    };
+    return adminAtualizado;
   }
 
   /**
@@ -136,17 +125,13 @@ export class AdminService {
    * @throws Error se o administrador não for encontrado.
    */
   async deletaAdmin(id: number) {
-    const adminExistente = await PrismaClient.membros.findUnique({
-      where: { id }
-    });
+    const adminExistente = await this.membroRepository.findOne({ where: { id, tipoConta: 'ADMIN' } });
 
-    if (!adminExistente || adminExistente.tipoConta !== 'ADMIN') {
+    if (!adminExistente) {
       throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
-    await PrismaClient.membros.delete({
-      where: { id }
-    });
+    await this.membroRepository.delete(id);
   }
 
   /**
@@ -157,9 +142,7 @@ export class AdminService {
    * @throws Error se o e-mail ou senha estiverem incorretos.
    */
   async login(email: string, senha: string) {
-    const admin = await PrismaClient.membros.findUnique({
-      where: { email }
-    });
+    const admin = await this.membroRepository.findOne({ where: { email } });
 
     if (!admin || admin.tipoConta !== 'ADMIN') {
       throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
