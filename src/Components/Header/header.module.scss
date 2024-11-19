@@ -1,16 +1,68 @@
 .header {
-    background: linear-gradient(90deg, #001B2F 0%, #005695 100%);
+    background: linear-gradient(90deg, #001b2f 0%, #005695 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 20vh;
 }
 
 .logoHeader {
-    border: solid red;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     width: 20%;
+    justify-content: space-around;
+    align-items: center;
 
-    
+    img {
+        width: 20%;
+    }
+
+    h1 {
+        font-size: 30px;
+        color: #fff;
+    }
+}
+
+.navHeader {
+    width: 30%;
+
+    ul {
+        display: flex;
+        justify-content: space-around;
+        list-style: none;
+    }
+
+    .link {
+        color: #fff;
+        font-size: 20px;
+        text-decoration: none;
+    }
+}
+
+.barraDeBusca {
+    border: solid #fff;
+    border-radius: 20px;
+    margin-right: 1%;
+    width: 20%;
+    height: 6vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    input {
+        background-color: transparent;
+        border: none;
+        width: 60%;
+        height: 5vh;
+
+        &::placeholder {
+            color: #fff;
+            font-size: 20px;
+        }
+    }
+
+    button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+    }
 }
