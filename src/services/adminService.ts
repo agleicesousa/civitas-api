@@ -153,7 +153,7 @@ export class AdminService {
   async login(email: string, senha: string) {
     const admin = await this.membroRepository.findOne({ where: { email } });
 
-    if (!admin || admin.tipoConta !== TipoConta.ALUNO) {
+    if (!admin || admin.tipoConta !== TipoConta.ADMIN) {
       throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
     }
 
