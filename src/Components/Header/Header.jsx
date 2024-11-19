@@ -17,9 +17,9 @@ export default function Header() {
                     <img src={logoLivro} alt="Imagem de um livro branco com fundo azul" />
                     <h1>Livro Vai Na Web</h1>
                 </section>
-                <nav className={s.navLink}>
+                <nav className={s.navHeader}>
                     <ul>
-                        <li><Link className={s.Link} to='/'>Inicio</Link></li>
+                        <li><Link className={s.Link} to='/Home'>Inicio</Link></li>
                         <li><Link className={s.link} to='/LivrosDoados'>Livros Doados</Link></li>
                         <li><Link className={s.link} to='/QueroDoar'>Quero doar</Link></li>
                     </ul>
@@ -33,9 +33,9 @@ export default function Header() {
             </header>
             <BrowserRouter>
                 <Routes>
-                    <Route path='/' element={ <Home/> } />
-                    <Route path='/novosLivros' element={ <LivrosDoados/> } />
-                    <Route path='/queroDoar' element={ <QueroDoar/> } />
+                    <Route path='/' element={ <Home /> } />
+                    <Route path='/novosLivros' element={ <LivrosDoados /> } />
+                    <Route path='/queroDoar' element={ <QueroDoar /> } />
                 </Routes>
             </BrowserRouter>
         </>
