@@ -1,6 +1,6 @@
 // import React from 'react';
-// import './index.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './Components/GlobalStyle/globalStyle.scss'
 
 import Home from './Pages/Home';
 
