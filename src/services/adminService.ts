@@ -2,21 +2,22 @@ import { hash, compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
-import { Membro } from '../entities/membrosEntities';
+import { Membros } from '../entities/membrosEntities';
 import ErrorHandler from '../errors/errorHandler';
+import { TipoConta } from 'entities/baseEntity';
 
 interface NovoAdminData {
   email: string;
   senha: string;
   nomeCompleto: string;
-  tipoConta: string;
+  tipoConta: TipoConta;
 }
 
 export class AdminService {
-  private membroRepository: Repository<Membro>;
+  private membroRepository: Repository<Membros>;
 
   constructor() {
-    this.membroRepository = MysqlDataSource.getRepository(Membro);
+    this.membroRepository = MysqlDataSource.getRepository(Membros);
   }
 
   /**
@@ -25,8 +26,8 @@ export class AdminService {
    */
   async listarAdmins() {
     return this.membroRepository.find({
-      where: { tipoConta: 'ADMIN' },
-      select: ['id', 'nomeCompleto', 'email', 'tipoConta'],
+      where: { tipoConta: TipoConta.ADMIN },
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
     });
   }
 
@@ -38,8 +39,8 @@ export class AdminService {
    */
   async obterAdminPorId(id: number) {
     const admin = await this.membroRepository.findOne({
-      where: { id, tipoConta: 'ADMIN' },
-      select: ['id', 'nomeCompleto', 'email', 'tipoConta'],
+      where: { id, tipoConta: TipoConta.ADMIN },
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
     });
 
     if (!admin) {
@@ -58,7 +59,9 @@ export class AdminService {
   async criarAdmin(dados: NovoAdminData) {
     const { email, senha, nomeCompleto, tipoConta } = dados;
 
-    const emailExistente = await this.membroRepository.findOne({ where: { email } });
+    const emailExistente = await this.membroRepository.findOne({
+      where: { email }
+    });
 
     if (emailExistente) {
       throw ErrorHandler.badRequest('E-mail já está em uso.');
@@ -70,7 +73,7 @@ export class AdminService {
       email,
       senha: senhaCriptografada,
       nomeCompleto,
-      tipoConta,
+      tipoConta
     });
 
     await this.membroRepository.save(novoAdmin);
@@ -79,7 +82,7 @@ export class AdminService {
       id: novoAdmin.id,
       nomeCompleto: novoAdmin.nomeCompleto,
       email: novoAdmin.email,
-      tipoConta: novoAdmin.tipoConta,
+      tipoConta: novoAdmin.tipoConta
     };
   }
 
@@ -91,14 +94,18 @@ export class AdminService {
    * @throws Error se o administrador não for encontrado ou o e-mail já estiver em uso.
    */
   async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
-    const adminExistente = await this.membroRepository.findOne({ where: { id, tipoConta: 'ADMIN' } });
+    const adminExistente = await this.membroRepository.findOne({
+      where: { id, tipoConta: TipoConta.ADMIN }
+    });
 
     if (!adminExistente) {
       throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
     if (dados.email) {
-      const emailEmUso = await this.membroRepository.findOne({ where: { email: dados.email } });
+      const emailEmUso = await this.membroRepository.findOne({
+        where: { email: dados.email }
+      });
 
       if (emailEmUso && emailEmUso.id !== id) {
         throw ErrorHandler.badRequest('E-mail já está em uso.');
@@ -113,7 +120,7 @@ export class AdminService {
 
     const adminAtualizado = await this.membroRepository.findOne({
       where: { id },
-      select: ['id', 'nomeCompleto', 'email', 'tipoConta'],
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
     });
 
     return adminAtualizado;
@@ -125,7 +132,9 @@ export class AdminService {
    * @throws Error se o administrador não for encontrado.
    */
   async deletaAdmin(id: number) {
-    const adminExistente = await this.membroRepository.findOne({ where: { id, tipoConta: 'ADMIN' } });
+    const adminExistente = await this.membroRepository.findOne({
+      where: { id, tipoConta: TipoConta.ADMIN }
+    });
 
     if (!adminExistente) {
       throw ErrorHandler.notFound('Administrador não encontrado.');
@@ -144,7 +153,7 @@ export class AdminService {
   async login(email: string, senha: string) {
     const admin = await this.membroRepository.findOne({ where: { email } });
 
-    if (!admin || admin.tipoConta !== 'ADMIN') {
+    if (!admin || admin.tipoConta !== TipoConta.ALUNO) {
       throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
     }
 
