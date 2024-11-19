@@ -1,15 +1,12 @@
-// import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import './Components/GlobalStyle/globalStyle.scss'
-
-import Home from './Pages/Home';
+import Footer from './components/footer/Footer.jsx';
+import Header from './components/header/Header.jsx';
+import './GlobalStyle/globalStyle.scss';
 
 export default function App() {
   return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
-      </BrowserRouter>
+    <section>
+      <Header />
+      <Footer />
+    </section>
   );
 }
