@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import ErrorHandler from '../errors/errorHandler';
-import { TipoConta } from 'entities/baseEntity';
+import { TipoConta } from '../entities/baseEntity';
 
 interface NovoAdminData {
   email: string;

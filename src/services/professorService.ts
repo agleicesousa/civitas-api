@@ -4,7 +4,6 @@ import { Turma } from '../entities/turmasEntities';
 import { Membros } from '../entities/membrosEntities';
 import { BaseEntity, TipoConta } from '../entities/baseEntity';
 import { In } from 'typeorm';
-import { criptografarSenha } from '../utils/senhaUtils';
 
 /**
  * Classe responsável por gerenciar operações relacionadas a Professores.
@@ -21,7 +20,6 @@ export class ProfessorService {
    * @param cpf - CPF do membro.
    * @param dataNascimento - Data de nascimento do membro.
    * @param numeroMatricula - Número de matrícula do membro.
-   * @param senha - Senha para o professor.
    * @param turmaApelido - Lista de apelidos das turmas associadas ao professor.
    * @param membroId - (Opcional) ID de um membro existente.
    * @returns O professor criado com o membro e turmas associados.
@@ -117,7 +115,6 @@ export class ProfessorService {
    *
    * @param id - ID do professor que será atualizado.
    * @param turmasApelidos - Array de apelidos das novas turmas que serão associadas ao professor;
-   * @param senha - Nova senha do professor.
    * @param membroId - ID do membro que será associado ao professor.
    * @returns Retorna o professor atualizado com as novas associações e dados.
    * @throws Lança um erro se o professor ou membro não forem encontrados.
