@@ -4,7 +4,7 @@ import { LoginService } from '../services/loginService';
 export class loginController {
   private loginService = new LoginService();
 
-  async login(req: Request, res: Response): Promise < Response > {
+  async login(req: Request, res: Response): Promise<Response> {
     const { email, senha } = req.body;
     const erros = [];
 
