@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { AlunosService } from '../services/alunosService';
 import { ConflictError } from '../errors/ConflitctError';
 import { NotFoundError } from '../errors/NotFoundError';
-
+import { getPaginationParams } from '../utils/paramsPagination';
 export class AlunosController {
   private alunosService = new AlunosService();
 
@@ -29,9 +29,12 @@ export class AlunosController {
       });
     } catch (error) {
       if (error instanceof ConflictError) {
-        return res.status(409).json({ message: error.message });
+        return res.status(409).json({
+          message:
+            'Estudante já existe nos cadastros. Verifique as informações.'
+        });
       }
-      return res.status(400).json({ message: 'Erro ao criar aluno', error });
+      return res.status(400).json({ message: 'Erro ao criar aluno' });
     }
   }
 
@@ -42,14 +45,15 @@ export class AlunosController {
    * @param res - A resposta a ser enviada ao cliente com a lista de alunos.
    */
   async listarAlunos(req: Request, res: Response) {
-    const page = Math.max(1, parseInt((req.query.page as string) ?? '1'));
-    const perPage = Math.max(1, parseInt((req.query.perPage as string) ?? '5'));
+    const { page, perPage } = getPaginationParams(req);
     const searchTerm = req.query.searchTerm ?? '';
+    const adminId = Number(req.user.id);
     try {
       const { data, total } = await this.alunosService.listarAlunos(
         page,
         perPage,
-        searchTerm as string
+        searchTerm as string,
+        adminId
       );
       return res.status(200).json({ page, perPage, total, data });
     } catch (error) {
@@ -86,11 +90,11 @@ export class AlunosController {
     try {
       const { id } = req.params;
       await this.alunosService.deletarAluno(Number(id));
-      return res.status(204).json({ message: 'Aluno excluído com sucesso' });
+      return res.status(200).json({ message: 'Aluno excluído com sucesso' });
     } catch (error) {
       console.error('Caught error:', error);
       if (error instanceof NotFoundError) {
-        return res.status(404).json({ message: error.message });
+        return res.status(404).json({ message: 'Aluno não encontrado' });
       }
       return res
         .status(500)
@@ -109,7 +113,7 @@ export class AlunosController {
       const { turmaId, rg, nomeCompleto, numeroMatricula, responsavelCpf } =
         req.body;
 
-      const alunoAtualizado = await this.alunosService.editarAluno(
+      await this.alunosService.editarAluno(
         id,
         nomeCompleto,
         rg,
@@ -118,12 +122,12 @@ export class AlunosController {
         responsavelCpf
       );
 
-      return res.json(alunoAtualizado);
+      return res.status(200).json({ message: 'Aluno atualizado com sucesso' });
     } catch (error) {
       if (error instanceof NotFoundError) {
         return res.status(404).json({ message: error.message });
       }
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ message: error.message });
     }
   }
 }

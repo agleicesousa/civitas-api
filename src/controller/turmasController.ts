@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { TurmasService } from '../services/turmasService';
-
+import { ConflictError } from '../errors/ConflitctError';
+import { getPaginationParams } from '../utils/paramsPagination';
 /**
  * Controlador para gerenciar as rotas relacionadas a turmas.
  */
@@ -16,19 +17,27 @@ export class TurmasController {
    */
   async criarTurma(req: Request, res: Response): Promise<Response> {
     try {
-      const { turmaApelido, periodoLetivo, anoLetivo, ensino, adminId } =
-        req.body;
+      const { turmaApelido, periodoLetivo, anoLetivo, ensino } = req.body;
+
+      const adminId = Number(req.user.id);
 
       const novaTurma = await this.turmasService.criar(
         anoLetivo,
         periodoLetivo,
         ensino,
         turmaApelido,
-        Number(adminId)
+        adminId
       );
-      return res.status(201).json(novaTurma);
+      return res
+        .status(201)
+        .json({ message: 'Turma criada com sucesso', turma: novaTurma });
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao criar turma' });
+      if (error instanceof ConflictError) {
+        return res.status(409).json({
+          message: error.message
+        });
+      }
+      return res.status(404).json({ message: 'Erro ao criar turma' });
     }
   }
 
@@ -40,11 +49,19 @@ export class TurmasController {
    * @returns Uma promessa que resolve para um objeto JSON contendo todas as turmas ou um erro, se ocorrer.
    */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
+    const { page, perPage } = getPaginationParams(req);
+    const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
+    const adminId = Number(req.user.id);
     try {
-      const turmas = await this.turmasService.listar();
+      const turmas = await this.turmasService.listar(
+        adminId,
+        page,
+        perPage,
+        searchTerm
+      );
       return res.status(200).json(turmas);
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao buscar turmas' });
+      return res.status(404).json({ message: 'Erro ao buscar turmas' });
     }
   }
 
@@ -61,7 +78,7 @@ export class TurmasController {
       const turma = await this.turmasService.buscarPorId(Number(id));
       return res.status(200).json(turma);
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao buscar turma' });
+      return res.status(404).json({ message: 'Erro ao buscar turma' });
     }
   }
 
@@ -75,13 +92,10 @@ export class TurmasController {
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const turmaAtualizada = await this.turmasService.editar(
-        Number(id),
-        req.body
-      );
-      return res.status(200).json(turmaAtualizada);
+      await this.turmasService.editar(Number(id), req.body);
+      return res.status(200).json({ message: 'Turma atualizada com sucesso' });
     } catch (error) {
-      return res.status(404).json({ error: error.message });
+      return res.status(404).json({ message: error.message });
     }
   }
 
@@ -96,9 +110,9 @@ export class TurmasController {
     try {
       const { id } = req.params;
       await this.turmasService.deletar(Number(id));
-      return res.status(204).send();
+      return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
-      return res.status(404).json({ error: 'Erro ao deletar turma' });
+      return res.status(404).json({ message: 'Erro ao deletar turma' });
     }
   }
 }

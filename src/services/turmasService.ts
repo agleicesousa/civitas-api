@@ -6,8 +6,10 @@ import {
 } from '../entities/turmasEntities';
 // import { Aluno } from '../entities/alunoEntities';
 import { Admin } from '../entities/adminEntities';
+import { Like } from 'typeorm';
 // import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
+import { ConflictError } from '../errors/ConflitctError';
 // import { In } from 'typeorm';
 
 /**
@@ -16,6 +18,17 @@ import { MysqlDataSource } from '../config/database';
 export class TurmasService {
   private turmasRepository = MysqlDataSource.getRepository(Turma);
   private adminRepository = MysqlDataSource.getRepository(Admin);
+
+  private mapTurma(turma: Turma) {
+    const { id, turmaApelido, anoLetivo, periodoLetivo } = turma;
+    return {
+      id,
+      turmaApelido,
+      anoLetivo,
+      periodoLetivo
+    };
+  }
+
   // private professorRepository = MysqlDataSource.getRepository(Professor);
   // private alunoRepository = MysqlDataSource.getRepository(Aluno);
 
@@ -33,11 +46,16 @@ export class TurmasService {
     adminId: number
   ): Promise<Turma> {
     const turmaExistente = await this.turmasRepository.findOne({
-      where: { turmaApelido }
+      where: {
+        turmaApelido,
+        admin: {
+          id: adminId
+        }
+      }
     });
 
     if (turmaExistente) {
-      throw new Error(`Já existe uma turma com o apelido ${turmaApelido}`);
+      throw new ConflictError('Turma já foi cadastrada');
     }
 
     const admin = await this.adminRepository.findOneBy({ id: adminId });
@@ -57,10 +75,31 @@ export class TurmasService {
    *
    * @returns Uma promessa que resolve para um array de turmas.
    */
-  async listar(): Promise<Turma[]> {
-    return await this.turmasRepository.find();
+  async listar(
+    adminId: number,
+    paginaNumero: number,
+    paginaTamanho: number | null,
+    searchTerm: string
+  ) {
+    const offset = (paginaNumero - 1) * (paginaTamanho ?? 0);
+    const [turmas, total] = await this.turmasRepository.findAndCount({
+      where: {
+        admin: {
+          id: adminId
+        },
+        turmaApelido: Like(`%${searchTerm}%`)
+      },
+      skip: paginaTamanho ? offset : undefined,
+      take: paginaTamanho || undefined
+    });
+    const turmasMap = turmas.map(this.mapTurma);
+    return {
+      paginaNumero,
+      paginaTamanho,
+      total,
+      data: turmasMap
+    };
   }
-
   /**
    * Atualiza uma turma existente.
    *
