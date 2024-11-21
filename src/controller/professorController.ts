@@ -19,7 +19,6 @@ export class ProfessorController {
         cpf,
         dataNascimento,
         numeroMatricula,
-        senha,
         turmasApelido,
         membroId
       } = req.body;
@@ -29,7 +28,6 @@ export class ProfessorController {
         cpf,
         new Date(dataNascimento),
         numeroMatricula,
-        senha,
         turmasApelido,
         membroId ? Number(membroId) : null
       );
@@ -105,12 +103,11 @@ export class ProfessorController {
   async editarProfessor(req: Request, res: Response): Promise<Response> {
     try {
       const id = req.params.id;
-      const { turmasApelidos, senha, membroId } = req.body;
+      const { turmasApelidos, membroId } = req.body;
 
       await this.professorService.editarProfessor(
         Number(id),
         turmasApelidos,
-        senha,
         Number(membroId)
       );
 

@@ -1,5 +1,6 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { BaseEntity, TipoConta } from './baseEntity';
+import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
@@ -10,6 +11,20 @@ export class Membros extends BaseEntity {
    */
   @Column({ unique: true, nullable: true })
   numeroMatricula: string;
+
+  /**
+   * Email único do membro.
+   * @type {string}
+   */
+  @Column({ nullable: true, unique: true })
+  email: string;
+
+  /**
+   * Senha do membro, armazena de forma criptografada.
+   * @type {string}
+   */
+  @Column({ nullable: true })
+  senha: string;
 
   /**
    * Nome completo do membro.
@@ -49,4 +64,23 @@ export class Membros extends BaseEntity {
    */
   @Column({ type: 'enum', enum: TipoConta })
   tipoConta: TipoConta;
+
+  /**
+   * Antes de atualizar ou inserir um novo membro, cripgrafa a senha.
+   */
+  @BeforeInsert()
+  @BeforeUpdate()
+  async handleCriptografiaSenha(): Promise<void> {
+    if (this.senha && this.isSenhaPlanText()) {
+      this.senha = await criptografarSenha(this.senha);
+    }
+  }
+
+  /**
+   * Verifica se a senha está em formato de texto puro.
+   * @return {boolean} true se a senha estiver em texto puro, false caso contrário.
+   */
+  private isSenhaPlanText(): boolean {
+    return !this.senha.startsWith('$2b$');
+  }
 }

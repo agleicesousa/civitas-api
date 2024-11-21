@@ -14,10 +14,72 @@ import {
   Turma
 } from '../entities/turmasEntities';
 
-const fakerBR = new Faker({
-  locale: [pt_BR]
+const fakerBR = new Faker({ locale: [pt_BR] });
+
+/**
+ * Fábrica para gerar dados de Membros.
+ */
+const membrosFabrica = setSeederFactory(Membros, () => {
+  const membro = new Membros();
+  membro.email = fakerBR.internet.email();
+  membro.senha = process.env.MEMBRO_PASSWORD;
+  membro.nomeCompleto = fakerBR.person.fullName();
+  membro.numeroMatricula = fakerBR.number
+    .int({ min: 1000, max: 999999 })
+    .toString();
+  membro.dataNascimento = fakerBR.date.birthdate();
+  membro.rg = fakerBR.number.int({ min: 100000000, max: 999999999 }).toString();
+  membro.cpf = fakerBR.number
+    .int({ min: 10000000000, max: 99999999999 })
+    .toString();
+  membro.tipoConta = fakerBR.helpers.arrayElement([
+    TipoConta.ADMIN,
+    TipoConta.ALUNO,
+    TipoConta.PROFESSOR,
+    TipoConta.RESPONSAVEL
+  ]);
+  return membro;
 });
 
+/**
+ * Fábrica para gerar dados de Alunos.
+ */
+const alunosFabrica = setSeederFactory(Alunos, () => {
+  const aluno = new Alunos();
+  aluno.membro = new Membros();
+  return aluno;
+});
+
+/**
+ * Fábrica para gerar dados de Responsáveis.
+ */
+const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
+  const responsavel = new Responsaveis();
+  responsavel.membro = new Membros();
+  return responsavel;
+});
+
+/**
+ * Fábrica para gerar dados de Professores.
+ */
+const professorFabrica = setSeederFactory(Professor, () => {
+  const professor = new Professor();
+  professor.membro = new Membros();
+  return professor;
+});
+
+/**
+ * Fábrica para gerar dados de Administradores.
+ */
+const adminFabrica = setSeederFactory(Admin, () => {
+  const admin = new Admin();
+  admin.membro = new Membros();
+  return admin;
+});
+
+/**
+ * Fábrica para gerar dados de Turmas.
+ */
 const turmaFabrica = setSeederFactory(Turma, () => {
   const turma = new Turma();
   turma.anoLetivo = fakerBR.helpers.arrayElement([
@@ -28,73 +90,24 @@ const turmaFabrica = setSeederFactory(Turma, () => {
     AnoLetivo.ANO_5,
     AnoLetivo.ANO_6
   ]);
-
   turma.periodoLetivo = fakerBR.helpers.arrayElement([
     PeriodoLetivo.MANHA,
     PeriodoLetivo.TARDE,
     PeriodoLetivo.NOITE
   ]);
-
   turma.ensino = fakerBR.helpers.arrayElement([
     TipoEnsino.MATERNAL,
     TipoEnsino.PRE_ESCOLA,
     TipoEnsino.ENSINO_FUNDAMENTAL_1
   ]);
-
   const letraClasse = fakerBR.helpers.arrayElement(['A', 'B', 'C', 'D', 'E']);
   turma.turmaApelido = `${turma.anoLetivo} ${letraClasse}`;
-
   return turma;
 });
 
-const membrosFabrica = setSeederFactory(Membros, () => {
-  const membro = new Membros();
-  membro.nomeCompleto = fakerBR.person.fullName();
-  membro.numeroMatricula = fakerBR.number
-    .int({ min: 1_000, max: 999_999 })
-    .toString();
-  membro.dataNascimento = fakerBR.date.birthdate();
-  membro.rg = fakerBR.number
-    .int({ min: 10_000_000_0, max: 99_999_999_9 })
-    .toString();
-  membro.cpf = fakerBR.number
-    .int({ min: 100_000_000_00, max: 999_999_999_99 })
-    .toString();
-  membro.tipoConta = fakerBR.helpers.arrayElement([
-    TipoConta.ADMIN,
-    TipoConta.ALUNO,
-    TipoConta.PROFESSOR,
-    TipoConta.RESPONSAVEL
-  ]);
-
-  return membro;
-});
-
-const alunosFabrica = setSeederFactory(Alunos, () => {
-  return new Alunos();
-});
-
-const responsaveisFabrica = setSeederFactory(Responsaveis, () => {
-  return new Responsaveis();
-});
-
-const professorFabrica = setSeederFactory(Professor, () => {
-  const professor = new Professor();
-  const senhaProfessor = process.env.PROF_PASSWORD;
-  professor.senha = senhaProfessor;
-
-  return professor;
-});
-
-const adminFabrica = setSeederFactory(Admin, () => {
-  const admin = new Admin();
-  const senhaAdmin = process.env.ADMIN_PASSWORD;
-  admin.email = fakerBR.internet.email();
-  admin.senha = senhaAdmin;
-
-  return admin;
-});
-
+/**
+ * Exporta todas as fábricas de dados.
+ */
 export default [
   turmaFabrica,
   membrosFabrica,

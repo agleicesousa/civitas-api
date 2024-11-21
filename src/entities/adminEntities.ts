@@ -1,18 +1,9 @@
-import {
-  Entity,
-  Column,
-  BeforeInsert,
-  BeforeUpdate,
-  OneToOne,
-  JoinColumn,
-  OneToMany
-} from 'typeorm';
+import { Entity, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Turma } from './turmasEntities';
 import { Professor } from './professorEntities';
 import { Alunos } from './alunosEntities';
-import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity()
 export class Admin extends BaseEntity {
@@ -24,26 +15,6 @@ export class Admin extends BaseEntity {
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
-  /**
-   * E-mail único do administrador.
-   * @type {string}
-   */
-  @Column({ unique: true })
-  email: string;
-
-  /**
-   * Senha do administrador, armazenada de forma criptografada.
-   * @type {string}
-   */
-  @Column()
-  senha: string;
-
-  /**
-   * Relação com as turmas gerenciadas pelo administrador.
-   * Esta propriedade representa todas as turmas associadas a este administrador.
-   *
-   * @type {Turma[]}
-   */
   @OneToMany(() => Turma, (turma) => turma.admin)
   turmas: Turma[];
 
@@ -52,26 +23,4 @@ export class Admin extends BaseEntity {
 
   @OneToMany(() => Alunos, (aluno) => aluno.admin)
   alunos: Alunos[];
-
-  @BeforeInsert()
-  @BeforeUpdate()
-
-  /**
-   * Antes de inserir ou atualizar um registro de administrador, criptografa a senha.
-   */
-  @BeforeInsert()
-  @BeforeUpdate()
-  async handleCriptografiaSenha(): Promise<void> {
-    if (this.senha && this.isSenhaPlainText()) {
-      this.senha = await criptografarSenha(this.senha);
-    }
-  }
-
-  /**
-   * Verifica se a senha está em formato de texto puro.
-   * @returns {boolean} true se a senha estiver em texto puro, false caso contrário.
-   */
-  private isSenhaPlainText(): boolean {
-    return !this.senha.startsWith('$2b$'); // Hash bcrypt começa com $2b$
-  }
 }

@@ -358,11 +358,10 @@ adminRouter.post(
 
 /**
  * Rota para atualizar um administrador existente.
- * Requer autenticação, permissão de gerenciamento de usuários e validação de e-mail.
+ * Requer autenticação, permissão de gerenciamento de usuários.
  */
 adminRouter.put(
   '/:id',
-  validarEmail,
   authenticateJWT,
   hasPermission('MANAGE_USERS'),
   (req, res) => adminController.atualizarAdmin(req, res)

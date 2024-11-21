@@ -1,129 +1,173 @@
+import { hash, compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
+import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
-import { Admin } from '../entities/adminEntities';
 import { Membros } from '../entities/membrosEntities';
-import { criptografarSenha, compararSenha } from '../utils/senhaUtils';
-import { gerarToken } from '../utils/jwtUtils';
+import ErrorHandler from '../errors/errorHandler';
+import { TipoConta } from '../entities/baseEntity';
+
+interface NovoAdminData {
+  email: string;
+  senha: string;
+  nomeCompleto: string;
+  tipoConta: TipoConta;
+}
 
 export class AdminService {
-  private adminRepository = MysqlDataSource.getRepository(Admin);
-  private membrosRepository = MysqlDataSource.getRepository(Membros);
+  private membroRepository: Repository<Membros>;
 
-  /**
-   * Lista todos os administradores, incluindo o membro associado.
-   * @returns Uma lista de todos os administradores com seus respectivos membros.
-   */
-  async listarAdmins() {
-    return await this.adminRepository.find({ relations: ['membro'] });
+  constructor() {
+    this.membroRepository = MysqlDataSource.getRepository(Membros);
   }
 
   /**
-   * Busca um administrador pelo ID.
-   * @param id - ID do administrador.
-   * @returns O administrador encontrado ou `undefined` se não encontrado.
+   * Lista todos os administradores cadastrados.
+   * @returns Lista de administradores.
    */
-  async buscarAdminPorId(id: number) {
-    return await this.adminRepository.findOne({
-      where: { id },
-      relations: ['membro']
+  async listarAdmins() {
+    return this.membroRepository.find({
+      where: { tipoConta: TipoConta.ADMIN },
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
     });
+  }
+
+  /**
+   * Obtém um administrador pelo ID.
+   * @param id ID do administrador.
+   * @returns Administrador encontrado.
+   * @throws Error se não encontrar o administrador ou se não for um admin.
+   */
+  async obterAdminPorId(id: number) {
+    const admin = await this.membroRepository.findOne({
+      where: { id, tipoConta: TipoConta.ADMIN },
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
+    });
+
+    if (!admin) {
+      throw ErrorHandler.notFound('Administrador não encontrado.');
+    }
+
+    return admin;
   }
 
   /**
    * Cria um novo administrador.
-   * @param email - Email do administrador.
-   * @param senha - Senha do administrador.
-   * @param membroId - ID do membro associado.
-   * @returns O novo administrador criado.
-   * @throws {Error} Se o membro associado não for encontrado ou se o email for inválido.
+   * @param dados Dados do novo administrador.
+   * @returns Dados do administrador criado.
+   * @throws Error se o e-mail já estiver em uso.
    */
-  async criarAdmin(email: string, senha: string, membroId: number) {
-    const membro = await this.membrosRepository.findOneBy({ id: membroId });
-    if (!membro) {
-      throw new Error('Membro não encontrado.');
+  async criarAdmin(dados: NovoAdminData) {
+    const { email, senha, nomeCompleto, tipoConta } = dados;
+
+    const emailExistente = await this.membroRepository.findOne({
+      where: { email }
+    });
+
+    if (emailExistente) {
+      throw ErrorHandler.badRequest('E-mail já está em uso.');
     }
 
-    const senhaCriptografada = await criptografarSenha(senha);
+    const senhaCriptografada = await hash(senha, 10);
 
-    const novoAdmin = this.adminRepository.create({
+    const novoAdmin = this.membroRepository.create({
       email,
       senha: senhaCriptografada,
-      membro
+      nomeCompleto,
+      tipoConta
     });
 
-    return await this.adminRepository.save(novoAdmin);
+    await this.membroRepository.save(novoAdmin);
+
+    return {
+      id: novoAdmin.id,
+      nomeCompleto: novoAdmin.nomeCompleto,
+      email: novoAdmin.email,
+      tipoConta: novoAdmin.tipoConta
+    };
   }
 
   /**
-   * Atualiza um administrador existente.
-   * @param id - ID do administrador.
-   * @param email - Novo email.
-   * @param senha - Nova senha (opcional).
-   * @param membroId - ID do membro associado.
-   * @returns O administrador atualizado ou `null` se não for encontrado.
-   * @throws {Error} Se o membro associado não for encontrado ou se o email for inválido.
+   * Atualiza os dados de um administrador.
+   * @param id ID do administrador a ser atualizado.
+   * @param dados Dados a serem atualizados.
+   * @returns Dados do administrador atualizado.
+   * @throws Error se o administrador não for encontrado ou o e-mail já estiver em uso.
    */
-  async atualizarAdmin(
-    id: number,
-    email: string,
-    senha: string | null,
-    membroId: number
-  ) {
-    const membro = await this.membrosRepository.findOneBy({ id: membroId });
-    if (!membro) {
-      throw new Error('Membro não encontrado.');
+  async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
+    const adminExistente = await this.membroRepository.findOne({
+      where: { id, tipoConta: TipoConta.ADMIN }
+    });
+
+    if (!adminExistente) {
+      throw ErrorHandler.notFound('Administrador não encontrado.');
     }
 
-    const admin = await this.adminRepository.findOneBy({ id });
-    if (!admin) {
-      return null;
+    if (dados.email) {
+      const emailEmUso = await this.membroRepository.findOne({
+        where: { email: dados.email }
+      });
+
+      if (emailEmUso && emailEmUso.id !== id) {
+        throw ErrorHandler.badRequest('E-mail já está em uso.');
+      }
     }
 
-    admin.email = email;
-    if (senha) {
-      admin.senha = await criptografarSenha(senha);
+    if (dados.senha) {
+      dados.senha = await hash(dados.senha, 10);
     }
-    admin.membro = membro;
 
-    return await this.adminRepository.save(admin);
+    await this.membroRepository.update(id, dados);
+
+    const adminAtualizado = await this.membroRepository.findOne({
+      where: { id },
+      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
+    });
+
+    return adminAtualizado;
   }
 
   /**
-   * Deleta um administrador.
-   * @param id - ID do administrador a ser deletado.
-   * @returns O resultado da operação de exclusão.
+   * Deleta um administrador pelo ID.
+   * @param id ID do administrador a ser deletado.
+   * @throws Error se o administrador não for encontrado.
    */
-  async deletarAdmin(id: number) {
-    return await this.adminRepository.delete(id);
+  async deletaAdmin(id: number) {
+    const adminExistente = await this.membroRepository.findOne({
+      where: { id, tipoConta: TipoConta.ADMIN }
+    });
+
+    if (!adminExistente) {
+      throw ErrorHandler.notFound('Administrador não encontrado.');
+    }
+
+    await this.membroRepository.delete(id);
   }
 
   /**
-   * Realiza o login de um administrador e retorna um token JWT.
-   * @param email - Email do administrador.
-   * @param senha - Senha do administrador.
-   * @returns Um objeto contendo o token JWT gerado.
-   * @throws {Error} Se o administrador não for encontrado ou a senha for inválida.
+   * Realiza o login de um administrador.
+   * @param email E-mail do administrador.
+   * @param senha Senha do administrador.
+   * @returns Token JWT para o administrador.
+   * @throws Error se o e-mail ou senha estiverem incorretos.
    */
   async login(email: string, senha: string) {
-    const admin = await this.adminRepository.findOne({
-      where: { email },
-      relations: ['membro']
-    });
+    const admin = await this.membroRepository.findOne({ where: { email } });
 
-    if (!admin?.membro) {
-      throw new Error('Administrador não encontrado.');
+    if (!admin || admin.tipoConta !== TipoConta.ADMIN) {
+      throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
     }
 
-    const senhaValida = await compararSenha(senha, admin.senha);
+    const senhaValida = await compare(senha, admin.senha);
+
     if (!senhaValida) {
-      throw new Error('Senha inválida.');
+      throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
     }
 
-    // Gera o token JWT usando o utilitário de token
-    const token = gerarToken({
-      id: admin.id,
-      numeroMatricula: admin.membro.numeroMatricula,
-      tipoConta: admin.membro.tipoConta
-    });
+    const token = sign(
+      { id: admin.id, email: admin.email, tipoConta: admin.tipoConta },
+      process.env.JWT_SECRET || 'default_secret',
+      { expiresIn: '1d' }
+    );
 
     return { token };
   }

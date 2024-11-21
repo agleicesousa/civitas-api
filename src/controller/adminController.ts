@@ -6,9 +6,9 @@ export class AdminController {
 
   /**
    * Lista todos os administradores.
-   * @param req - Objeto da requisição HTTP.
-   * @param res - Objeto da resposta HTTP.
-   * @returns Uma lista de administradores em formato JSON.
+   * @param req - Requisição da API.
+   * @param res - Resposta da API.
+   * @returns Lista de administradores.
    */
   async listarAdmins(req: Request, res: Response): Promise<Response> {
     try {
@@ -20,10 +20,10 @@ export class AdminController {
   }
 
   /**
-   * Busca um administrador específico pelo ID.
-   * @param req - Objeto da requisição HTTP, contendo o ID do administrador nos parâmetros.
-   * @param res - Objeto da resposta HTTP.
-   * @returns O administrador correspondente ao ID ou uma mensagem de erro se não encontrado.
+   * Busca um administrador por ID.
+   * @param req - Requisição com o ID do administrador.
+   * @param res - Resposta com os dados do administrador ou erro.
+   * @returns Dados do administrador ou erro.
    */
   async buscarAdminPorId(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
@@ -34,36 +34,31 @@ export class AdminController {
     }
 
     try {
-      const admin = await this.adminService.buscarAdminPorId(Number(id));
-      if (admin) {
-        return res.json(admin);
-      }
-      return res.status(404).json({ error: 'Administrador não encontrado.' });
+      const admin = await this.adminService.obterAdminPorId(idNumber);
+      return res.json(admin);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao buscar administrador.' });
+      return res
+        .status(404)
+        .json({ error: error.message || 'Administrador não encontrado.' });
     }
   }
 
   /**
    * Cria um novo administrador.
-   * @param req - Objeto da requisição HTTP, contendo as informações do administrador no corpo.
-   * @param res - Objeto da resposta HTTP.
-   * @returns O novo administrador criado em formato JSON.
+   * @param req - Requisição com dados do administrador.
+   * @param res - Resposta com o administrador criado ou erro.
+   * @returns Administrador criado.
    */
   async criarAdmin(req: Request, res: Response): Promise<Response> {
-    const { email, senha, membroId } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'O campo email é obrigatório.' });
-    }
+    const { email, senha, nomeCompleto, tipoConta } = req.body;
 
     try {
-      const novoAdmin = await this.adminService.criarAdmin(
+      const novoAdmin = await this.adminService.criarAdmin({
         email,
         senha,
-        Number(membroId)
-      );
-
+        nomeCompleto,
+        tipoConta
+      });
       return res.status(201).json(novoAdmin);
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -71,47 +66,38 @@ export class AdminController {
   }
 
   /**
-   * Atualiza um administrador existente.
-   * @param req - Objeto da requisição HTTP, contendo o ID do administrador nos parâmetros e os dados atualizados no corpo.
-   * @param res - Objeto da resposta HTTP.
-   * @returns O administrador atualizado ou uma mensagem de erro se não encontrado.
+   * Atualiza os dados de um administrador.
+   * @param req - Requisição com o ID e novos dados do administrador.
+   * @param res - Resposta com os dados do administrador atualizado ou erro.
+   * @returns Administrador atualizado.
    */
   async atualizarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    const { email, senha, membroId } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'O campo email é obrigatório.' });
-    }
+    const novoMembroData = req.body;
 
     try {
       const adminAtualizado = await this.adminService.atualizarAdmin(
         Number(id),
-        email,
-        senha,
-        Number(membroId)
+        novoMembroData
       );
-      if (adminAtualizado) {
-        return res.json(adminAtualizado);
-      }
-      return res.status(404).json({ error: 'Administrador não encontrado.' });
+      return res.json(adminAtualizado);
     } catch (error) {
       return res
-        .status(500)
-        .json({ error: 'Erro ao atualizar administrador.' });
+        .status(404)
+        .json({ error: error.message || 'Erro ao atualizar administrador.' });
     }
   }
 
   /**
-   * Exclui um administrador existente.
-   * @param req - Objeto da requisição HTTP, contendo o ID do administrador nos parâmetros.
-   * @param res - Objeto da resposta HTTP.
-   * @returns Uma resposta sem conteúdo (204) se o administrador for excluído com sucesso ou uma mensagem de erro.
+   * Deleta um administrador.
+   * @param req - Requisição com o ID do administrador a ser deletado.
+   * @param res - Resposta confirmando a exclusão ou erro.
+   * @returns Status de sucesso ou erro.
    */
   async deletarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-
     const adminAutenticadoId = req.user?.id;
+
     try {
       if (Number(id) === adminAutenticadoId) {
         return res
@@ -119,49 +105,42 @@ export class AdminController {
           .json({ error: 'Você não pode excluir sua própria conta.' });
       }
 
-      const resultado = await this.adminService.deletarAdmin(Number(id));
-      if (resultado.affected) {
-        return res.status(204).send();
-      }
-      return res.status(404).json({ error: 'Administrador não encontrado.' });
+      await this.adminService.deletaAdmin(Number(id));
+      return res.status(204).send();
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res
+        .status(404)
+        .json({ error: error.message || 'Administrador não encontrado.' });
     }
   }
+
   /**
-   * Realiza o login de um administrador e retorna um token JWT.
-   * @param req - Objeto da requisição HTTP, contendo o email e senha do administrador no corpo.
-   * @param res - Objeto da resposta HTTP.
-   * @returns O token JWT gerado em formato JSON ou uma mensagem de erro.
+   * Realiza o login de um administrador.
+   * @param req - Requisição com email e senha.
+   * @param res - Resposta com o token de autenticação ou erro.
+   * @returns Token de autenticação ou erro.
    */
   async login(req: Request, res: Response): Promise<Response> {
     const { email, senha } = req.body;
-
     const erros = [];
-    // Valida se o email foi fornecido
+
     if (!email) {
       erros.push({ campo: 'email', erro: 'E-mail é obrigatório' });
     }
-
-    // Valida se a senha foi fornecida
     if (!senha) {
       erros.push({ campo: 'senha', erro: 'Senha é obrigatória' });
     }
-
-    // Se houver erros de validação, retorna com código 400
     if (erros.length > 0) {
       return res.status(400).json({ erros });
     }
 
     try {
-      // Tenta realizar o login após a validação dos campos
       const { token } = await this.adminService.login(email, senha);
       return res.json({ token });
     } catch (error) {
-      // Se as credenciais forem inválidas, retorna um erro de autenticação
-      return res
-        .status(401)
-        .json({ error: 'Seu e-mail ou senha estão incorretos.' });
+      return res.status(401).json({
+        error: error.message || 'Seu e-mail ou senha estão incorretos.'
+      });
     }
   }
 }
