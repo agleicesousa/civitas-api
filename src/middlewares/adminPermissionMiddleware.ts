@@ -30,11 +30,9 @@ export async function checkAdminPermission(entity: any, entityType: string) {
 
       // Verificar se o admin que criou a entidade é o admin autenticado
       if (entityRecord.admin.id !== user.id) {
-        return res
-          .status(403)
-          .json({
-            error: 'Acesso negado. Você não pode gerenciar este professor.'
-          });
+        return res.status(403).json({
+          error: 'Acesso negado. Você não pode gerenciar este professor.'
+        });
       }
 
       // Se o admin for o mesmo que criou, permite continuar

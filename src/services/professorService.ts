@@ -21,9 +21,11 @@ export class ProfessorService {
     senha: string,
     adminId: number,
     turmaIds: number[]
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     // Verifica se o e-mail já está registrado
-    const membroExistente = await this.membrosRepository.findOne({ where: { email } });
+    const membroExistente = await this.membrosRepository.findOne({
+      where: { email }
+    });
     if (membroExistente) {
       throw ErrorHandler.badRequest('Email já registrado');
     }
@@ -63,7 +65,7 @@ export class ProfessorService {
     email: string,
     senha: string,
     turmaIds: number[]
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     // Busca o professor com base no ID e nas relações com admin, membro e turmas
     const professor = await this.professorRepository.findOne({
       where: { id: professorId },
@@ -102,7 +104,7 @@ export class ProfessorService {
     return professor;
   }
 
-  async listarProfessores(adminId: number): Promise < Professor[] > {
+  async listarProfessores(adminId: number): Promise<Professor[]> {
     const professores = await this.professorRepository.find({
       where: { adminId },
       relations: ['membro', 'turmas']
@@ -118,7 +120,7 @@ export class ProfessorService {
   async buscarProfessorPorId(
     professorId: number,
     adminId: number
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     const professor = await this.professorRepository.findOne({
       where: { id: professorId, adminId },
       relations: ['membro', 'turmas']
@@ -131,7 +133,7 @@ export class ProfessorService {
     return professor;
   }
 
-  async deletarProfessor(professorId: number, adminId: number): Promise < void > {
+  async deletarProfessor(professorId: number, adminId: number): Promise<void> {
     const professor = await this.professorRepository.findOne({
       where: { id: professorId, adminId }
     });
