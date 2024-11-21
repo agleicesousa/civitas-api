@@ -7,7 +7,6 @@ import { TipoConta } from '../entities/baseEntity';
 import { criptografarSenha } from '../utils/senhaUtils';
 
 export class ProfessorService {
-
   async criarProfessor(
     nomeMembro: string,
     cpf: string,
@@ -18,7 +17,7 @@ export class ProfessorService {
     senha: string,
     adminId: number,
     turmaIds: number[]
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     // Verifica se o e-mail já está registrado
     const membroExistente = await Membros.findOne({ where: { email } });
     if (membroExistente) {
@@ -60,7 +59,7 @@ export class ProfessorService {
     email: string,
     senha: string,
     turmaIds: number[]
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     // Busca o professor com base no ID e nas relações com admin, membro e turmas
     const professor = await Professor.findOne({
       where: { id: professorId },
@@ -73,7 +72,9 @@ export class ProfessorService {
 
     // Verifica se o admin que está fazendo a edição é o mesmo que criou o professor.
     if (professor.admin.id !== adminId) {
-      throw ErrorHandler.forbidden('Você não tem permissão para editar esse professor');
+      throw ErrorHandler.forbidden(
+        'Você não tem permissão para editar esse professor'
+      );
     }
 
     if (email) {
@@ -96,8 +97,11 @@ export class ProfessorService {
     return professor;
   }
 
-  async listarProfessores(adminId: number): Promise < Professor[] > {
-    const professores = await Professor.find({ where: { adminId }, relations: ['membro', 'turmas'] });
+  async listarProfessores(adminId: number): Promise<Professor[]> {
+    const professores = await Professor.find({
+      where: { adminId },
+      relations: ['membro', 'turmas']
+    });
 
     if (professores.length === 0) {
       throw ErrorHandler.notFound('Nenhum professor encontrado');
@@ -106,7 +110,10 @@ export class ProfessorService {
     return professores;
   }
 
-  async buscarProfessorPorId(professorId: number, adminId: number): Promise < Professor > {
+  async buscarProfessorPorId(
+    professorId: number,
+    adminId: number
+  ): Promise<Professor> {
     const professor = await Professor.findOne({
       where: { id: professorId, adminId },
       relations: ['membro', 'turmas']
@@ -118,9 +125,11 @@ export class ProfessorService {
 
     return professor;
   }
-  
-  async deletarProfessor(professorId: number, adminId: number): Promise < void > {
-    const professor = await Professor.findOne({ where: { id: professorId, adminId } });
+
+  async deletarProfessor(professorId: number, adminId: number): Promise<void> {
+    const professor = await Professor.findOne({
+      where: { id: professorId, adminId }
+    });
 
     if (!professor) {
       throw ErrorHandler.notFound('Professor não encontrado');

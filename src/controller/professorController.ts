@@ -14,7 +14,7 @@ export class ProfessorController {
       turmasApelido,
       email,
       senha,
-      turmaIds,
+      turmaIds
     } = req.body;
     const adminId = req.user.id;
 
@@ -43,7 +43,8 @@ export class ProfessorController {
     const adminId = req.user.id;
 
     try {
-      const professores = await this.professorService.listarProfessores(adminId);
+      const professores =
+        await this.professorService.listarProfessores(adminId);
       return res.status(200).json(professores);
     } catch (error) {
       if (error instanceof ErrorHandler) {
