@@ -23,13 +23,16 @@ export class ProfessorController {
         membroId
       } = req.body;
 
+      const adminId = req.user.id;
+
       const novoProfessor = await this.professorService.criarProfessor(
         nomeMembro,
         cpf,
         new Date(dataNascimento),
         numeroMatricula,
         turmasApelido,
-        membroId ? Number(membroId) : null
+        membroId ? Number(membroId) : null,
+        adminId
       );
 
       res.status(201).json(novoProfessor);
@@ -39,14 +42,16 @@ export class ProfessorController {
   }
 
   /**
-   * Lista todos os professores.
+   * Lista todos os professores criados pelo admin que está fazendo a requisição.
    *
    * @param req - A requisição HTTP.
    * @param res - A resposta HTTP para ser enviada ao cliente.
    */
   async listarProfessores(req: Request, res: Response) {
     try {
-      const professores = await this.professorService.listarProfessores();
+      const adminId = req.user.id;
+
+      const professores = await this.professorService.listarProfessores(adminId);
       res.json(professores);
     } catch (error) {
       res.status(404).json({ message: 'Erro ao listar professores', error });
@@ -62,8 +67,11 @@ export class ProfessorController {
   async buscarProfessorPorId(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      const adminId = req.user.id;
+
       const professor = await this.professorService.buscarProfessorPorId(
-        Number(id)
+        Number(id),
+        adminId // Passa o adminId para garantir que o admin que criou o professor seja o único que possa acessá-lo
       );
       return res.json(professor);
     } catch (error) {
@@ -82,7 +90,9 @@ export class ProfessorController {
   async deletarProfessor(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await this.professorService.deletarProfessor(Number(id));
+      const adminId = req.user.id;
+
+      await this.professorService.deletarProfessor(Number(id), adminId); // Passa o adminId para garantir que apenas o admin responsável possa deletar
       return res.status(204).send();
     } catch (error) {
       return res
@@ -98,15 +108,17 @@ export class ProfessorController {
    * @param res - A resposta HTTP para ser enviada ao cliente.
    * @returns A resposta HTTP com o professor atualizado.
    */
-  async editarProfessor(req: Request, res: Response): Promise<Response> {
+  async editarProfessor(req: Request, res: Response): Promise < Response > {
     try {
       const id = req.params.id;
       const { turmasApelidos, membroId } = req.body;
+      const adminId = req.user.id;
 
       const professorAtualizado = await this.professorService.editarProfessor(
         Number(id),
         turmasApelidos,
-        Number(membroId)
+        Number(membroId),
+        adminId
       );
 
       return res.json(professorAtualizado);

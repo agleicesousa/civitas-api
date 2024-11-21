@@ -22,6 +22,7 @@ export class ProfessorService {
    * @param numeroMatricula - Número de matrícula do membro.
    * @param turmaApelido - Lista de apelidos das turmas associadas ao professor.
    * @param membroId - (Opcional) ID de um membro existente.
+   * @param adminId - ID do admin que está criando o professor.
    * @returns O professor criado com o membro e turmas associados.
    */
   async criarProfessor(
@@ -30,8 +31,9 @@ export class ProfessorService {
     dataNascimento: Date,
     numeroMatricula: string,
     turmaApelido: string[],
-    membroId?: number
-  ): Promise<Professor> {
+    membroId ? : number,
+    adminId: number
+  ): Promise < Professor > {
     let membro: Membros | null = null;
 
     // Verifica se um ID de membro foi fornecido e tenta encontrar o membro associado.
@@ -56,73 +58,98 @@ export class ProfessorService {
       turmaApelido: In(turmaApelido)
     });
 
-    // Cria e salva o novo professor com as informações de membro e turmas.
+    // Busca o admin pelo ID fornecido
+    const admin = await this.membrosRepository.findOneBy({ id: adminId });
+
+    if (!admin) {
+      throw new Error('Admin não encontrado');
+    }
+
+    // Cria e salva o novo professor com as informações de membro, turmas e admin.
     const novoProfessor = this.professorRepository.create({
       membro,
-      turmas
+      turmas,
+      admin
     });
 
     return await this.professorRepository.save(novoProfessor);
   }
 
   /**
-   * Lista todos os professores.
+   * Lista todos os professores criados pelo admin específico.
    *
-   * @returns Uma lista de professores.
+   * @param adminId - ID do admin que está buscando os professores.
+   * @returns Uma lista de professores associados ao admin.
    */
-  async listarProfessores(): Promise<Professor[]> {
-    return await this.professorRepository.find();
+  async listarProfessores(adminId: number): Promise < Professor[] > {
+    return this.professorRepository.find({
+      where: {
+        admin: { id: adminId }
+      }
+    });
   }
+
   /**
-   * Busca um professor pelo seu ID.
+   * Busca um professor pelo seu ID, garantindo que o admin seja o responsável por gerenciá-lo.
    *
    * @param id - O ID do professor.
-   * @throws Error se o professor não for encontrado
+   * @param adminId - ID do admin que está tentando acessar o professor.
+   * @throws Error se o professor não for encontrado ou não for associado ao admin.
    * @returns O professor correspondente ao ID fornecido.
    */
-  async buscarProfessorPorId(id: number): Promise<Professor> {
+  async buscarProfessorPorId(id: number, adminId: number): Promise < Professor > {
     const professor = await this.professorRepository.findOne({
-      where: { id }
+      where: {
+        id,
+        admin: { id: adminId }
+      }
     });
 
     if (!professor) {
-      throw new Error(`Professor com ID ${id} não encontrado`);
+      throw new Error(`Professor com ID ${id} não encontrado ou não autorizado`);
     }
 
     return professor;
   }
 
   /**
-   * Deleta um professor pelo seu ID.
+   * Deleta um professor pelo seu ID, garantindo que o admin seja o responsável por excluí-lo.
    *
    * @param id - O ID do professor a ser deletado.
-   * @throws Error se o professor não for encontrado
+   * @param adminId - ID do admin que está tentando excluir o professor.
+   * @throws Error se o professor não for encontrado ou não for associado ao admin.
    * @returns O resultado da operação de deleção.
    */
-  async deletarProfessor(id: number) {
+  async deletarProfessor(id: number, adminId: number): Promise < void > {
     const professor = await this.professorRepository.findOne({
-      where: { id }
+      where: {
+        id,
+        admin: { id: adminId }
+      }
     });
 
     if (!professor) {
-      throw new Error(`Professor com ID ${id} não encontrado`);
+      throw new Error(`Professor com ID ${id} não encontrado ou não autorizado`);
     }
+
     await this.professorRepository.delete(id);
-    await this.membrosRepository.delete(professor.membro.id);
   }
+
   /**
-   * Atualiza os dados de um professor existente.
+   * Atualiza os dados de um professor, garantindo que o admin seja o responsável pela atualização.
    *
    * @param id - ID do professor que será atualizado.
    * @param turmasApelidos - Array de apelidos das novas turmas que serão associadas ao professor;
    * @param membroId - ID do membro que será associado ao professor.
+   * @param adminId - ID do admin que está atualizando o professor.
    * @returns Retorna o professor atualizado com as novas associações e dados.
-   * @throws Lança um erro se o professor ou membro não forem encontrados.
+   * @throws Lança um erro se o professor ou membro não forem encontrados, ou se o admin não for o responsável.
    */
   async editarProfessor(
     id: number,
     turmasApelidos: string[],
-    membroId: number
+    membroId: number,
+    adminId: number
   ) {
     const membro = await this.membrosRepository.findOneBy({ id: membroId });
 
@@ -132,8 +159,8 @@ export class ProfessorService {
 
     const professorExistente = await this.professorRepository.findOneBy({ id });
 
-    if (!professorExistente) {
-      throw new Error(`Professor com ID ${id} não encontrado`);
+    if (!professorExistente || professorExistente.admin.id !== adminId) {
+      throw new Error(`Professor com ID ${id} não encontrado ou não autorizado`);
     }
 
     const turmas = await this.turmasRepository.findBy({
