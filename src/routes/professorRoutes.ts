@@ -9,7 +9,6 @@ const professorRouter = Router();
 
 /**
  * Cria um novo professor.
- * Requer autenticação e permissão de gerenciamento de usuários.
  */
 professorRouter.post(
   '/',
@@ -19,20 +18,18 @@ professorRouter.post(
 );
 
 /**
- * Lista todos os professores.
- * Requer autenticação e permissão de gerenciamento de usuários.
+ * Lista todos os professores do admin autenticado.
  */
 professorRouter.get(
   '/',
   authenticateJWT,
   hasPermission('MANAGE_USERS'),
-  checkAdminPermission(Professor, 'professor'),
   (req, res) => professorController.listarProfessores(req, res)
 );
 
 /**
  * Busca um professor por ID.
- * Requer autenticação e permissão de gerenciamento de usuários.
+ * Somente o admin que criou o professor pode acessá-lo.
  */
 professorRouter.get(
   '/:id',
@@ -44,7 +41,7 @@ professorRouter.get(
 
 /**
  * Edita os dados de um professor.
- * Requer autenticação e permissão de gerenciamento de usuários.
+ * Somente o admin que criou o professor pode editá-lo.
  */
 professorRouter.put(
   '/:id',
@@ -56,7 +53,7 @@ professorRouter.put(
 
 /**
  * Deleta um professor.
- * Requer autenticação e permissão de gerenciamento de usuários.
+ * Somente o admin que criou o professor pode deletá-lo.
  */
 professorRouter.delete(
   '/:id',

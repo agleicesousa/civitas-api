@@ -1,177 +1,161 @@
-import { Professor } from '../entities/professorEntities';
-import { MysqlDataSource } from '../config/database';
-import { Turma } from '../entities/turmasEntities';
+import { Professor } from '../entities/professoresEntities';
 import { Membros } from '../entities/membrosEntities';
-import { BaseEntity, TipoConta } from '../entities/baseEntity';
-import { In } from 'typeorm';
+import { Turma } from '../entities/turmasEntities';
+import { Admin } from '../entities/adminEntities';
+import { AppError } from '../utils/appError';
+import { TipoConta } from '../entities/baseEntity';
 
-/**
- * Classe responsável por gerenciar operações relacionadas a Professores.
- */
 export class ProfessorService {
-  private professorRepository = MysqlDataSource.getRepository(Professor);
-  private membrosRepository = MysqlDataSource.getRepository(Membros);
-  private turmasRepository = MysqlDataSource.getRepository(Turma);
-  private baseRepository = MysqlDataSource.getRepository(BaseEntity);
-
   /**
-   * Cria um novo professor e, se necessário, cria um novo membro associado.
-   * @param nomeMembro - Nome completo do membro.
+   * Cria um novo professor e associa a ele múltiplas turmas.
+   * 
+   * @param nomeMembro - Nome do membro.
    * @param cpf - CPF do membro.
    * @param dataNascimento - Data de nascimento do membro.
-   * @param numeroMatricula - Número de matrícula do membro.
-   * @param turmaApelido - Lista de apelidos das turmas associadas ao professor.
-   * @param membroId - (Opcional) ID de um membro existente.
-   * @param adminId - ID do admin que está criando o professor.
-   * @returns O professor criado com o membro e turmas associados.
+   * @param numeroMatricula - Número de matrícula do professor.
+   * @param turmasApelido - Apelido das turmas associadas ao professor.
+   * @param adminId - ID do administrador que está criando o professor.
+   * @param turmaIds - IDs das turmas que serão associadas ao professor.
+   * @returns O professor criado com as turmas associadas.
+   * 
+   * @throws AppError - Se ocorrer um erro ao criar o professor.
    */
   async criarProfessor(
     nomeMembro: string,
     cpf: string,
     dataNascimento: Date,
     numeroMatricula: string,
-    turmaApelido: string[],
-    membroId ? : number,
-    adminId: number
+    turmasApelido: string,
+    adminId: number,
+    turmaIds: number[]
   ): Promise < Professor > {
-    let membro: Membros | null = null;
+    const membro = new Membros();
+    membro.nome = nomeMembro;
+    membro.cpf = cpf;
+    membro.dataNascimento = dataNascimento;
+    membro.tipoConta = TipoConta.PROFESSOR;
 
-    // Verifica se um ID de membro foi fornecido e tenta encontrar o membro associado.
-    if (membroId) {
-      membro = await this.membrosRepository.findOneBy({ id: membroId });
+    // Criação do membro
+    await membro.save();
+
+    // Busca as turmas com base nos IDs
+    const turmas = await Turma.findByIds(turmaIds);
+
+    // Verifica se todas as turmas foram encontradas
+    if (turmas.length !== turmaIds.length) {
+      throw new AppError('Algumas turmas não foram encontradas', 404);
     }
 
-    // Se o membro não for encontrado ou o ID não for fornecido, cria um novo membro.
-    if (!membro) {
-      membro = this.membrosRepository.create({
-        nomeCompleto: nomeMembro,
-        numeroMatricula,
-        dataNascimento,
-        cpf,
-        tipoConta: TipoConta.PROFESSOR
-      });
-      membro = await this.membrosRepository.save(membro);
-    }
+    const professor = new Professor();
+    professor.membro = membro;
+    professor.turmas = turmas;
+    professor.turmasApelido = turmasApelido;
+    professor.admin = { id: adminId } as Admin;
 
-    // Busca as turmas associadas pelos apelidos fornecidos.
-    const turmas = await this.turmasRepository.findBy({
-      turmaApelido: In(turmaApelido)
-    });
+    await professor.save();
 
-    // Busca o admin pelo ID fornecido
-    const admin = await this.membrosRepository.findOneBy({ id: adminId });
-
-    if (!admin) {
-      throw new Error('Admin não encontrado');
-    }
-
-    // Cria e salva o novo professor com as informações de membro, turmas e admin.
-    const novoProfessor = this.professorRepository.create({
-      membro,
-      turmas,
-      admin
-    });
-
-    return await this.professorRepository.save(novoProfessor);
+    return professor;
   }
 
   /**
-   * Lista todos os professores criados pelo admin específico.
-   *
-   * @param adminId - ID do admin que está buscando os professores.
-   * @returns Uma lista de professores associados ao admin.
+   * Lista todos os professores de um admin específico.
+   * 
+   * @param adminId - ID do administrador para filtrar os professores.
+   * @returns Lista de professores do admin.
    */
   async listarProfessores(adminId: number): Promise < Professor[] > {
-    return this.professorRepository.find({
-      where: {
-        admin: { id: adminId }
-      }
-    });
+    return Professor.find({ where: { admin: { id: adminId } }, relations: ['membro', 'admin', 'turmas'] });
   }
 
   /**
-   * Busca um professor pelo seu ID, garantindo que o admin seja o responsável por gerenciá-lo.
-   *
-   * @param id - O ID do professor.
-   * @param adminId - ID do admin que está tentando acessar o professor.
-   * @throws Error se o professor não for encontrado ou não for associado ao admin.
-   * @returns O professor correspondente ao ID fornecido.
+   * Busca um professor pelo ID, verificando se o admin é o mesmo que o criou.
+   * 
+   * @param professorId - ID do professor a ser buscado.
+   * @param adminId - ID do admin que está buscando o professor.
+   * @returns O professor encontrado.
+   * 
+   * @throws AppError - Se o professor não for encontrado ou se o admin não for o responsável por ele.
    */
-  async buscarProfessorPorId(id: number, adminId: number): Promise < Professor > {
-    const professor = await this.professorRepository.findOne({
-      where: {
-        id,
-        admin: { id: adminId }
-      }
-    });
+  async buscarProfessorPorId(professorId: number, adminId: number): Promise < Professor > {
+    const professor = await Professor.findOne({ where: { id: professorId }, relations: ['admin', 'turmas'] });
 
     if (!professor) {
-      throw new Error(`Professor com ID ${id} não encontrado ou não autorizado`);
+      throw new AppError('Professor não encontrado', 404);
+    }
+
+    if (professor.admin.id !== adminId) {
+      throw new AppError('Você não tem permissão para acessar esse professor', 403);
     }
 
     return professor;
   }
 
   /**
-   * Deleta um professor pelo seu ID, garantindo que o admin seja o responsável por excluí-lo.
-   *
-   * @param id - O ID do professor a ser deletado.
-   * @param adminId - ID do admin que está tentando excluir o professor.
-   * @throws Error se o professor não for encontrado ou não for associado ao admin.
-   * @returns O resultado da operação de deleção.
+   * Edita um professor, atualizando as turmas associadas ao professor.
+   * 
+   * @param professorId - ID do professor a ser editado.
+   * @param adminId - ID do admin que está editando o professor.
+   * @param turmasApelido - Apelido das turmas a ser atualizado.
+   * @param membroId - ID do membro a ser atualizado.
+   * @param turmaIds - IDs das turmas a serem associadas ao professor.
+   * @returns O professor atualizado.
+   * 
+   * @throws AppError - Se o professor não for encontrado ou se o admin não for o responsável por ele.
    */
-  async deletarProfessor(id: number, adminId: number): Promise < void > {
-    const professor = await this.professorRepository.findOne({
-      where: {
-        id,
-        admin: { id: adminId }
-      }
-    });
+  async editarProfessor(
+    professorId: number,
+    adminId: number,
+    turmasApelido: string,
+    membroId: number,
+    turmaIds: number[]
+  ): Promise < Professor > {
+    const professor = await Professor.findOne({ where: { id: professorId }, relations: ['admin', 'membro', 'turmas'] });
 
     if (!professor) {
-      throw new Error(`Professor com ID ${id} não encontrado ou não autorizado`);
+      throw new AppError('Professor não encontrado', 404);
     }
 
-    await this.professorRepository.delete(id);
+    if (professor.admin.id !== adminId) {
+      throw new AppError('Você não tem permissão para editar esse professor', 403);
+    }
+
+    // Atualiza o apelido das turmas e o membro
+    professor.turmasApelido = turmasApelido;
+    professor.membro.id = membroId;
+
+    // Atualiza as turmas associadas ao professor
+    const turmas = await Turma.findByIds(turmaIds);
+
+    // Verifica se todas as turmas foram encontradas
+    if (turmas.length !== turmaIds.length) {
+      throw new AppError('Algumas turmas não foram encontradas', 404);
+    }
+
+    professor.turmas = turmas;
+
+    await professor.save();
+
+    return professor;
   }
 
   /**
-   * Atualiza os dados de um professor, garantindo que o admin seja o responsável pela atualização.
-   *
-   * @param id - ID do professor que será atualizado.
-   * @param turmasApelidos - Array de apelidos das novas turmas que serão associadas ao professor;
-   * @param membroId - ID do membro que será associado ao professor.
-   * @param adminId - ID do admin que está atualizando o professor.
-   * @returns Retorna o professor atualizado com as novas associações e dados.
-   * @throws Lança um erro se o professor ou membro não forem encontrados, ou se o admin não for o responsável.
+   * Deleta um professor, apenas se o admin for o mesmo que o criou.
+   * 
+   * @param professorId - ID do professor a ser deletado.
+   * @param adminId - ID do admin que está deletando o professor.
+   * @throws AppError - Se o professor não for encontrado ou se o admin não for o responsável por ele.
    */
-  async editarProfessor(
-    id: number,
-    turmasApelidos: string[],
-    membroId: number,
-    adminId: number
-  ) {
-    const membro = await this.membrosRepository.findOneBy({ id: membroId });
+  async deletarProfessor(professorId: number, adminId: number): Promise < void > {
+    const professor = await Professor.findOne({ where: { id: professorId }, relations: ['admin'] });
 
-    if (!membro) {
-      throw new Error(`Membro com ID ${membroId} não encontrado`);
+    if (!professor) {
+      throw new AppError('Professor não encontrado', 404);
     }
 
-    const professorExistente = await this.professorRepository.findOneBy({ id });
-
-    if (!professorExistente || professorExistente.admin.id !== adminId) {
-      throw new Error(`Professor com ID ${id} não encontrado ou não autorizado`);
+    if (professor.admin.id !== adminId) {
+      throw new AppError('Você não tem permissão para deletar esse professor', 403);
     }
 
-    const turmas = await this.turmasRepository.findBy({
-      turmaApelido: In(turmasApelidos)
-    });
-
-    Object.assign(professorExistente, {
-      membro,
-      turmas: turmas || professorExistente.turmas
-    });
-
-    return await this.professorRepository.save(professorExistente);
+    await professor.remove();
   }
 }

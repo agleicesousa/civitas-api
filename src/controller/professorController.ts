@@ -1,130 +1,121 @@
 import { Request, Response } from 'express';
 import { ProfessorService } from '../services/professorService';
+import { AppError } from '../utils/appError';
 
 /**
- * Classe responsável por gerenciar as operações de controle de professores.
+ * Controlador para gerenciar os professores.
  */
 export class ProfessorController {
   private professorService = new ProfessorService();
 
   /**
-   * Cria um novo professor.
-   * @param req - O objeto da requisição contendo os dados do professor.
-   * @param res - A resposta HTTP para ser enviada ao cliente.
+   * Cria um novo professor e o associa ao admin que está criando.
    */
   async criarProfessor(req: Request, res: Response) {
+    const {
+      nomeMembro,
+      cpf,
+      dataNascimento,
+      numeroMatricula,
+      turmasApelido,
+    } = req.body;
+    const adminId = req.user.id;
+
     try {
-      const {
+      const professor = await this.professorService.criarProfessor(
         nomeMembro,
         cpf,
         dataNascimento,
         numeroMatricula,
         turmasApelido,
-        membroId
-      } = req.body;
-
-      const adminId = req.user.id;
-
-      const novoProfessor = await this.professorService.criarProfessor(
-        nomeMembro,
-        cpf,
-        new Date(dataNascimento),
-        numeroMatricula,
-        turmasApelido,
-        membroId ? Number(membroId) : null,
         adminId
       );
-
-      res.status(201).json(novoProfessor);
+      return res.status(201).json(professor);
     } catch (error) {
-      res.status(500).json({ message: 'Erro ao criar professor', error });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
 
   /**
-   * Lista todos os professores criados pelo admin que está fazendo a requisição.
-   *
-   * @param req - A requisição HTTP.
-   * @param res - A resposta HTTP para ser enviada ao cliente.
+   * Lista todos os professores associados ao admin autenticado.
    */
   async listarProfessores(req: Request, res: Response) {
-    try {
-      const adminId = req.user.id;
+    const adminId = req.user.id;
 
+    try {
       const professores = await this.professorService.listarProfessores(adminId);
-      res.json(professores);
+      return res.status(200).json(professores);
     } catch (error) {
-      res.status(404).json({ message: 'Erro ao listar professores', error });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
 
   /**
-   * Busca um professor pelo ID.
-   *
-   * @param req - A requisição HTTP contendo o ID do professor.
-   * @param res - A resposta HTTP para ser enviada ao cliente.
+   * Busca um professor pelo ID, somente se o admin que está fazendo a requisição for o mesmo que o criou.
    */
   async buscarProfessorPorId(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const adminId = req.user.id;
+    const professorId = parseInt(req.params.id);
+    const adminId = req.user.id;
 
+    try {
       const professor = await this.professorService.buscarProfessorPorId(
-        Number(id),
-        adminId // Passa o adminId para garantir que o admin que criou o professor seja o único que possa acessá-lo
-      );
-      return res.json(professor);
-    } catch (error) {
-      return res
-        .status(404)
-        .json({ message: 'Erro ao buscar professor', error });
-    }
-  }
-
-  /**
-   * Deleta um professor pelo ID.
-   *
-   * @param req - A requisição HTTP contendo o ID do professor.
-   * @param res - A resposta HTTP para ser enviada ao cliente.
-   */
-  async deletarProfessor(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const adminId = req.user.id;
-
-      await this.professorService.deletarProfessor(Number(id), adminId); // Passa o adminId para garantir que apenas o admin responsável possa deletar
-      return res.status(204).send();
-    } catch (error) {
-      return res
-        .status(404)
-        .json({ message: 'Erro ao deletar professor', error });
-    }
-  }
-
-  /**
-   * Edita os detalhes de um professor existente.
-   *
-   * @param req - A requisição HTTP contendo o ID do professor e os novos dados.
-   * @param res - A resposta HTTP para ser enviada ao cliente.
-   * @returns A resposta HTTP com o professor atualizado.
-   */
-  async editarProfessor(req: Request, res: Response): Promise < Response > {
-    try {
-      const id = req.params.id;
-      const { turmasApelidos, membroId } = req.body;
-      const adminId = req.user.id;
-
-      const professorAtualizado = await this.professorService.editarProfessor(
-        Number(id),
-        turmasApelidos,
-        Number(membroId),
+        professorId,
         adminId
       );
-
-      return res.json(professorAtualizado);
+      return res.status(200).json(professor);
     } catch (error) {
-      console.error('Erro ao editar professor:', error);
-      return res.status(404).json({ error: error.message });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  }
+
+  /**
+   * Edita os dados de um professor, somente se o admin que está fazendo a requisição for o mesmo que o criou.
+   */
+  async editarProfessor(req: Request, res: Response) {
+    const professorId = parseInt(req.params.id);
+    const adminId = req.user.id;
+    const { turmasApelido, membroId } = req.body;
+
+    try {
+      const professor = await this.professorService.editarProfessor(
+        professorId,
+        adminId,
+        turmasApelido,
+        membroId
+      );
+      return res.status(200).json(professor);
+    } catch (error) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  }
+
+  /**
+   * Deleta um professor, somente se o admin que está fazendo a requisição for o mesmo que o criou.
+   */
+  async deletarProfessor(req: Request, res: Response) {
+    const professorId = parseInt(req.params.id);
+    const adminId = req.user.id;
+
+    try {
+      await this.professorService.deletarProfessor(professorId, adminId);
+      return res.status(204).send();
+    } catch (error) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
 }

@@ -1,32 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
 import { getRepository } from 'typeorm';
+import { Professor } from '../entities/professoresEntities';
 
 /**
- * Middleware genérico que verifica se o admin autenticado é o responsável por gerenciar um recurso.
+ * Middleware genérico para verificar se o admin autenticado é o mesmo que criou o usuário.
  * 
- * @param resourceRepository - Repositório da entidade que será verificada (ex: Professor, Aluno, etc.).
- * @param resourceName - Nome do recurso sendo gerido (ex: "professor", "aluno").
- * @returns Middleware que verifica a permissão do admin para gerenciar o recurso.
+ * @param entity - A entidade que estamos verificando.
+ * @param entityType - Tipo da entidade que estamos verificando
  */
-export const checkAdminPermission = (resourceRepository: any, resourceName: string) => {
+export async function checkAdminPermission(entity: any, entityType: string) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-    const userId = req.user.id;
-
     try {
-      const resource = await resourceRepository.findOne(id);
+      const { id } = req.params;
+      const { user } = req;
 
-      if (!resource) {
-        return res.status(404).json({ error: `${resourceName} não encontrado.` });
+      if (!user || user.tipoConta !== 'admin') {
+        return res.status(403).json({ error: 'Acesso negado. Permissão de admin necessária.' });
       }
 
-      if (resource.admin.id !== userId) {
-        return res.status(403).json({ error: 'Permissão negada.' });
+      // Obter o objeto da entidade pelo ID
+      const entityRepository = getRepository(entity);
+      const entityRecord = await entityRepository.findOne(id);
+
+      if (!entityRecord) {
+        return res.status(404).json({ error: `${entityType} não encontrado.` });
       }
 
+      // Verificar se o admin que criou a entidade é o admin autenticado
+      if (entityRecord.admin.id !== user.id) {
+        return res.status(403).json({ error: 'Acesso negado. Você não pode gerenciar este professor.' });
+      }
+
+      // Se o admin for o mesmo que criou, permite continuar
       next();
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao verificar permissão.' });
+      console.error('Erro ao verificar permissão de admin:', error);
+      res.status(500).json({ error: 'Erro ao verificar permissão de admin.' });
     }
   };
 }
