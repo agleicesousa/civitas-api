@@ -16,7 +16,6 @@ export class ProfessorService {
     cpf: string,
     dataNascimento: Date,
     numeroMatricula: string,
-    turmasApelido: string,
     email: string,
     senha: string,
     adminId: number,

@@ -11,7 +11,6 @@ export class ProfessorController {
       cpf,
       dataNascimento,
       numeroMatricula,
-      turmasApelido,
       email,
       senha,
       turmaIds
@@ -24,7 +23,6 @@ export class ProfessorController {
         cpf,
         dataNascimento,
         numeroMatricula,
-        turmasApelido,
         email,
         senha,
         adminId,
