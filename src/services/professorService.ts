@@ -21,8 +21,10 @@ export class ProfessorService {
     senha: string,
     adminId: number,
     turmaIds: number[]
-  ): Promise < Professor > {
-    const membroExistente = await this.membrosRepository.findOne({ where: { email } });
+  ): Promise<Professor> {
+    const membroExistente = await this.membrosRepository.findOne({
+      where: { email }
+    });
     if (membroExistente) {
       throw ErrorHandler.badRequest('Email já registrado');
     }
@@ -34,13 +36,13 @@ export class ProfessorService {
       numeroMatricula,
       email,
       senha: await criptografarSenha(senha),
-      tipoConta: TipoConta.PROFESSOR,
+      tipoConta: TipoConta.PROFESSOR
     });
 
     await this.membrosRepository.save(membro);
 
     const turmas = await this.turmaRepository.find({
-      where: { id: In(turmaIds) },
+      where: { id: In(turmaIds) }
     });
     if (turmas.length !== turmaIds.length) {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas');
@@ -49,7 +51,7 @@ export class ProfessorService {
     const professor = this.professorRepository.create({
       membro,
       turmas,
-      adminId,
+      adminId
     });
 
     await this.professorRepository.save(professor);
@@ -62,10 +64,10 @@ export class ProfessorService {
     email: string,
     senha: string,
     turmaIds: number[]
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     const professor = await this.professorRepository.findOne({
       where: { id: professorId },
-      relations: ['admin', 'membro', 'turmas'],
+      relations: ['admin', 'membro', 'turmas']
     });
 
     if (!professor) {
@@ -73,14 +75,16 @@ export class ProfessorService {
     }
 
     if (professor.admin.id !== adminId) {
-      throw ErrorHandler.forbidden('Você não tem permissão para editar esse professor')
+      throw ErrorHandler.forbidden(
+        'Você não tem permissão para editar esse professor'
+      );
     }
 
     if (email) professor.membro.email = email;
     if (senha) professor.membro.senha = await criptografarSenha(senha);
 
     const turmas = await this.turmaRepository.find({
-      where: { id: In(turmaIds) },
+      where: { id: In(turmaIds) }
     });
     if (turmas.length !== turmaIds.length) {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas');
@@ -92,10 +96,10 @@ export class ProfessorService {
     return professor;
   }
 
-  async listarProfessores(adminId: number): Promise < Professor[] > {
+  async listarProfessores(adminId: number): Promise<Professor[]> {
     const professores = await this.professorRepository.find({
       where: { adminId },
-      relations: ['membro', 'turmas'],
+      relations: ['membro', 'turmas']
     });
 
     if (!professores.length) {
@@ -108,10 +112,10 @@ export class ProfessorService {
   async buscarProfessorPorId(
     professorId: number,
     adminId: number
-  ): Promise < Professor > {
+  ): Promise<Professor> {
     const professor = await this.professorRepository.findOne({
       where: { id: professorId, adminId },
-      relations: ['membro', 'turmas'],
+      relations: ['membro', 'turmas']
     });
 
     if (!professor) {
@@ -121,9 +125,9 @@ export class ProfessorService {
     return professor;
   }
 
-  async deletarProfessor(professorId: number, adminId: number): Promise < void > {
+  async deletarProfessor(professorId: number, adminId: number): Promise<void> {
     const professor = await this.professorRepository.findOne({
-      where: { id: professorId, adminId },
+      where: { id: professorId, adminId }
     });
 
     if (!professor) {
