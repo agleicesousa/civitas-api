@@ -4,7 +4,8 @@ import {
   OneToOne,
   JoinTable,
   JoinColumn,
-  ManyToOne
+  ManyToOne,
+  Column
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';

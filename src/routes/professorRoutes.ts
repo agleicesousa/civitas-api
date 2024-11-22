@@ -2,7 +2,7 @@ import { ProfessorController } from '../controller/professorController';
 import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 import { Router } from 'express';
 import { checkAdminPermission } from '../middlewares/adminPermissionMiddleware';
-import { Professor } from '../entities/professoresEntities';
+import { Professor } from '../entities/professorEntities';
 
 const professorController = new ProfessorController();
 const professorRouter = Router();

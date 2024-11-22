@@ -1,4 +1,4 @@
-import { getRepository } from 'typeorm';
+import { getRepository, In } from 'typeorm';
 import { Professor } from '../entities/professorEntities';
 import { Membros } from '../entities/membrosEntities';
 import { Turma } from '../entities/turmasEntities';
@@ -21,41 +21,38 @@ export class ProfessorService {
     senha: string,
     adminId: number,
     turmaIds: number[]
-  ): Promise<Professor> {
-    // Verifica se o e-mail já está registrado
-    const membroExistente = await this.membrosRepository.findOne({
-      where: { email }
-    });
+  ): Promise < Professor > {
+    const membroExistente = await this.membrosRepository.findOne({ where: { email } });
     if (membroExistente) {
       throw ErrorHandler.badRequest('Email já registrado');
     }
 
-    // Cria o novo membro
-    const membro = new Membros();
-    membro.nomeCompleto = nomeMembro;
-    membro.cpf = cpf;
-    membro.dataNascimento = dataNascimento;
-    membro.numeroMatricula = numeroMatricula;
-    membro.email = email;
-    membro.senha = await criptografarSenha(senha);
-    membro.tipoConta = TipoConta.PROFESSOR;
+    const membro = this.membrosRepository.create({
+      nomeCompleto: nomeMembro,
+      cpf,
+      dataNascimento,
+      numeroMatricula,
+      email,
+      senha: await criptografarSenha(senha),
+      tipoConta: TipoConta.PROFESSOR,
+    });
 
     await this.membrosRepository.save(membro);
 
-    // Verifica se todas as turmas existem
-    const turmas = await this.turmaRepository.findByIds(turmaIds);
+    const turmas = await this.turmaRepository.find({
+      where: { id: In(turmaIds) },
+    });
     if (turmas.length !== turmaIds.length) {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas');
     }
 
-    // Cria o novo professor
-    const professor = new Professor();
-    professor.membro = membro;
-    professor.turmas = turmas;
-    professor.adminId = adminId;
+    const professor = this.professorRepository.create({
+      membro,
+      turmas,
+      adminId,
+    });
 
     await this.professorRepository.save(professor);
-
     return professor;
   }
 
@@ -65,34 +62,26 @@ export class ProfessorService {
     email: string,
     senha: string,
     turmaIds: number[]
-  ): Promise<Professor> {
-    // Busca o professor com base no ID e nas relações com admin, membro e turmas
+  ): Promise < Professor > {
     const professor = await this.professorRepository.findOne({
       where: { id: professorId },
-      relations: ['admin', 'membro', 'turmas']
+      relations: ['admin', 'membro', 'turmas'],
     });
 
     if (!professor) {
       throw ErrorHandler.notFound('Professor não encontrado');
     }
 
-    // Verifica se o admin que está fazendo a edição é o mesmo que criou o professor.
     if (professor.admin.id !== adminId) {
-      throw ErrorHandler.forbidden(
-        'Você não tem permissão para editar esse professor'
-      );
+      throw ErrorHandler.forbidden('Você não tem permissão para editar esse professor')
     }
 
-    if (email) {
-      professor.membro.email = email;
-    }
+    if (email) professor.membro.email = email;
+    if (senha) professor.membro.senha = await criptografarSenha(senha);
 
-    if (senha) {
-      professor.membro.senha = await criptografarSenha(senha);
-    }
-
-    // Verifica se as turmas existem
-    const turmas = await this.turmaRepository.findByIds(turmaIds);
+    const turmas = await this.turmaRepository.find({
+      where: { id: In(turmaIds) },
+    });
     if (turmas.length !== turmaIds.length) {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas');
     }
@@ -100,17 +89,16 @@ export class ProfessorService {
     professor.turmas = turmas;
 
     await this.professorRepository.save(professor);
-
     return professor;
   }
 
-  async listarProfessores(adminId: number): Promise<Professor[]> {
+  async listarProfessores(adminId: number): Promise < Professor[] > {
     const professores = await this.professorRepository.find({
       where: { adminId },
-      relations: ['membro', 'turmas']
+      relations: ['membro', 'turmas'],
     });
 
-    if (professores.length === 0) {
+    if (!professores.length) {
       throw ErrorHandler.notFound('Nenhum professor encontrado');
     }
 
@@ -120,10 +108,10 @@ export class ProfessorService {
   async buscarProfessorPorId(
     professorId: number,
     adminId: number
-  ): Promise<Professor> {
+  ): Promise < Professor > {
     const professor = await this.professorRepository.findOne({
       where: { id: professorId, adminId },
-      relations: ['membro', 'turmas']
+      relations: ['membro', 'turmas'],
     });
 
     if (!professor) {
@@ -133,9 +121,9 @@ export class ProfessorService {
     return professor;
   }
 
-  async deletarProfessor(professorId: number, adminId: number): Promise<void> {
+  async deletarProfessor(professorId: number, adminId: number): Promise < void > {
     const professor = await this.professorRepository.findOne({
-      where: { id: professorId, adminId }
+      where: { id: professorId, adminId },
     });
 
     if (!professor) {
