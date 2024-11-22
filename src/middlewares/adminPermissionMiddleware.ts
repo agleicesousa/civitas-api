@@ -29,23 +29,23 @@ export function checkAdminPermission<T extends EntityWithAdmin>(
           .json({ error: 'Acesso negado. Permissão de admin necessária.' });
       }
 
-      const entityRepository: Repository<T> = MysqlDataSource.getRepository(entityClass);
+      const entityRepository: Repository<T> =
+        MysqlDataSource.getRepository(entityClass);
 
       // Busca a entidade no banco
       const entityRecord = await entityRepository.findOne(Number(id), {
-        relations: ['admin'],
+        relations: ['admin']
       });
 
       if (!entityRecord) {
-        return res
-          .status(404)
-          .json({ error: `${entityType} não encontrado.` });
+        return res.status(404).json({ error: `${entityType} não encontrado.` });
       }
 
       // Verifica se o admin autenticado criou a entidade
       if (entityRecord.admin.id !== user.id) {
         return res.status(403).json({
-          error: 'Acesso negado. Você não tem permissão para gerenciar esta entidade.',
+          error:
+            'Acesso negado. Você não tem permissão para gerenciar esta entidade.'
         });
       }
 
@@ -53,9 +53,7 @@ export function checkAdminPermission<T extends EntityWithAdmin>(
       next();
     } catch (error) {
       console.error('Erro ao verificar permissão de admin:', error);
-      res
-        .status(500)
-        .json({ error: 'Erro ao verificar permissão de admin.' });
+      res.status(500).json({ error: 'Erro ao verificar permissão de admin.' });
     }
   };
 }

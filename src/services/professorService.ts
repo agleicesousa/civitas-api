@@ -5,7 +5,7 @@ import { Turma } from '../entities/turmasEntities';
 import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha } from '../utils/senhaUtils';
-import { MysqlDataSource } from '../config/database'
+import { MysqlDataSource } from '../config/database';
 
 export class ProfessorService {
   private professorRepository = MysqlDataSource.getRepository(Professor);
