@@ -1,5 +1,4 @@
 import { compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
 import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';

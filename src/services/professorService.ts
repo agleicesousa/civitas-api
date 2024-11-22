@@ -1,15 +1,16 @@
-import { getRepository, In } from 'typeorm';
+import { In } from 'typeorm';
 import { Professor } from '../entities/professorEntities';
 import { Membros } from '../entities/membrosEntities';
 import { Turma } from '../entities/turmasEntities';
 import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha } from '../utils/senhaUtils';
+import { MysqlDataSource } from '../config/database'
 
 export class ProfessorService {
-  private professorRepository = getRepository(Professor);
-  private membrosRepository = getRepository(Membros);
-  private turmaRepository = getRepository(Turma);
+  private professorRepository = MysqlDataSource.getRepository(Professor);
+  private membrosRepository = MysqlDataSource.getRepository(Membros);
+  private turmaRepository = MysqlDataSource.getRepository(Turma);
 
   async criarProfessor(
     nomeMembro: string,
