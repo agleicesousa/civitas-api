@@ -5,7 +5,7 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 export interface JwtPayload {
   id: number;
-  numeroMatricula: string;
+  email: string;
   tipoConta: string;
   permissions: string[];
   iat?: number;
@@ -36,12 +36,12 @@ const permissionsByRole = {
  * Gera um token JWT para um usuário com base no payload fornecido.
  * Inclui permissões de acordo com o tipo de conta do usuário.
  *
- * @param payload - Dados do usuário, incluindo `id`, `numeroMatricula` e `tipoConta`.
+ * @param payload - Dados do usuário, incluindo `id`, `email` e `tipoConta`.
  * @returns O token JWT gerado como uma string.
  */
 export function gerarToken(payload: {
   id: number;
-  numeroMatricula: string;
+  email: string;
   tipoConta: string;
 }): string {
   const permissions = permissionsByRole[payload.tipoConta] || [];

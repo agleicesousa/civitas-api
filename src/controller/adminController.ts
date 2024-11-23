@@ -113,34 +113,4 @@ export class AdminController {
         .json({ error: error.message || 'Administrador não encontrado.' });
     }
   }
-
-  /**
-   * Realiza o login de um administrador.
-   * @param req - Requisição com email e senha.
-   * @param res - Resposta com o token de autenticação ou erro.
-   * @returns Token de autenticação ou erro.
-   */
-  async login(req: Request, res: Response): Promise<Response> {
-    const { email, senha } = req.body;
-    const erros = [];
-
-    if (!email) {
-      erros.push({ campo: 'email', erro: 'E-mail é obrigatório' });
-    }
-    if (!senha) {
-      erros.push({ campo: 'senha', erro: 'Senha é obrigatória' });
-    }
-    if (erros.length > 0) {
-      return res.status(400).json({ erros });
-    }
-
-    try {
-      const { token } = await this.adminService.login(email, senha);
-      return res.json({ token });
-    } catch (error) {
-      return res.status(401).json({
-        error: error.message || 'Seu e-mail ou senha estão incorretos.'
-      });
-    }
-  }
 }

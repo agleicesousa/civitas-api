@@ -4,7 +4,8 @@ import {
   OneToOne,
   JoinTable,
   JoinColumn,
-  ManyToOne
+  ManyToOne,
+  Column
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
@@ -39,7 +40,18 @@ export class Professor extends BaseEntity {
   })
   turmas: Turma[];
 
+  /**
+   * Representa a associação entre o professor e o admin que o criou.
+   * Garante que apenas o admin responsável possa gerenciar o professor.
+   */
   @ManyToOne(() => Admin, { eager: true })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
+
+  /**
+   * Campo que representa o ID do admin que criou o professor.
+   * Não deve ser atualizado diretamente, apenas atribuído na criação.
+   */
+  @Column()
+  adminId: number;
 }
