@@ -11,7 +11,7 @@ import turmasRouter from './routes/turmaRoutes';
 import professorRouter from './routes/professorRoutes';
 import responsaveisRouter from './routes/responsaveisRoutes';
 import alunoRouter from './routes/alunoRoutes';
-import loginRouter from './routes/loginRoutes.ts';
+import loginRouter from './routes/loginRoutes';
 MysqlDataSource.initialize()
   .then(() => {
     console.log('Database initialized!');
@@ -31,7 +31,7 @@ app.use('/turmas', turmasRouter);
 app.use('/professores', professorRouter);
 app.use('/responsaveis', responsaveisRouter);
 app.use('/alunos', alunoRouter);
-app.use('/login', loginRouter);
+app.use('/auth', loginRouter);
 app.use(errorHandler);
 
 const swaggerSpec = swaggerJSDoc(swaggerConfig);

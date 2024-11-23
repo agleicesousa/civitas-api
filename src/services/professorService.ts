@@ -22,6 +22,7 @@ export class ProfessorService {
     adminId: number,
     turmaIds: number[]
   ): Promise<Professor> {
+    // Verifica se o email já está registrado
     const membroExistente = await this.membrosRepository.findOne({
       where: { email }
     });
@@ -29,6 +30,7 @@ export class ProfessorService {
       throw ErrorHandler.badRequest('Email já registrado');
     }
 
+    // Cria um novo membro
     const membro = this.membrosRepository.create({
       nomeCompleto: nomeMembro,
       cpf,
@@ -38,9 +40,9 @@ export class ProfessorService {
       senha: await criptografarSenha(senha),
       tipoConta: TipoConta.PROFESSOR
     });
-
     await this.membrosRepository.save(membro);
 
+    // Busca as turmas para associar ao professor
     const turmas = await this.turmaRepository.find({
       where: { id: In(turmaIds) }
     });
@@ -48,13 +50,16 @@ export class ProfessorService {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas');
     }
 
+    // Cria o professor com o membro criado
     const professor = this.professorRepository.create({
-      membro,
+      membro: membro,
       turmas,
       adminId
     });
 
+    // Salva o professor no banco de dados
     await this.professorRepository.save(professor);
+
     return professor;
   }
 
