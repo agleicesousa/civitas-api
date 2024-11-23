@@ -108,11 +108,12 @@ export class TurmasController {
    */
   async deletarTurma(req: Request, res: Response): Promise<Response> {
     try {
-      const { id } = req.params;
-      await this.turmasService.deletar(Number(id));
+      const turmaId = req.params.id;
+      const adminId = req.user.id;
+      await this.turmasService.deletar(Number(turmaId), adminId);
       return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
-      return res.status(404).json({ message: 'Erro ao deletar turma' });
+      return res.status(404).json({ message: error.message });
     }
   }
 }

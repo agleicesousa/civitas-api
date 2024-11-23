@@ -119,8 +119,21 @@ export class TurmasService {
    * @param id - O ID da turma a ser deletada (pode ser string ou number).
    * @returns Uma promessa que resolve para o resultado da operação de exclusão
    */
-  async deletar(id: number) {
-    return await this.turmasRepository.delete(id);
+  async deletar(turmaId: number, adminId: number) {
+    const turma = await this.turmasRepository.findOne({
+      where: {
+        id: turmaId,
+        admin: {
+          id: adminId
+        }
+      }
+    });
+
+    if (!turma) {
+      throw { status: 404, message: 'Turma não encontrada' };
+    }
+
+    await this.turmasRepository.remove(turma);
   }
 
   /**
