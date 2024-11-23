@@ -317,12 +317,6 @@ const adminRouter = Router();
 const adminController = new AdminController();
 
 /**
- * Rota para autenticar um administrador e obter um token JWT.
- * Acesso público (não requer autenticação).
- */
-adminRouter.post('/login', (req, res) => adminController.login(req, res));
-
-/**
  * Rota para listar todos os administradores.
  * Requer autenticação e permissão de gerenciamento de usuários.
  */

@@ -142,33 +142,4 @@ export class AdminService {
 
     await this.membroRepository.delete(id);
   }
-
-  /**
-   * Realiza o login de um administrador.
-   * @param email E-mail do administrador.
-   * @param senha Senha do administrador.
-   * @returns Token JWT para o administrador.
-   * @throws Error se o e-mail ou senha estiverem incorretos.
-   */
-  async login(email: string, senha: string) {
-    const admin = await this.membroRepository.findOne({ where: { email } });
-
-    if (!admin || admin.tipoConta !== TipoConta.ADMIN) {
-      throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
-    }
-
-    const senhaValida = await compare(senha, admin.senha);
-
-    if (!senhaValida) {
-      throw ErrorHandler.unauthorized('Seu e-mail ou senha estão incorretos.');
-    }
-
-    const token = sign(
-      { id: admin.id, email: admin.email, tipoConta: admin.tipoConta },
-      process.env.JWT_SECRET || 'default_secret',
-      { expiresIn: '1d' }
-    );
-
-    return { token };
-  }
 }

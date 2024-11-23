@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import { gerarToken } from '../utils/jwtUtils';
-import  ErrorHandler from '../errors/errorHandler';
+import ErrorHandler from '../errors/errorHandler';
 
 export class LoginService {
   private membroRepository: Repository<Membros>;
@@ -28,9 +28,11 @@ export class LoginService {
     }
 
     // Gera o token JWT com o id, email e tipo de conta do usuário
-    const token = gerarToken(
-      { id: user.id, email: user.email, tipoConta: user.tipoConta }
-    );
+    const token = gerarToken({
+      id: user.id,
+      email: user.email,
+      tipoConta: user.tipoConta
+    });
 
     return { token, tipoConta: user.tipoConta };
   }
