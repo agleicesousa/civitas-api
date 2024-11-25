@@ -4,12 +4,6 @@ import { AdminService } from '../services/adminService';
 export class AdminController {
   private adminService = new AdminService();
 
-  /**
-   * Lista todos os administradores.
-   * @param req - Requisição da API.
-   * @param res - Resposta da API.
-   * @returns Lista de administradores.
-   */
   async listarAdmins(req: Request, res: Response): Promise<Response> {
     try {
       const admins = await this.adminService.listarAdmins();
@@ -19,12 +13,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Busca um administrador por ID.
-   * @param req - Requisição com o ID do administrador.
-   * @param res - Resposta com os dados do administrador ou erro.
-   * @returns Dados do administrador ou erro.
-   */
   async buscarAdminPorId(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     const idNumber = Number(id);
@@ -43,12 +31,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Cria um novo administrador.
-   * @param req - Requisição com dados do administrador.
-   * @param res - Resposta com o administrador criado ou erro.
-   * @returns Administrador criado.
-   */
   async criarAdmin(req: Request, res: Response): Promise<Response> {
     const { email, senha, nomeCompleto, tipoConta } = req.body;
 
@@ -65,12 +47,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Atualiza os dados de um administrador.
-   * @param req - Requisição com o ID e novos dados do administrador.
-   * @param res - Resposta com os dados do administrador atualizado ou erro.
-   * @returns Administrador atualizado.
-   */
   async atualizarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     const novoMembroData = req.body;
@@ -88,12 +64,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Deleta um administrador.
-   * @param req - Requisição com o ID do administrador a ser deletado.
-   * @param res - Resposta confirmando a exclusão ou erro.
-   * @returns Status de sucesso ou erro.
-   */
   async deletarAdmin(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     const adminAutenticadoId = req.user?.id;
