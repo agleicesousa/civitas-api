@@ -145,17 +145,25 @@ export class AdminService {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
-
+  
     const adminExistente = await adminRepository.findOne({
       where: { id },
       relations: ['membro']
     });
-
+  
     if (!adminExistente) {
       throw ErrorHandler.notFound('Admin não encontrado.');
     }
-
-    await membrosRepository.update({ admin: adminExistente }, { admin: null });
+  
+    await membrosRepository.update(
+      { adminCriadorId: adminExistente },
+      { adminCriadorId: null }
+    );
+  
+    if (adminExistente.membro) {
+      await membrosRepository.remove(adminExistente.membro);
+    }
+  
     await adminRepository.remove(adminExistente);
   }
 }
