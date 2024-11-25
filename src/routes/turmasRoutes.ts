@@ -7,36 +7,36 @@ const turmasRouter = Router();
 
 turmasRouter.post(
   '/',
-//  authenticateJWT,
-//  hasPermission('MANAGE_USERS'),
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
   (req, res) => turmaController.criarTurma(req, res)
 );
 
 turmasRouter.get(
   '/',
-//  authenticateJWT,
-//  hasPermission('MANAGE_USERS'),
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
   (req, res) => turmaController.listarTurmas(req, res)
 );
 
 turmasRouter.get(
   '/:id',
-//  authenticateJWT,
-//  hasPermission('MANAGE_USERS'),
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
   (req, res) => turmaController.buscarTurma(req, res)
 );
 
 turmasRouter.put(
   '/:id',
-//  authenticateJWT,
-//  hasPermission('MANAGE_USERS'),
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
   (req, res) => turmaController.editarTurma(req, res)
 );
 
 turmasRouter.delete(
   '/:id',
-//  authenticateJWT,
-//  hasPermission('MANAGE_USERS'),
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
   (req, res) => turmaController.deletarTurma(req, res)
 );
 
