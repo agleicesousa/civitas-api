@@ -10,7 +10,6 @@ import { Like } from 'typeorm';
 // import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
 import { ConflictError } from '../errors/ConflitctError';
-// import { In } from 'typeorm';
 
 /**
  * Classe para gerenciar operações relacionadas a turmas.
@@ -28,10 +27,6 @@ export class TurmasService {
       periodoLetivo
     };
   }
-
-  // private professorRepository = MysqlDataSource.getRepository(Professor);
-  // private alunoRepository = MysqlDataSource.getRepository(Aluno);
-
   /**
    * Cria uma nova turma com os dados fornecidos.
    *
@@ -49,7 +44,7 @@ export class TurmasService {
       where: {
         turmaApelido,
         admin: {
-          id: adminId
+          membro: { id: adminId }
         }
       }
     });
@@ -58,7 +53,9 @@ export class TurmasService {
       throw new ConflictError('Turma já foi cadastrada');
     }
 
-    const admin = await this.adminRepository.findOneBy({ id: adminId });
+    const admin = await this.adminRepository.findOneBy({
+      membro: { id: adminId }
+    });
 
     const novaTurma = this.turmasRepository.create({
       anoLetivo,
@@ -85,7 +82,7 @@ export class TurmasService {
     const [turmas, total] = await this.turmasRepository.findAndCount({
       where: {
         admin: {
-          id: adminId
+          membro: { id: adminId }
         },
         turmaApelido: Like(`%${searchTerm}%`)
       },
