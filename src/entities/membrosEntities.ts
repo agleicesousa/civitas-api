@@ -2,6 +2,7 @@ import {
   Entity,
   Column,
   ManyToOne,
+  OneToOne,
   JoinColumn,
   BeforeInsert,
   BeforeUpdate
@@ -12,6 +13,9 @@ import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
+  @OneToOne(() => Admin, (admin) => admin.membro, { nullable: true })
+  idAdmin: Admin;
+
   @Column({ unique: true, nullable: false })
   numeroMatricula: string;
 
@@ -27,7 +31,7 @@ export class Membros extends BaseEntity {
   @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
-  @ManyToOne(() => Admin, { eager: true, nullable: true })
+  @ManyToOne(() => Admin, { nullable: true })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
 

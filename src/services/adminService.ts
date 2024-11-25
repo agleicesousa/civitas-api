@@ -12,13 +12,14 @@ export class AdminService {
     }
   }
 
-  private async verificarEmailDuplicado(email: string) {
+  async verificarEmailDuplicado(email: string) {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const emailExistente = await membrosRepository.findOne({
       where: { email }
     });
+
     if (emailExistente) {
       throw ErrorHandler.badRequest('Email já cadastrado.');
     }
@@ -53,6 +54,8 @@ export class AdminService {
       numeroMatricula: dadosAdmin.numeroMatricula,
       tipoConta: TipoConta.ADMIN
     });
+
+    await membrosRepository.save(membro);
 
     const admin = adminRepository.create({ membro });
     return await adminRepository.save(admin);
