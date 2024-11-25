@@ -4,12 +4,10 @@ import {
   TipoEnsino,
   Turma
 } from '../entities/turmasEntities';
-// import { Aluno } from '../entities/alunoEntities';
 import { Admin } from '../entities/adminEntities';
 import { Like } from 'typeorm';
-// import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
-import { ConflictError } from '../errors/ConflitctError';
+import ErrorHandler from '../errors/errorHandler';
 
 /**
  * Classe para gerenciar operações relacionadas a turmas.
@@ -50,7 +48,11 @@ export class TurmasService {
     });
 
     if (turmaExistente) {
-      throw new ConflictError('Turma já foi cadastrada');
+      throw ErrorHandler.conflictError('Turma já foi cadastrada');
+    }
+
+    if (turmaApelido.length > 12) {
+      throw ErrorHandler.badRequest('O apelido da turma é muito longo');
     }
 
     const admin = await this.adminRepository.findOneBy({
@@ -104,6 +106,12 @@ export class TurmasService {
    */
   async editar(id: number, dadosTurma: Partial<Turma>) {
     const turmaExistente = await this.turmasRepository.findOneBy({ id });
+    const { turmaApelido } = dadosTurma;
+
+    if (turmaApelido && turmaApelido.length > 12) {
+      throw ErrorHandler.badRequest('O apelido da turma é muito longo');
+    }
+
     Object.assign(turmaExistente, dadosTurma);
     return await this.turmasRepository.save(turmaExistente);
   }
