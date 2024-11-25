@@ -1,7 +1,8 @@
 import { MysqlDataSource } from '../config/database';
 import { Admin } from '../entities/adminEntities';
 import { Membros } from '../entities/membrosEntities';
-import ErrorHandler from '../middlewares/errorHandler';
+import { TipoConta } from '../entities/baseEntity'
+import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha, validarSenha } from '../utils/senhaUtils';
 
 export class AdminService {
@@ -11,59 +12,67 @@ export class AdminService {
     }
   }
 
-  async verificarEmailDuplicado(email: string) {
+  private async verificarEmailDuplicado(email: string) {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    const emailExistente = await membrosRepository.findOne({
-      where: { email }
-    });
-
+    const emailExistente = await membrosRepository.findOne({ where: { email } });
     if (emailExistente) {
       throw ErrorHandler.badRequest('Email já cadastrado.');
     }
   }
 
-  async criarAdmin(dadosAdmin: Partial<Admin>) {
+  async criarAdmin(dadosAdmin: {
+    email: string;
+    senha: string;
+    nomeCompleto: string;
+    numeroMatricula: string;
+    tipoConta: TipoConta;
+  }) {
     await this.iniciarDatabase();
+
     const adminRepository = MysqlDataSource.getRepository(Admin);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    if (!validarSenha(dadosAdmin.senha || '')) {
+    await this.verificarEmailDuplicado(dadosAdmin.email);
+
+    if (!validarSenha(dadosAdmin.senha)) {
       throw ErrorHandler.badRequest(
         'Senha inválida. Deve ter ao menos 8 caracteres, uma letra maiúscula e um caractere especial.'
       );
     }
 
-    const senhaCriptografada = await criptografarSenha(dadosAdmin.senha || '');
+    const senhaCriptografada = await criptografarSenha(dadosAdmin.senha);
 
     const membro = membrosRepository.create({
       email: dadosAdmin.email,
       senha: senhaCriptografada,
       nomeCompleto: dadosAdmin.nomeCompleto,
       numeroMatricula: dadosAdmin.numeroMatricula,
-      tipoConta: 'admin'
+      tipoConta: TipoConta.ADMIN,
     });
 
-    const admin = adminRepository.create({
-      ...dadosAdmin,
-      membro
-    });
-
+    const admin = adminRepository.create({ membro });
     return await adminRepository.save(admin);
   }
 
   async listarAdmins() {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
-    return await adminRepository.find();
+
+    return await adminRepository.find({
+      relations: ['membro'],
+    });
   }
 
   async buscarAdminPorId(id: number) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
 
-    const admin = await adminRepository.findOne({ where: { id } });
+    const admin = await adminRepository.findOne({
+      where: { id },
+      relations: ['membro'],
+    });
 
     if (!admin) {
       throw ErrorHandler.notFound('Admin não encontrado.');
@@ -72,14 +81,32 @@ export class AdminService {
     return admin;
   }
 
-  async atualizarAdmin(id: number, dadosAdmin: Partial<Admin>) {
+  async atualizarAdmin(
+    id: number,
+    dadosAdmin: Partial<{
+      email?: string;
+      senha?: string;
+      nomeCompleto?: string;
+      numeroMatricula?: string;
+    }>
+  ) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    const adminExistente = await adminRepository.findOne({ where: { id } });
+    const adminExistente = await adminRepository.findOne({
+      where: { id },
+      relations: ['membro'],
+    });
 
     if (!adminExistente) {
       throw ErrorHandler.notFound('Admin não encontrado.');
+    }
+
+    const membro = adminExistente.membro;
+
+    if (dadosAdmin.email && dadosAdmin.email !== membro.email) {
+      await this.verificarEmailDuplicado(dadosAdmin.email);
     }
 
     if (dadosAdmin.senha) {
@@ -91,21 +118,28 @@ export class AdminService {
       dadosAdmin.senha = await criptografarSenha(dadosAdmin.senha);
     }
 
-    await adminRepository.update(id, dadosAdmin);
+    Object.assign(membro, dadosAdmin);
+    await membrosRepository.save(membro);
 
-    return await adminRepository.findOne({ where: { id } });
+    return await adminRepository.findOne({
+      where: { id },
+      relations: ['membro'],
+    });
   }
 
   async deletarAdmin(id: number) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
 
-    const adminExistente = await adminRepository.findOne({ where: { id } });
+    const adminExistente = await adminRepository.findOne({
+      where: { id },
+      relations: ['membro'],
+    });
 
     if (!adminExistente) {
       throw ErrorHandler.notFound('Admin não encontrado.');
     }
 
-    return await adminRepository.remove(adminExistente);
+    await adminRepository.remove(adminExistente);
   }
 }
