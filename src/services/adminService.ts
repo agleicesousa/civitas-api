@@ -1,7 +1,7 @@
 import { MysqlDataSource } from '../config/database';
 import { Admin } from '../entities/adminEntities';
 import { Membros } from '../entities/membrosEntities';
-import { TipoConta } from '../entities/baseEntity'
+import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha, validarSenha } from '../utils/senhaUtils';
 
@@ -16,7 +16,9 @@ export class AdminService {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    const emailExistente = await membrosRepository.findOne({ where: { email } });
+    const emailExistente = await membrosRepository.findOne({
+      where: { email }
+    });
     if (emailExistente) {
       throw ErrorHandler.badRequest('Email já cadastrado.');
     }
@@ -49,7 +51,7 @@ export class AdminService {
       senha: senhaCriptografada,
       nomeCompleto: dadosAdmin.nomeCompleto,
       numeroMatricula: dadosAdmin.numeroMatricula,
-      tipoConta: TipoConta.ADMIN,
+      tipoConta: TipoConta.ADMIN
     });
 
     const admin = adminRepository.create({ membro });
@@ -61,7 +63,7 @@ export class AdminService {
     const adminRepository = MysqlDataSource.getRepository(Admin);
 
     return await adminRepository.find({
-      relations: ['membro'],
+      relations: ['membro']
     });
   }
 
@@ -71,7 +73,7 @@ export class AdminService {
 
     const admin = await adminRepository.findOne({
       where: { id },
-      relations: ['membro'],
+      relations: ['membro']
     });
 
     if (!admin) {
@@ -96,7 +98,7 @@ export class AdminService {
 
     const adminExistente = await adminRepository.findOne({
       where: { id },
-      relations: ['membro'],
+      relations: ['membro']
     });
 
     if (!adminExistente) {
@@ -123,7 +125,7 @@ export class AdminService {
 
     return await adminRepository.findOne({
       where: { id },
-      relations: ['membro'],
+      relations: ['membro']
     });
   }
 
@@ -133,7 +135,7 @@ export class AdminService {
 
     const adminExistente = await adminRepository.findOne({
       where: { id },
-      relations: ['membro'],
+      relations: ['membro']
     });
 
     if (!adminExistente) {
