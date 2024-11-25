@@ -23,12 +23,11 @@ export class MembrosService {
     });
   }
 
-  async criarMembro(adminId: number, dadosMembro: Partial<Membros>) {
+  async criarMembro(dadosMembro: Partial<Membros>) {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
     const novoMembro = membrosRepository.create({
-      ...dadosMembro,
-      admin: { id: adminId }
+      ...dadosMembro
     });
     return await membrosRepository.save(novoMembro);
   }

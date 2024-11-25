@@ -28,7 +28,7 @@ export class Membros extends BaseEntity {
   @Column({ type: 'enum', enum: TipoConta })
   tipoConta: TipoConta;
 
-  @ManyToOne(() => Admin, { eager: true, nullable: false })
+  @ManyToOne(() => Admin, { eager: true, nullable: true })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
 }
