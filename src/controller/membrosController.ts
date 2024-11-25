@@ -33,7 +33,10 @@ export class MembrosController {
   async criarMembro(req: Request, res: Response) {
     try {
       const adminId = req.user.id;
-      const novoMembro = await this.membrosService.criarMembro(adminId, req.body);
+      const novoMembro = await this.membrosService.criarMembro(
+        adminId,
+        req.body
+      );
       res.status(201).json(novoMembro);
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar membro' });

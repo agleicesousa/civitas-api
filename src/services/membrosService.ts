@@ -23,14 +23,21 @@ export class MembrosService {
     });
   }
 
-  async criarMembro(adminId: number, dadosMembro: Partial < Membros > ) {
+  async criarMembro(adminId: number, dadosMembro: Partial<Membros>) {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
-    const novoMembro = membrosRepository.create({ ...dadosMembro, admin: { id: adminId } });
+    const novoMembro = membrosRepository.create({
+      ...dadosMembro,
+      admin: { id: adminId }
+    });
     return await membrosRepository.save(novoMembro);
   }
 
-  async atualizarMembro(adminId: number, id: string, dadosMembro: Partial < Membros > ) {
+  async atualizarMembro(
+    adminId: number,
+    id: string,
+    dadosMembro: Partial<Membros>
+  ) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -40,7 +47,9 @@ export class MembrosService {
     });
 
     if (!membroExistente) {
-      throw new Error('Membro não encontrado ou você não tem permissão para atualizá-lo.');
+      throw new Error(
+        'Membro não encontrado ou você não tem permissão para atualizá-lo.'
+      );
     }
 
     await membrosRepository.update(idNumber, dadosMembro);
@@ -57,7 +66,9 @@ export class MembrosService {
     });
 
     if (!membroExistente) {
-      throw new Error('Membro não encontrado ou você não tem permissão para deletá-lo.');
+      throw new Error(
+        'Membro não encontrado ou você não tem permissão para deletá-lo.'
+      );
     }
 
     return await membrosRepository.delete(idNumber);
