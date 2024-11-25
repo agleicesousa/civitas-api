@@ -1,86 +1,67 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AdminService } from '../services/adminService';
 
 export class AdminController {
   private adminService = new AdminService();
+  
+  async criarAdmin(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email } = req.body;
 
-  async listarAdmins(req: Request, res: Response): Promise<Response> {
+    await this.adminService.verificarEmailDuplicado(email);
+
+    const novoAdmin = await this.adminService.criarAdmin(req.body);
+    res.status(201).json(novoAdmin);
+  } catch (error) {
+    next(error);
+  }
+}
+
+  async listarAdmins(req: Request, res: Response, next: NextFunction) {
     try {
       const admins = await this.adminService.listarAdmins();
-      return res.json(admins);
+      res.json(admins);
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao listar administradores.' });
+      next(error);
     }
   }
 
-  async buscarAdminPorId(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    const idNumber = Number(id);
-
-    if (isNaN(idNumber)) {
-      return res.status(400).json({ error: 'ID inválido' });
-    }
-
+  async buscarAdminPorId(req: Request, res: Response, next: NextFunction) {
     try {
-      const admin = await this.adminService.obterAdminPorId(idNumber);
-      return res.json(admin);
+      const id = parseInt(req.params.id, 10);
+      const admin = await this.adminService.buscarAdminPorId(id);
+      res.json(admin);
     } catch (error) {
-      return res
-        .status(404)
-        .json({ error: error.message || 'Administrador não encontrado.' });
+      next(error);
     }
   }
 
-  async criarAdmin(req: Request, res: Response): Promise<Response> {
-    const { email, senha, nomeCompleto, tipoConta } = req.body;
-
+  async atualizarAdmin(req: Request, res: Response, next: NextFunction) {
     try {
-      const novoAdmin = await this.adminService.criarAdmin({
-        email,
-        senha,
-        nomeCompleto,
-        tipoConta
-      });
-      return res.status(201).json(novoAdmin);
-    } catch (error) {
-      return res.status(500).json({ error: error.message });
-    }
-  }
+      const id = parseInt(req.params.id, 10);
 
-  async atualizarAdmin(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    const novoMembroData = req.body;
-
-    try {
-      const adminAtualizado = await this.adminService.atualizarAdmin(
-        Number(id),
-        novoMembroData
-      );
-      return res.json(adminAtualizado);
-    } catch (error) {
-      return res
-        .status(404)
-        .json({ error: error.message || 'Erro ao atualizar administrador.' });
-    }
-  }
-
-  async deletarAdmin(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    const adminAutenticadoId = req.user?.id;
-
-    try {
-      if (Number(id) === adminAutenticadoId) {
-        return res
-          .status(403)
-          .json({ error: 'Você não pode excluir sua própria conta.' });
+      if (req.body.email) {
+        await this.adminService.verificarEmailDuplicado(req.body.email);
       }
 
-      await this.adminService.deletaAdmin(Number(id));
-      return res.status(204).send();
+      const adminAtualizado = await this.adminService.atualizarAdmin(
+        id,
+        req.body
+      );
+      res.json(adminAtualizado);
     } catch (error) {
-      return res
-        .status(404)
-        .json({ error: error.message || 'Administrador não encontrado.' });
+      next(error);
+    }
+  }
+
+  async deletarAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = parseInt(req.params.id, 10);
+
+      await this.adminService.deletarAdmin(id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
     }
   }
 }
