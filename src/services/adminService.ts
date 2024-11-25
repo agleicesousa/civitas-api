@@ -10,13 +10,13 @@ export class AdminService {
       await MysqlDataSource.initialize();
     }
   }
-  
+
   async verificarEmailDuplicado(email: string) {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const emailExistente = await membrosRepository.findOne({
-      where: { email },
+      where: { email }
     });
 
     if (emailExistente) {
@@ -24,7 +24,7 @@ export class AdminService {
     }
   }
 
-  async criarAdmin(dadosAdmin: Partial < Admin > ) {
+  async criarAdmin(dadosAdmin: Partial<Admin>) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -42,12 +42,12 @@ export class AdminService {
       senha: senhaCriptografada,
       nomeCompleto: dadosAdmin.nomeCompleto,
       numeroMatricula: dadosAdmin.numeroMatricula,
-      tipoConta: 'admin',
+      tipoConta: 'admin'
     });
 
     const admin = adminRepository.create({
       ...dadosAdmin,
-      membro,
+      membro
     });
 
     return await adminRepository.save(admin);
@@ -72,7 +72,7 @@ export class AdminService {
     return admin;
   }
 
-  async atualizarAdmin(id: number, dadosAdmin: Partial < Admin > ) {
+  async atualizarAdmin(id: number, dadosAdmin: Partial<Admin>) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
 

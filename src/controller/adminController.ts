@@ -3,19 +3,19 @@ import { AdminService } from '../services/adminService';
 
 export class AdminController {
   private adminService = new AdminService();
-  
+
   async criarAdmin(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { email } = req.body;
+    try {
+      const { email } = req.body;
 
-    await this.adminService.verificarEmailDuplicado(email);
+      await this.adminService.verificarEmailDuplicado(email);
 
-    const novoAdmin = await this.adminService.criarAdmin(req.body);
-    res.status(201).json(novoAdmin);
-  } catch (error) {
-    next(error);
+      const novoAdmin = await this.adminService.criarAdmin(req.body);
+      res.status(201).json(novoAdmin);
+    } catch (error) {
+      next(error);
+    }
   }
-}
 
   async listarAdmins(req: Request, res: Response, next: NextFunction) {
     try {
