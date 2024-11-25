@@ -55,6 +55,15 @@ export default class ErrorHandler extends Error {
   static internalServerError(message: string) {
     return new ErrorHandler(message, 500);
   }
+
+  /**
+   * Retorna um erro de conflito (409).
+   * @param message - Mensagem descrevendo o conflito.
+   * @returns Uma instância de ErrorHandler com status 409.
+   */
+  static conflictError(message: string) {
+    return new ErrorHandler(message, 409);
+  }
 }
 
 /**
