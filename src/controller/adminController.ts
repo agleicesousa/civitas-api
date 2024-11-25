@@ -8,9 +8,14 @@ export class AdminController {
     try {
       const { email } = req.body;
 
+      const adminLogadoId = req.user?.id || null;
+
       await this.adminService.verificarEmailDuplicado(email);
 
-      const novoAdmin = await this.adminService.criarAdmin(req.body);
+      const novoAdmin = await this.adminService.criarAdmin(
+        req.body,
+        adminLogadoId
+      );
       res.status(201).json(novoAdmin);
     } catch (error) {
       next(error);

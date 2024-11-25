@@ -25,13 +25,16 @@ export class AdminService {
     }
   }
 
-  async criarAdmin(dadosAdmin: {
-    email: string;
-    senha: string;
-    nomeCompleto: string;
-    numeroMatricula: string;
-    tipoConta: TipoConta;
-  }) {
+  async criarAdmin(
+    dadosAdmin: {
+      email: string;
+      senha: string;
+      nomeCompleto: string;
+      numeroMatricula: string;
+      tipoConta: TipoConta;
+    },
+    adminCriadorId: number | null
+  ) {
     await this.iniciarDatabase();
 
     const adminRepository = MysqlDataSource.getRepository(Admin);
@@ -52,7 +55,8 @@ export class AdminService {
       senha: senhaCriptografada,
       nomeCompleto: dadosAdmin.nomeCompleto,
       numeroMatricula: dadosAdmin.numeroMatricula,
-      tipoConta: TipoConta.ADMIN
+      tipoConta: TipoConta.ADMIN,
+      ...(adminCriadorId && { admin: { id: adminCriadorId } })
     });
 
     await membrosRepository.save(membro);
