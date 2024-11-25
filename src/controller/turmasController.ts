@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { TurmasService } from '../services/turmasService';
 import { ConflictError } from '../errors/ConflitctError';
 import { getPaginationParams } from '../utils/paramsPagination';
+
 /**
  * Controlador para gerenciar as rotas relacionadas a turmas.
  */
@@ -37,7 +38,9 @@ export class TurmasController {
           message: error.message
         });
       }
-      return res.status(404).json({ message: 'Erro ao criar turma' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao criar turma' });
     }
   }
 
@@ -53,15 +56,17 @@ export class TurmasController {
     const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
     const adminId = Number(req.user.id);
     try {
-      const turmas = await this.turmasService.listar(
+      const { data, total } = await this.turmasService.listar(
         adminId,
         page,
         perPage,
         searchTerm
       );
-      return res.status(200).json(turmas);
+      return res.status(200).json({ page, perPage, total, data });
     } catch (error) {
-      return res.status(404).json({ message: 'Erro ao buscar turmas' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao listar turmas' });
     }
   }
 
@@ -78,7 +83,9 @@ export class TurmasController {
       const turma = await this.turmasService.buscarPorId(Number(id));
       return res.status(200).json(turma);
     } catch (error) {
-      return res.status(404).json({ message: 'Erro ao buscar turma' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao obter turma' });
     }
   }
 
@@ -95,7 +102,9 @@ export class TurmasController {
       await this.turmasService.editar(Number(id), req.body);
       return res.status(200).json({ message: 'Turma atualizada com sucesso' });
     } catch (error) {
-      return res.status(404).json({ message: error.message });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao editar turma' });
     }
   }
 
@@ -112,7 +121,9 @@ export class TurmasController {
       await this.turmasService.deletar(Number(id));
       return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
-      return res.status(404).json({ message: 'Erro ao deletar turma' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao excluir turma' });
     }
   }
 }

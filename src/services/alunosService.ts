@@ -14,13 +14,13 @@ export class AlunosService {
   private responsaveisRepository = MysqlDataSource.getRepository(Responsaveis);
 
   private mapAluno(aluno: Alunos) {
-    const { id, membro} = aluno;
+    const { id, membro } = aluno;
     const { nomeCompleto, numeroMatricula } = membro;
     return {
       id,
       nomeCompleto,
       numeroMatricula
-    }
+    };
   }
 
   /**

@@ -94,8 +94,6 @@ export class TurmasService {
     });
     const turmasMap = turmas.map(this.mapTurma);
     return {
-      paginaNumero,
-      paginaTamanho,
       total,
       data: turmasMap
     };

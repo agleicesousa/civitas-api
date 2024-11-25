@@ -34,7 +34,9 @@ export class AlunosController {
             'Estudante já existe nos cadastros. Verifique as informações.'
         });
       }
-      return res.status(400).json({ message: 'Erro ao criar aluno' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao criar aluno' });
     }
   }
 
@@ -57,7 +59,9 @@ export class AlunosController {
       );
       return res.status(200).json({ page, perPage, total, data });
     } catch (error) {
-      return res.status(404).json({ message: error.message });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao listar alunos' });
     }
   }
 
@@ -77,7 +81,9 @@ export class AlunosController {
       if (error instanceof NotFoundError) {
         return res.status(404).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Erro ao listar alunos', error });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao obter aluno' });
     }
   }
   /**
@@ -98,7 +104,7 @@ export class AlunosController {
       }
       return res
         .status(500)
-        .json({ message: 'Erro interno do servidor', error });
+        .json({ error: error.message, message: 'Erro ao excluir aluno' });
     }
   }
   /**
@@ -127,7 +133,9 @@ export class AlunosController {
       if (error instanceof NotFoundError) {
         return res.status(404).json({ message: error.message });
       }
-      return res.status(500).json({ message: error.message });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao editar aluno' });
     }
   }
 }
