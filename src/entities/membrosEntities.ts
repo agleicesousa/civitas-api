@@ -13,8 +13,13 @@ import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
-  @OneToOne(() => Admin, (admin) => admin.membro, { nullable: true })
-  idAdmin: Admin;
+  @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'adminCriadorId' })
+  adminCriadorId: Admin;
+
+  @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'adminId' })
+  admin: Admin;
 
   @Column({ unique: true, nullable: false })
   numeroMatricula: string;
@@ -30,10 +35,6 @@ export class Membros extends BaseEntity {
 
   @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
-
-  @ManyToOne(() => Admin, { nullable: true })
-  @JoinColumn({ name: 'adminId' })
-  admin: Admin;
 
   @BeforeInsert()
   @BeforeUpdate()
