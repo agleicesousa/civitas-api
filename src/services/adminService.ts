@@ -139,6 +139,7 @@ export class AdminService {
   async deletarAdmin(id: number) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const adminExistente = await adminRepository.findOne({
       where: { id },
@@ -149,6 +150,7 @@ export class AdminService {
       throw ErrorHandler.notFound('Admin não encontrado.');
     }
 
+    await membrosRepository.update({ admin: adminExistente }, { admin: null });
     await adminRepository.remove(adminExistente);
   }
 }
