@@ -56,13 +56,18 @@ export class AdminService {
       nomeCompleto: dadosAdmin.nomeCompleto,
       numeroMatricula: dadosAdmin.numeroMatricula,
       tipoConta: TipoConta.ADMIN,
-      ...(adminCriadorId && { admin: { id: adminCriadorId } })
+      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
 
     await membrosRepository.save(membro);
 
     const admin = adminRepository.create({ membro });
-    return await adminRepository.save(admin);
+    const novoAdmin = await adminRepository.save(admin);
+
+    membro.admin = novoAdmin;
+    await membrosRepository.save(membro);
+
+    return novoAdmin;
   }
 
   async listarAdmins() {
