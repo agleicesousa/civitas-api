@@ -31,9 +31,16 @@ professorRouter.get(
 professorRouter.put(
   '/:id',
   validarEmail,
-  // authenticateJWT,
+  //  authenticateJWT,
   //  hasPermission('MANAGE_USERS'),
   (req, res, next) => professorController.atualizarProfessor(req, res, next)
+);
+
+professorRouter.delete(
+  '/:id',
+  //  authenticateJWT,
+  //  hasPermission('MANAGER_USERS'),
+  (req, res, next) => professorController.deletarProfessor(req, res, next)
 );
 
 export default professorRouter;

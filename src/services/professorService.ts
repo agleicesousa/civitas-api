@@ -143,4 +143,20 @@ export class ProfessorService {
       relations: ['membro', 'turmas']
     });
   }
+
+  async deletarProfessor(id: number) {
+    await this.iniciarDatabase();
+
+    const professorExistente = await this.professorRepository.findOne({
+      where: { id },
+      relations: ['membro']
+    });
+
+    if (!professorExistente) {
+      throw ErrorHandler.notFound('Professor não encontrado.');
+    }
+
+    await this.membrosRepository.remove(professorExistente.membro);
+    await this.professorRepository.remove(professorExistente);
+  }
 }
