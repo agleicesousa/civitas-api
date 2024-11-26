@@ -2,6 +2,8 @@ import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 
 export class MembrosService {
+  private membroRepository = MysqlDataSource.getRepository(Membros);
+
   private async iniciarDatabase() {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
@@ -10,7 +12,6 @@ export class MembrosService {
 
   async listarMembros(adminCriadorId: number) {
     await this.iniciarDatabase();
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
     return await membrosRepository.find({
       where: { admin: { id: adminCriadorId } }
     });
@@ -19,7 +20,6 @@ export class MembrosService {
   async buscarMembroPorId(adminCriadorId: number, id: string) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
     return await membrosRepository.findOne({
       where: { id: idNumber, admin: { id: adminCriadorId } }
     });
@@ -27,7 +27,6 @@ export class MembrosService {
 
   async criarMembro(dadosMembro: Partial<Membros>) {
     await this.iniciarDatabase();
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
     const novoMembro = membrosRepository.create({
       ...dadosMembro
     });
@@ -41,7 +40,6 @@ export class MembrosService {
   ) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const membroExistente = await membrosRepository.findOne({
       where: { id: idNumber, admin: { id: adminCriadorId } }
@@ -60,7 +58,6 @@ export class MembrosService {
   async deletarMembro(adminCriadorId: number, id: string) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const membroExistente = await membrosRepository.findOne({
       where: { id: idNumber, admin: { id: adminCriadorId } }
