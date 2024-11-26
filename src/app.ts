@@ -7,10 +7,10 @@ import { swaggerConfig } from './config/swagger';
 import { errorHandler } from './errors/errorHandler';
 import adminRouter from './routes/adminRoutes';
 import membrosRouter from './routes/membrosRoutes';
-import turmasRouter from './routes/turmaRoutes';
+import turmasRouter from './routes/turmasRoutes';
 import professorRouter from './routes/professorRoutes';
-import responsaveisRouter from './routes/responsaveisRoutes';
-import alunoRouter from './routes/alunoRoutes';
+// import responsaveisRouter from './routes/responsaveisRoutes';
+// import alunoRouter from './routes/alunosRoutes';
 import loginRouter from './routes/loginRoutes';
 MysqlDataSource.initialize()
   .then(() => {
@@ -29,8 +29,8 @@ app.use('/admin', adminRouter);
 app.use('/membros', membrosRouter);
 app.use('/turmas', turmasRouter);
 app.use('/professores', professorRouter);
-app.use('/responsaveis', responsaveisRouter);
-app.use('/alunos', alunoRouter);
+// app.use('/responsaveis', responsaveisRouter);
+// app.use('/alunos', alunoRouter);
 app.use('/auth', loginRouter);
 app.use(errorHandler);
 
