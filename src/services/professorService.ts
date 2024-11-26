@@ -30,7 +30,7 @@ export class ProfessorService {
 
     // Buscar turmas associadas
     const turmas = await turmaRepository.find({
-      where: { id: In(dadosProfessor.turmasId) },
+      where: { id: In(dadosProfessor.turmasId) }
     });
 
     if (turmas.length !== dadosProfessor.turmasId.length) {
@@ -43,7 +43,7 @@ export class ProfessorService {
       nomeCompleto: dadosProfessor.nomeCompleto,
       numeroMatricula: dadosProfessor.numeroMatricula,
       tipoConta: TipoConta.PROFESSOR,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null,
+      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
 
     await membrosRepository.save(membro);
@@ -52,8 +52,8 @@ export class ProfessorService {
     const professor = professorRepository.create({
       membro,
       turmas
-    })
-    
+    });
+
     const novoProfessor = await professorRepository.save(professor);
 
     membro.professor = novoProfessor;

@@ -33,10 +33,16 @@ export class Membros extends BaseEntity {
   @JoinColumn({ name: 'adminCriadorId' })
   adminCriadorId: Admin;
 
-  @OneToOne(() => Professor, { nullable: true, onDelete: 'CASCADE' })
+  @OneToOne(() => Professor, {
+    nullable: true,
+    onDelete: 'CASCADE'
+  })
   professor: Professor;
 
-  @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
+  @OneToOne(() => Admin, {
+    nullable: true,
+    onDelete: 'CASCADE'
+  })
   admin: Admin;
 
   @BeforeInsert()
