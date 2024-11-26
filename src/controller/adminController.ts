@@ -62,8 +62,9 @@ export class AdminController {
   async deletarAdmin(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id, 10);
+      const adminLogadoId = req.user.id;
 
-      await this.adminService.deletarAdmin(id);
+      await this.adminService.deletarAdmin(id, adminLogadoId);
       res.status(204).send();
     } catch (error) {
       next(error);

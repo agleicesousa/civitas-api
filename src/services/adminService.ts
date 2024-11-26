@@ -141,10 +141,14 @@ export class AdminService {
     });
   }
 
-  async deletarAdmin(id: number) {
+  async deletarAdmin(id: number, adminLogadoId: number) {
     await this.iniciarDatabase();
     const adminRepository = MysqlDataSource.getRepository(Admin);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
+
+    if (id === adminLogadoId) {
+      throw ErrorHandler.badRequest('Você não pode excluir sua própria conta.');
+    }
 
     const adminExistente = await adminRepository.findOne({
       where: { id },
@@ -155,15 +159,7 @@ export class AdminService {
       throw ErrorHandler.notFound('Admin não encontrado.');
     }
 
-    await membrosRepository.update(
-      { adminCriadorId: adminExistente },
-      { adminCriadorId: null }
-    );
-
-    if (adminExistente.membro) {
-      await membrosRepository.remove(adminExistente.membro);
-    }
-
+    await membrosRepository.remove(adminExistente.membro);
     await adminRepository.remove(adminExistente);
   }
 }
