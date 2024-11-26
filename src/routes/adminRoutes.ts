@@ -6,6 +6,14 @@ import { validarEmail } from '../middlewares/validarEmail';
 const adminRouter = Router();
 const adminController = new AdminController();
 
+adminRouter.post(
+  '/',
+  validarEmail,
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
+  (req, res, next) => adminController.criarAdmin(req, res, next)
+);
+
 adminRouter.get(
   '/',
   //  authenticateJWT,
@@ -18,14 +26,6 @@ adminRouter.get(
   //  authenticateJWT,
   //  hasPermission('MANAGE_USERS'),
   (req, res, next) => adminController.buscarAdminPorId(req, res, next)
-);
-
-adminRouter.post(
-  '/',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
-  (req, res, next) => adminController.criarAdmin(req, res, next)
 );
 
 adminRouter.put(
