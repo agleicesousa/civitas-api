@@ -118,11 +118,11 @@ export class ProfessorService {
       numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula
     });
 
-    await membrosRepository.save(membro);
+    await this.membrosRepository.save(membro);
 
     // Atualizar as turmas associadas (se fornecido)
     if (dadosProfessor.turmasIds) {
-      const turmas = await turmaRepository.findBy({
+      const turmas = await this.turmaRepository.findBy({
         id: In(dadosProfessor.turmasIds)
       });
 
