@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { MembrosController } from '../controller/membrosController';
 // import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
-import { validarEmail } from '../middlewares/validarEmail'
+import { validarEmail } from '../middlewares/validarEmail';
 
 const membrosRouter = Router();
 const membrosController = new MembrosController();

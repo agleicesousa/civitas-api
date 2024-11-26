@@ -54,7 +54,7 @@ export class ProfessorController {
   async deletarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
       const id = parseInt(req.params.id, 10);
-  
+
       await this.professorService.deletarProfessor(id);
       res.status(204).send();
     } catch (error) {
