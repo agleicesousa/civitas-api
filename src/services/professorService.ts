@@ -58,4 +58,29 @@ export class ProfessorService {
 
     return novoProfessor;
   }
+
+  async listarProfessores() {
+    await this.iniciarDatabase();
+    const professorRepository = MysqlDataSource.getRepository(Professor);
+
+    return await professorRepository.find({
+      relations: ['membro']
+    });
+  }
+
+  async buscarProfessorPorId(id: number) {
+    await this.iniciarDatabase();
+    const professorRepository = MysqlDataSource.getRepository(Professor);
+
+    const professor = await professorRepository.findOne({
+      where: { id },
+      relations: ['membro']
+    });
+
+    if (!professor) {
+      throw ErrorHandler.notFound('Professor não encontrado.');
+    }
+
+    return professor;
+  }
 }
