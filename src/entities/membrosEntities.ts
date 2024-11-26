@@ -18,7 +18,6 @@ export class Membros extends BaseEntity {
   adminCriadorId: Admin;
 
   @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'adminId' })
   admin: Admin;
 
   @Column({ unique: true, nullable: false })
