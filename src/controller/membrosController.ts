@@ -6,8 +6,8 @@ export class MembrosController {
 
   async listarMembros(req: Request, res: Response) {
     try {
-      const adminId = req.user.id;
-      const membros = await this.membrosService.listarMembros(adminId);
+      const adminCriadorId = req.user.id;
+      const membros = await this.membrosService.listarMembros(adminCriadorId);
       res.json(membros);
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar membros' });
@@ -16,10 +16,10 @@ export class MembrosController {
 
   async buscarMembroPorId(req: Request, res: Response) {
     try {
-      const adminId = req.user.id;
+      const adminCriadorId = req.user.id;
       const id = req.params.id;
 
-      const membro = await this.membrosService.buscarMembroPorId(adminId, id);
+      const membro = await this.membrosService.buscarMembroPorId(adminCriadorId, id);
       if (membro) {
         res.json(membro);
       } else {
@@ -43,11 +43,11 @@ export class MembrosController {
 
   async atualizarMembro(req: Request, res: Response) {
     try {
-      const adminId = req.user.id;
+      const adminCriadorId = req.user.id;
       const id = req.params.id;
 
       const membroAtualizado = await this.membrosService.atualizarMembro(
-        adminId,
+        adminCriadorId,
         id,
         req.body
       );
@@ -59,10 +59,10 @@ export class MembrosController {
 
   async deletarMembro(req: Request, res: Response) {
     try {
-      const adminId = req.user.id;
+      const adminCriadorId = req.user.id;
       const id = req.params.id;
 
-      await this.membrosService.deletarMembro(adminId, id);
+      await this.membrosService.deletarMembro(adminCriadorId, id);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: 'Erro ao deletar membro' });
