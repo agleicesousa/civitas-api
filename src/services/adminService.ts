@@ -1,144 +1,165 @@
-import { hash } from 'bcrypt';
-import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
+import { Admin } from '../entities/adminEntities';
 import { Membros } from '../entities/membrosEntities';
-import ErrorHandler from '../errors/errorHandler';
 import { TipoConta } from '../entities/baseEntity';
-
-interface NovoAdminData {
-  email: string;
-  senha: string;
-  nomeCompleto: string;
-  tipoConta: TipoConta;
-}
+import ErrorHandler from '../errors/errorHandler';
+import { criptografarSenha, validarSenha } from '../utils/senhaUtils';
 
 export class AdminService {
-  private membroRepository: Repository<Membros>;
-
-  constructor() {
-    this.membroRepository = MysqlDataSource.getRepository(Membros);
+  private async iniciarDatabase() {
+    if (!MysqlDataSource.isInitialized) {
+      await MysqlDataSource.initialize();
+    }
   }
 
-  /**
-   * Lista todos os administradores cadastrados.
-   * @returns Lista de administradores.
-   */
+  async verificarEmailDuplicado(email: string) {
+    await this.iniciarDatabase();
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
+
+    const emailExistente = await membrosRepository.findOne({
+      where: { email }
+    });
+
+    if (emailExistente) {
+      throw ErrorHandler.badRequest('Email já cadastrado.');
+    }
+  }
+
+  async criarAdmin(
+    dadosAdmin: {
+      email: string;
+      senha: string;
+      nomeCompleto: string;
+      numeroMatricula: string;
+      tipoConta: TipoConta;
+    },
+    adminCriadorId: number | null
+  ) {
+    await this.iniciarDatabase();
+
+    const adminRepository = MysqlDataSource.getRepository(Admin);
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
+
+    await this.verificarEmailDuplicado(dadosAdmin.email);
+
+    if (!validarSenha(dadosAdmin.senha)) {
+      throw ErrorHandler.badRequest(
+        'Senha inválida. Deve ter ao menos 8 caracteres, uma letra maiúscula e um caractere especial.'
+      );
+    }
+
+    const senhaCriptografada = await criptografarSenha(dadosAdmin.senha);
+
+    const membro = membrosRepository.create({
+      email: dadosAdmin.email,
+      senha: senhaCriptografada,
+      nomeCompleto: dadosAdmin.nomeCompleto,
+      numeroMatricula: dadosAdmin.numeroMatricula,
+      tipoConta: TipoConta.ADMIN,
+      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
+    });
+
+    await membrosRepository.save(membro);
+
+    const admin = adminRepository.create({ membro });
+    const novoAdmin = await adminRepository.save(admin);
+
+    membro.admin = novoAdmin;
+    await membrosRepository.save(membro);
+
+    return novoAdmin;
+  }
+
   async listarAdmins() {
-    return this.membroRepository.find({
-      where: { tipoConta: TipoConta.ADMIN },
-      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
+    await this.iniciarDatabase();
+    const adminRepository = MysqlDataSource.getRepository(Admin);
+
+    return await adminRepository.find({
+      relations: ['membro']
     });
   }
 
-  /**
-   * Obtém um administrador pelo ID.
-   * @param id ID do administrador.
-   * @returns Administrador encontrado.
-   * @throws Error se não encontrar o administrador ou se não for um admin.
-   */
-  async obterAdminPorId(id: number) {
-    const admin = await this.membroRepository.findOne({
-      where: { id, tipoConta: TipoConta.ADMIN },
-      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
+  async buscarAdminPorId(id: number) {
+    await this.iniciarDatabase();
+    const adminRepository = MysqlDataSource.getRepository(Admin);
+
+    const admin = await adminRepository.findOne({
+      where: { id },
+      relations: ['membro']
     });
 
     if (!admin) {
-      throw ErrorHandler.notFound('Administrador não encontrado.');
+      throw ErrorHandler.notFound('Admin não encontrado.');
     }
 
     return admin;
   }
 
-  /**
-   * Cria um novo administrador.
-   * @param dados Dados do novo administrador.
-   * @returns Dados do administrador criado.
-   * @throws Error se o e-mail já estiver em uso.
-   */
-  async criarAdmin(dados: NovoAdminData) {
-    const { email, senha, nomeCompleto, tipoConta } = dados;
+  async atualizarAdmin(
+    id: number,
+    dadosAdmin: Partial<{
+      email?: string;
+      senha?: string;
+      nomeCompleto?: string;
+      numeroMatricula?: string;
+    }>
+  ) {
+    await this.iniciarDatabase();
+    const adminRepository = MysqlDataSource.getRepository(Admin);
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    const emailExistente = await this.membroRepository.findOne({
-      where: { email }
-    });
-
-    if (emailExistente) {
-      throw ErrorHandler.badRequest('E-mail já está em uso.');
-    }
-
-    const senhaCriptografada = await hash(senha, 10);
-
-    const novoAdmin = this.membroRepository.create({
-      email,
-      senha: senhaCriptografada,
-      nomeCompleto,
-      tipoConta
-    });
-
-    await this.membroRepository.save(novoAdmin);
-
-    return {
-      id: novoAdmin.id,
-      nomeCompleto: novoAdmin.nomeCompleto,
-      email: novoAdmin.email,
-      tipoConta: novoAdmin.tipoConta
-    };
-  }
-
-  /**
-   * Atualiza os dados de um administrador.
-   * @param id ID do administrador a ser atualizado.
-   * @param dados Dados a serem atualizados.
-   * @returns Dados do administrador atualizado.
-   * @throws Error se o administrador não for encontrado ou o e-mail já estiver em uso.
-   */
-  async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
-    const adminExistente = await this.membroRepository.findOne({
-      where: { id, tipoConta: TipoConta.ADMIN }
-    });
-
-    if (!adminExistente) {
-      throw ErrorHandler.notFound('Administrador não encontrado.');
-    }
-
-    if (dados.email) {
-      const emailEmUso = await this.membroRepository.findOne({
-        where: { email: dados.email }
-      });
-
-      if (emailEmUso && emailEmUso.id !== id) {
-        throw ErrorHandler.badRequest('E-mail já está em uso.');
-      }
-    }
-
-    if (dados.senha) {
-      dados.senha = await hash(dados.senha, 10);
-    }
-
-    await this.membroRepository.update(id, dados);
-
-    const adminAtualizado = await this.membroRepository.findOne({
+    const adminExistente = await adminRepository.findOne({
       where: { id },
-      select: ['id', 'nomeCompleto', 'email', 'tipoConta']
-    });
-
-    return adminAtualizado;
-  }
-
-  /**
-   * Deleta um administrador pelo ID.
-   * @param id ID do administrador a ser deletado.
-   * @throws Error se o administrador não for encontrado.
-   */
-  async deletaAdmin(id: number) {
-    const adminExistente = await this.membroRepository.findOne({
-      where: { id, tipoConta: TipoConta.ADMIN }
+      relations: ['membro']
     });
 
     if (!adminExistente) {
-      throw ErrorHandler.notFound('Administrador não encontrado.');
+      throw ErrorHandler.notFound('Admin não encontrado.');
     }
 
-    await this.membroRepository.delete(id);
+    const membro = adminExistente.membro;
+
+    if (dadosAdmin.email && dadosAdmin.email !== membro.email) {
+      await this.verificarEmailDuplicado(dadosAdmin.email);
+    }
+
+    if (dadosAdmin.senha) {
+      if (!validarSenha(dadosAdmin.senha)) {
+        throw ErrorHandler.badRequest(
+          'Senha inválida. Deve ter ao menos 8 caracteres, uma letra maiúscula e um caractere especial.'
+        );
+      }
+      dadosAdmin.senha = await criptografarSenha(dadosAdmin.senha);
+    }
+
+    Object.assign(membro, dadosAdmin);
+    await membrosRepository.save(membro);
+
+    return await adminRepository.findOne({
+      where: { id },
+      relations: ['membro']
+    });
+  }
+
+  async deletarAdmin(id: number, adminLogadoId: number) {
+    await this.iniciarDatabase();
+    const adminRepository = MysqlDataSource.getRepository(Admin);
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
+
+    if (id === adminLogadoId) {
+      throw ErrorHandler.badRequest('Você não pode excluir sua própria conta.');
+    }
+
+    const adminExistente = await adminRepository.findOne({
+      where: { id },
+      relations: ['membro']
+    });
+
+    if (!adminExistente) {
+      throw ErrorHandler.notFound('Admin não encontrado.');
+    }
+
+    await membrosRepository.remove(adminExistente.membro);
+    await adminRepository.remove(adminExistente);
   }
 }

@@ -1,73 +1,41 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+  BeforeInsert,
+  BeforeUpdate
+} from 'typeorm';
 import { BaseEntity, TipoConta } from './baseEntity';
+import { Admin } from './adminEntities';
 import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
-  /**
-   * Número de matrícula único associado ao membro.
-   * @type {string}
-   * @unique
-   */
-  @Column({ unique: true, nullable: true })
+  @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'adminCriadorId' })
+  adminCriadorId: Admin;
+
+  @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'adminId' })
+  admin: Admin;
+
+  @Column({ unique: true, nullable: false })
   numeroMatricula: string;
 
-  /**
-   * Email único do membro.
-   * @type {string}
-   */
-  @Column({ nullable: true, unique: true })
+  @Column({ unique: true, nullable: false })
   email: string;
 
-  /**
-   * Senha do membro, armazena de forma criptografada.
-   * @type {string}
-   */
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   senha: string;
 
-  /**
-   * Nome completo do membro.
-   * @type {string}
-   */
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   nomeCompleto: string;
 
-  /**
-   * Data de nascimento do membro.
-   * @type {Date}
-   */
-  @Column({ nullable: true })
-  dataNascimento: Date;
-
-  /**
-   * Número do RG (Registro Geral) do membro.
-   * O RG deve ser único no banco de dados.
-   * @type {string}
-   * @unique
-   */
-  @Column({ unique: true, nullable: true })
-  rg: string;
-
-  /**
-   * Número do CPF (Cadastro de Pessoa Física) do membro.
-   * O CPF deve ser único no banco de dados.
-   * @type {string}
-   * @unique
-   */
-  @Column({ unique: true, nullable: true })
-  cpf: string;
-
-  /**
-   * Tipo de conta do membro, que pode ser um dos valores definidos no enum `TipoConta`.
-   * @type {TipoConta}
-   */
-  @Column({ type: 'enum', enum: TipoConta })
+  @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
-  /**
-   * Antes de atualizar ou inserir um novo membro, cripgrafa a senha.
-   */
   @BeforeInsert()
   @BeforeUpdate()
   async handleCriptografiaSenha(): Promise<void> {
@@ -76,10 +44,6 @@ export class Membros extends BaseEntity {
     }
   }
 
-  /**
-   * Verifica se a senha está em formato de texto puro.
-   * @return {boolean} true se a senha estiver em texto puro, false caso contrário.
-   */
   private isSenhaPlanText(): boolean {
     return !this.senha.startsWith('$2b$');
   }

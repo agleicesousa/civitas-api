@@ -5,13 +5,9 @@ import { Turma } from './turmasEntities';
 import { Professor } from './professorEntities';
 import { Alunos } from './alunosEntities';
 
-@Entity()
+@Entity('admin')
 export class Admin extends BaseEntity {
-  /**
-   * Relacionamento com a entidade `Membros`, indicando que um administrador é também um membro.
-   * @type {Membros}
-   */
-  @OneToOne(() => Membros, { eager: true })
+  @OneToOne(() => Membros, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
