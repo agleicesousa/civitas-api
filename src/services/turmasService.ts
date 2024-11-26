@@ -4,17 +4,11 @@ import {
   TipoEnsino,
   Turma
 } from '../entities/turmasEntities';
-// import { Aluno } from '../entities/alunoEntities';
 import { Admin } from '../entities/adminEntities';
 import { Like } from 'typeorm';
-// import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
-import { ConflictError } from '../errors/ConflitctError';
-// import { In } from 'typeorm';
+import ErrorHandler from '../errors/errorHandler';
 
-/**
- * Classe para gerenciar operações relacionadas a turmas.
- */
 export class TurmasService {
   private turmasRepository = MysqlDataSource.getRepository(Turma);
   private adminRepository = MysqlDataSource.getRepository(Admin);
@@ -28,16 +22,6 @@ export class TurmasService {
       periodoLetivo
     };
   }
-
-  // private professorRepository = MysqlDataSource.getRepository(Professor);
-  // private alunoRepository = MysqlDataSource.getRepository(Aluno);
-
-  /**
-   * Cria uma nova turma com os dados fornecidos.
-   *
-   * @param dadosTurma - Dados da turma a ser criada. Pode ser um objeto parcial da entidade `Turma`.
-   * @returns A turma criada.
-   */
   async criar(
     anoLetivo: AnoLetivo,
     periodoLetivo: PeriodoLetivo,
@@ -49,16 +33,22 @@ export class TurmasService {
       where: {
         turmaApelido,
         admin: {
-          id: adminId
+          membro: { id: adminId }
         }
       }
     });
 
     if (turmaExistente) {
-      throw new ConflictError('Turma já foi cadastrada');
+      throw ErrorHandler.conflictError('Turma já foi cadastrada');
     }
 
-    const admin = await this.adminRepository.findOneBy({ id: adminId });
+    if (turmaApelido.length > 12) {
+      throw ErrorHandler.badRequest('O apelido da turma é muito longo');
+    }
+
+    const admin = await this.adminRepository.findOneBy({
+      membro: { id: adminId }
+    });
 
     const novaTurma = this.turmasRepository.create({
       anoLetivo,
@@ -70,11 +60,7 @@ export class TurmasService {
 
     return await this.turmasRepository.save(novaTurma);
   }
-  /**
-   * Lista todas as turmas cadastradas.
-   *
-   * @returns Uma promessa que resolve para um array de turmas.
-   */
+
   async listar(
     adminId: number,
     paginaNumero: number,
@@ -85,7 +71,7 @@ export class TurmasService {
     const [turmas, total] = await this.turmasRepository.findAndCount({
       where: {
         admin: {
-          id: adminId
+          membro: { id: adminId }
         },
         turmaApelido: Like(`%${searchTerm}%`)
       },
@@ -94,54 +80,36 @@ export class TurmasService {
     });
     const turmasMap = turmas.map(this.mapTurma);
     return {
-      paginaNumero,
-      paginaTamanho,
       total,
       data: turmasMap
     };
   }
-  /**
-   * Atualiza uma turma existente.
-   *
-   * @param id - O ID da turma a ser atualizada.
-   * @param dadosTurma - Dados atualizados da turma. Pode ser um objeto parcial da entidade `Turma`.
-   * @returns A turma atualizada ou null se não encontrada.
-   */
+
   async editar(id: number, dadosTurma: Partial<Turma>) {
     const turmaExistente = await this.turmasRepository.findOneBy({ id });
+    const { turmaApelido } = dadosTurma;
+
+    if (!turmaExistente) {
+      throw ErrorHandler.notFound('Turma não encontrada');
+    }
+
+    if (turmaApelido && turmaApelido.length > 12) {
+      throw ErrorHandler.badRequest('O apelido da turma é muito longo');
+    }
+
     Object.assign(turmaExistente, dadosTurma);
     return await this.turmasRepository.save(turmaExistente);
   }
 
-  /**
-   * Deleta uma turma pelo ID.
-   *
-   * @param id - O ID da turma a ser deletada (pode ser string ou number).
-   * @returns Uma promessa que resolve para o resultado da operação de exclusão
-   */
-  async deletar(turmaId: number, adminId: number) {
-    const turma = await this.turmasRepository.findOne({
-      where: {
-        id: turmaId,
-        admin: {
-          id: adminId
-        }
-      }
-    });
+  async deletar(id: number) {
+    const turma = await this.turmasRepository.findOneBy({ id });
 
     if (!turma) {
-      throw { status: 404, message: 'Turma não encontrada' };
+      throw ErrorHandler.notFound('Turma não encontrada');
     }
-
-    await this.turmasRepository.remove(turma);
+    return await this.turmasRepository.delete(id);
   }
 
-  /**
-   * Busca uma turma específica pelo ID.
-   *
-   * @param id - O ID da turma a ser buscada (pode ser string ou number).
-   * @returns A turma encontrada ou null se não encontrada.
-   */
   async buscarPorId(id: number): Promise<Turma | null> {
     return await this.turmasRepository.findOneBy({ id });
   }

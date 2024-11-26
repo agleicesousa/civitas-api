@@ -33,7 +33,9 @@ export class ProfessorController {
       if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao criar professor' });
     }
   }
 
@@ -48,7 +50,9 @@ export class ProfessorController {
       if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao listar professores' });
     }
   }
 
@@ -66,7 +70,9 @@ export class ProfessorController {
       if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao obter professor' });
     }
   }
 
@@ -88,7 +94,9 @@ export class ProfessorController {
       if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao editar professor' });
     }
   }
 
@@ -103,7 +111,9 @@ export class ProfessorController {
       if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(500).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(500)
+        .json({ error: error.message, message: 'Erro ao excluir professor' });
     }
   }
 }
