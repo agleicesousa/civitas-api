@@ -3,19 +3,9 @@ import { TurmasService } from '../services/turmasService';
 import { getPaginationParams } from '../utils/paramsPagination';
 import ErrorHandler from '../errors/errorHandler';
 
-/**
- * Controlador para gerenciar as rotas relacionadas a turmas.
- */
 export class TurmasController {
   private turmasService = new TurmasService();
 
-  /**
-   * Cria uma nova turma com os dados fornecidos na requisição.
-   *
-   * @param req - O objeto de requisição contendo os dados da nova turma.
-   * @param res - O objeto de resposta para enviar de volta ao cliente.
-   * @returns Uma promessa que resolve para um objeto JSON com a turma criada ou um erro, se ocorrer.
-   */
   async criarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { turmaApelido, periodoLetivo, anoLetivo, ensino } = req.body;
@@ -44,13 +34,6 @@ export class TurmasController {
     }
   }
 
-  /**
-   * Lista todas as turmas cadastradas.
-   *
-   * @param req - O objeto de requisição. (Não utilizado atualmente)
-   * @param res - O objeto de resposta para enviar de volta ao cliente.
-   * @returns Uma promessa que resolve para um objeto JSON contendo todas as turmas ou um erro, se ocorrer.
-   */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
     const { page, perPage } = getPaginationParams(req);
     const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
@@ -70,13 +53,6 @@ export class TurmasController {
     }
   }
 
-  /**
-   * Busca uma turma específica pelo ID.
-   *
-   * @param req - O objeto de requisição contendo o ID da turma.
-   * @param res - O objeto de resposta para enviar de volta ao cliente.
-   * @returns Uma promessa que resolve para um objeto JSON com a turma encontrada ou um erro, se ocorrer.
-   */
   async buscarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -89,13 +65,6 @@ export class TurmasController {
     }
   }
 
-  /**
-   * Atualiza uma turma existente.
-   *
-   * @param req - O objeto de requisição contendo o ID da turma e os dados atualizados.
-   * @param res - O objeto de resposta para enviar de volta ao cliente.
-   * @returns Uma promessa que resolve para um objeto JSON com a turma atualizada ou um erro, se ocorrer.
-   */
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -111,13 +80,6 @@ export class TurmasController {
     }
   }
 
-  /**
-   * Deleta uma turma pelo ID.
-   *
-   * @param req - O objeto de requisição contendo o ID da turma a ser deletada.
-   * @param res - O objeto de resposta para enviar de volta ao cliente.
-   * @returns Uma promessa que resolve para um status de sucesso ou um erro, se ocorrer.
-   */
   async deletarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
