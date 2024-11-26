@@ -8,6 +8,10 @@ import ErrorHandler from '../errors/errorHandler';
 import { MysqlDataSource } from '../config/database';
 
 export class ProfessorService {
+  private membrosRepository = MysqlDataSource.getRepository(Membros);
+  private professorRepository = MysqlDataSource.getRepository(Professor);
+  private turmaRepository = MysqlDataSource.getRepository(Turma);
+
   private async iniciarDatabase() {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
@@ -25,12 +29,8 @@ export class ProfessorService {
   ) {
     await this.iniciarDatabase();
 
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
-    const professorRepository = MysqlDataSource.getRepository(Professor);
-    const turmaRepository = MysqlDataSource.getRepository(Turma);
-
     // Buscar turmas associadas
-    const turmas = await turmaRepository.find({
+    const turmas = await this.turmaRepository.find({
       where: { id: In(dadosProfessor.turmasId) }
     });
 
@@ -39,7 +39,7 @@ export class ProfessorService {
     }
 
     // Criar o membro
-    const membro = membrosRepository.create({
+    const membro = this.membrosRepository.create({
       email: dadosProfessor.email,
       nomeCompleto: dadosProfessor.nomeCompleto,
       numeroMatricula: dadosProfessor.numeroMatricula,
@@ -47,33 +47,31 @@ export class ProfessorService {
       adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
 
-    await membrosRepository.save(membro);
+    await this.membrosRepository.save(membro);
 
     // Criar o professor associado ao membro
-    const professor = professorRepository.create({
+    const professor = this.professorRepository.create({
       membro,
       turmas
     });
 
-    const novoProfessor = await professorRepository.save(professor);
+    const novoProfessor = await this.professorRepository.save(professor);
 
     return novoProfessor;
   }
 
   async listarProfessores() {
     await this.iniciarDatabase();
-    const professorRepository = MysqlDataSource.getRepository(Professor);
 
-    return await professorRepository.find({
+    return await this.professorRepository.find({
       relations: ['membro']
     });
   }
 
   async buscarProfessorPorId(id: number) {
     await this.iniciarDatabase();
-    const professorRepository = MysqlDataSource.getRepository(Professor);
 
-    const professor = await professorRepository.findOne({
+    const professor = await this.professorRepository.findOne({
       where: { id },
       relations: ['membro']
     });
@@ -96,11 +94,8 @@ export class ProfessorService {
     } >
   ) {
     await this.iniciarDatabase();
-    const professorRepository = MysqlDataSource.getRepository(Professor);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
-    const turmaRepository = MysqlDataSource.getRepository(Turma);
   
-    const professorExistente = await professorRepository.findOne({
+    const professorExistente = await this.professorRepository.findOne({
       where: { id },
       relations: ['membro', 'turmas']
     });
@@ -139,9 +134,9 @@ export class ProfessorService {
     }
   
     // Salvar alterações no professor
-    await professorRepository.save(professorExistente);
+    await this.professorRepository.save(professorExistente);
   
-    return await professorRepository.findOne({
+    return await this.professorRepository.findOne({
       where: { id },
       relations: ['membro', 'turmas'],
     });
