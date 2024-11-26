@@ -51,7 +51,7 @@ export class MembrosService {
       );
     }
 
-    await this.memmbrosRepository.update(idNumber, dadosMembro);
+    await this.membrosRepository.update(idNumber, dadosMembro);
     return await this.membrosRepository.findOneBy({ id: idNumber });
   }
 
