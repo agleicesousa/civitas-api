@@ -3,7 +3,6 @@ import { ProfessorController } from '../controller/professorController';
 import { validarEmail } from '../middlewares/validarEmail';
 // import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 
-
 const professorController = new ProfessorController();
 const professorRouter = Router();
 
