@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
 // import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 import { validarEmail } from '../middlewares/validarEmail';
+import { validarSenha } from '../utils/senhaUtils';
 
 const adminRouter = Router();
 const adminController = new AdminController();
@@ -9,6 +10,7 @@ const adminController = new AdminController();
 adminRouter.post(
   '/',
   validarEmail,
+  validarSenha,
   //  authenticateJWT,
   //  hasPermission('MANAGE_USERS'),
   (req, res, next) => adminController.criarAdmin(req, res, next)
@@ -30,6 +32,8 @@ adminRouter.get(
 
 adminRouter.put(
   '/:id',
+  validarEmail,
+  validarSenha,
   // authenticateJWT,
   //  hasPermission('MANAGE_USERS'),
   (req, res, next) => adminController.atualizarAdmin(req, res, next)

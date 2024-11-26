@@ -30,6 +30,7 @@ professorRouter.get(
 
 professorRouter.put(
   '/:id',
+  validarEmail,
   // authenticateJWT,
   //  hasPermission('MANAGE_USERS'),
   (req, res, next) => professorController.atualizarProfessor(req, res, next)

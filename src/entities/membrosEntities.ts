@@ -14,7 +14,7 @@ import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
-  @Column({ unique: true, nullable: false })
+  @Column({ unique: true, nullable: true })
   numeroMatricula: string;
 
   @Column({ nullable: false })
