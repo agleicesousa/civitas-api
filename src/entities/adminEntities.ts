@@ -7,7 +7,7 @@ import { Alunos } from './alunosEntities';
 
 @Entity('admin')
 export class Admin extends BaseEntity {
-  @OneToOne(() => Membros, { eager: true })
+  @OneToOne(() => Membros, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
