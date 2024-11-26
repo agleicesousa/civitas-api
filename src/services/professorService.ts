@@ -26,9 +26,10 @@ export class ProfessorService {
 
     const membrosRepository = MysqlDataSource.getRepository(Membros);
     const professorRepository = MysqlDataSource.getRepository(Professor);
-    const turmasRepository = MysqlDataSource.getRepository(Turma);
+    const turmaRepository = MysqlDataSource.getRepository(Turma);
 
-    const turmas = await turmasRepository.find({
+    // Buscar turmas associadas
+    const turmas = await turmaRepository.find({
       where: { id: In(dadosProfessor.turmasId) }
     });
 
@@ -36,6 +37,7 @@ export class ProfessorService {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas.');
     }
 
+    // Criar membro
     const membro = membrosRepository.create({
       email: dadosProfessor.email,
       nomeCompleto: dadosProfessor.nomeCompleto,

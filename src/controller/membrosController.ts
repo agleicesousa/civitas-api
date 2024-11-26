@@ -19,7 +19,10 @@ export class MembrosController {
       const adminCriadorId = req.user.id;
       const id = req.params.id;
 
-      const membro = await this.membrosService.buscarMembroPorId(adminCriadorId, id);
+      const membro = await this.membrosService.buscarMembroPorId(
+        adminCriadorId,
+        id
+      );
       if (membro) {
         res.json(membro);
       } else {
