@@ -37,4 +37,19 @@ export class ProfessorController {
       next(error);
     }
   }
+
+  async atualizarProfessor(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = parseInt(req.params.id, 10);
+  
+      const professorAtualizado = await this.professorService.atualizarProfessor(
+        id,
+        req.body
+      );
+  
+      res.status(200).json(professorAtualizado);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -3,6 +3,7 @@ import { Professor } from '../entities/professorEntities';
 import { Membros } from '../entities/membrosEntities';
 import { Turma } from '../entities/turmasEntities';
 import { TipoConta } from '../entities/baseEntity';
+import { criptografarSenha } from '../utils/senhaUtils';
 import ErrorHandler from '../errors/errorHandler';
 import { MysqlDataSource } from '../config/database';
 
@@ -82,5 +83,67 @@ export class ProfessorService {
     }
 
     return professor;
+  }
+
+  async atualizarProfessor(
+    id: number,
+    dadosProfessor: Partial < {
+      email ? : string;
+      senha ? : string;
+      nomeCompleto ? : string;
+      numeroMatricula ? : string;
+      turmasIds ? : number[];
+    } >
+  ) {
+    await this.iniciarDatabase();
+    const professorRepository = MysqlDataSource.getRepository(Professor);
+    const membrosRepository = MysqlDataSource.getRepository(Membros);
+    const turmaRepository = MysqlDataSource.getRepository(Turma);
+  
+    const professorExistente = await professorRepository.findOne({
+      where: { id },
+      relations: ['membro', 'turmas']
+    });
+  
+    if (!professorExistente) {
+      throw ErrorHandler.notFound('Professor não encontrado.');
+    }
+  
+    const membro = professorExistente.membro;
+  
+    // Atualizar senha (criptografada)
+    if (dadosProfessor.senha) {
+      dadosProfessor.senha = await criptografarSenha(dadosProfessor.senha);
+    }
+  
+    // Atualizar os campos do membro
+    Object.assign(membro, {
+      email: dadosProfessor.email ?? membro.email,
+      nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
+      numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula,
+    });
+  
+    await membrosRepository.save(membro);
+  
+    // Atualizar as turmas associadas (se fornecido)
+    if (dadosProfessor.turmasIds) {
+      const turmas = await turmaRepository.findBy({
+        id: In(dadosProfessor.turmasIds),
+      });
+  
+      if (turmas.length !== dadosProfessor.turmasIds.length) {
+        throw ErrorHandler.notFound('Algumas turmas fornecidas não foram encontradas.');
+      }
+      
+      professorExistente.turmas = turmas;
+    }
+  
+    // Salvar alterações no professor
+    await professorRepository.save(professorExistente);
+  
+    return await professorRepository.findOne({
+      where: { id },
+      relations: ['membro', 'turmas'],
+    });
   }
 }

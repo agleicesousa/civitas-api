@@ -28,4 +28,11 @@ professorRouter.get(
   (req, res, next) => professorController.buscarProfessorPorId(req, res, next)
 );
 
+professorRouter.put(
+  '/:id',
+  // authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
+  (req, res, next) => professorController.atualizarProfessor(req, res, next)
+);
+
 export default professorRouter;
