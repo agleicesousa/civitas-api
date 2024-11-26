@@ -56,9 +56,6 @@ export class ProfessorService {
 
     const novoProfessor = await professorRepository.save(professor);
 
-    membro.professor = novoProfessor;
-    await membrosRepository.save(membro);
-
     return novoProfessor;
   }
 }

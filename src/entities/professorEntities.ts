@@ -25,6 +25,6 @@ export class Professor extends BaseEntity {
   })
   turmas: Turma[];
 
-  @ManyToOne(() => Admin, { eager: true, nullable: false })
+  @ManyToOne(() => Admin, { eager: true, nullable: true })
   admin: Admin;
 }
