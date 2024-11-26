@@ -85,60 +85,62 @@ export class ProfessorService {
 
   async atualizarProfessor(
     id: number,
-    dadosProfessor: Partial < {
-      email ? : string;
-      senha ? : string;
-      nomeCompleto ? : string;
-      numeroMatricula ? : string;
-      turmasIds ? : number[];
-    } >
+    dadosProfessor: Partial<{
+      email?: string;
+      senha?: string;
+      nomeCompleto?: string;
+      numeroMatricula?: string;
+      turmasIds?: number[];
+    }>
   ) {
     await this.iniciarDatabase();
-  
+
     const professorExistente = await this.professorRepository.findOne({
       where: { id },
       relations: ['membro', 'turmas']
     });
-  
+
     if (!professorExistente) {
       throw ErrorHandler.notFound('Professor não encontrado.');
     }
-  
+
     const membro = professorExistente.membro;
-  
+
     // Atualizar senha (criptografada)
     if (dadosProfessor.senha) {
       dadosProfessor.senha = await criptografarSenha(dadosProfessor.senha);
     }
-  
+
     // Atualizar os campos do membro
     Object.assign(membro, {
       email: dadosProfessor.email ?? membro.email,
       nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
-      numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula,
+      numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula
     });
-  
+
     await membrosRepository.save(membro);
-  
+
     // Atualizar as turmas associadas (se fornecido)
     if (dadosProfessor.turmasIds) {
       const turmas = await turmaRepository.findBy({
-        id: In(dadosProfessor.turmasIds),
+        id: In(dadosProfessor.turmasIds)
       });
-  
+
       if (turmas.length !== dadosProfessor.turmasIds.length) {
-        throw ErrorHandler.notFound('Algumas turmas fornecidas não foram encontradas.');
+        throw ErrorHandler.notFound(
+          'Algumas turmas fornecidas não foram encontradas.'
+        );
       }
-      
+
       professorExistente.turmas = turmas;
     }
-  
+
     // Salvar alterações no professor
     await this.professorRepository.save(professorExistente);
-  
+
     return await this.professorRepository.findOne({
       where: { id },
-      relations: ['membro', 'turmas'],
+      relations: ['membro', 'turmas']
     });
   }
 }
