@@ -89,6 +89,10 @@ export class TurmasService {
     const turmaExistente = await this.turmasRepository.findOneBy({ id });
     const { turmaApelido } = dadosTurma;
 
+    if (!turmaExistente) {
+      throw ErrorHandler.notFound('Turma não encontrada');
+    }
+
     if (turmaApelido && turmaApelido.length > 12) {
       throw ErrorHandler.badRequest('O apelido da turma é muito longo');
     }
@@ -98,6 +102,11 @@ export class TurmasService {
   }
 
   async deletar(id: number) {
+    const turma = await this.turmasRepository.findOneBy({ id });
+
+    if (!turma) {
+      throw ErrorHandler.notFound('Turma não encontrada');
+    }
     return await this.turmasRepository.delete(id);
   }
 

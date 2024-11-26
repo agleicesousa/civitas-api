@@ -86,6 +86,9 @@ export class TurmasController {
       await this.turmasService.deletar(Number(id));
       return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
       return res
         .status(500)
         .json({ error: error.message, message: 'Erro ao excluir turma' });
