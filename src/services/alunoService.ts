@@ -1,11 +1,11 @@
-import { In } from "typeorm";
-import { MysqlDataSource } from "../config/database";
-import { Membros } from "../entities/membrosEntities";
-import { Alunos } from "../entities/alunosEntities";
-import { Turma } from "../entities/turmasEntities";
-import { TipoConta } from "../entities/baseEntity";
-import { criptografarSenha } from "../utils/senhaUtils";
-import ErrorHandler from "../errors/errorHandler";
+import { In } from 'typeorm';
+import { MysqlDataSource } from '../config/database';
+import { Membros } from '../entities/membrosEntities';
+import { Alunos } from '../entities/alunosEntities';
+import { Turma } from '../entities/turmasEntities';
+import { TipoConta } from '../entities/baseEntity';
+import { criptografarSenha } from '../utils/senhaUtils';
+import ErrorHandler from '../errors/errorHandler';
 
 export class AlunoService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -32,11 +32,11 @@ export class AlunoService {
 
     //  Buscar turmas
     const turma = await this.turmaRepository.find({
-      where: { id: In(dadosAluno.turma) },
+      where: { id: In(dadosAluno.turma) }
     });
 
     if (!turma.length) {
-      throw ErrorHandler.notFound("Turma não encontrada");
+      throw ErrorHandler.notFound('Turma não encontrada');
     }
 
     //  Criar membro
@@ -48,7 +48,7 @@ export class AlunoService {
       cpf: dadosAluno.cpf,
       senha: dadosAluno.numeroMatricula,
       tipoConta: TipoConta.ALUNO,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null,
+      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
 
     await this.membrosRepository.save(membro);
@@ -56,7 +56,7 @@ export class AlunoService {
     //  Cria aluno e associa ao membro
     const aluno = this.alunoRepository.crete({
       membro,
-      turma,
+      turma
     });
 
     const novoAluno = this.alunoRepository.save(aluno);
