@@ -6,6 +6,7 @@ import { TipoConta } from '../entities/baseEntity';
 import { criptografarSenha } from '../utils/senhaUtils';
 import ErrorHandler from '../errors/errorHandler';
 import { MysqlDataSource } from '../config/database';
+import { ConflictError } from 'errors/ConflitctError';
 
 export class ProfessorService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -23,6 +24,7 @@ export class ProfessorService {
       email: string;
       nomeCompleto: string;
       numeroMatricula: string;
+      cpf: string;
       turmasId: number[];
     },
     adminCriadorId: number | null
@@ -43,6 +45,7 @@ export class ProfessorService {
       email: dadosProfessor.email,
       nomeCompleto: dadosProfessor.nomeCompleto,
       numeroMatricula: dadosProfessor.numeroMatricula,
+      cpf: dadosProfessor.cpf,
       tipoConta: TipoConta.PROFESSOR,
       adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
@@ -90,6 +93,7 @@ export class ProfessorService {
       senha?: string;
       nomeCompleto?: string;
       numeroMatricula?: string;
+      cpf?: string;
       turmasIds?: number[];
     }>
   ) {
@@ -110,6 +114,7 @@ export class ProfessorService {
     Object.assign(membro, {
       email: dadosProfessor.email ?? membro.email,
       nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
+      cpf: dadosProfessor.cpf ?? membro.cpf,
       numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula
     });
 
