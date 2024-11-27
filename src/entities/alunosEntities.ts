@@ -1,9 +1,9 @@
-import { Entity, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, ManyToOne, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Turma } from './turmasEntities';
 import { Admin } from './adminEntities';
-
+import { PDI } from './pdiEntities';
 @Entity('alunos')
 export class Alunos extends BaseEntity {
   @OneToOne(() => Membros, { eager: true })
@@ -17,4 +17,9 @@ export class Alunos extends BaseEntity {
   @ManyToOne(() => Turma, (turma) => turma.alunos, { nullable: true })
   @JoinColumn({ name: 'turmaId' })
   turma: Turma;
+
+  @OneToMany(() => PDI, (pdi) => pdi.aluno, {
+    cascade: true
+  })
+  pdi: PDI[];
 }
