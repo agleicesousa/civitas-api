@@ -6,7 +6,6 @@ import { TipoConta } from '../entities/baseEntity';
 import { criptografarSenha } from '../utils/senhaUtils';
 import ErrorHandler from '../errors/errorHandler';
 import { MysqlDataSource } from '../config/database';
-import { ConflictError } from 'errors/ConflitctError';
 
 export class ProfessorService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -25,7 +24,7 @@ export class ProfessorService {
       nomeCompleto: string;
       numeroMatricula: string;
       cpf: string;
-      turmasId: number[];
+      turma: number[];
     },
     adminCriadorId: number | null
   ) {
@@ -33,10 +32,10 @@ export class ProfessorService {
 
     // Buscar turmas associadas
     const turmas = await this.turmaRepository.find({
-      where: { id: In(dadosProfessor.turmasId) }
+      where: { id: In(dadosProfessor.turma) }
     });
 
-    if (turmas.length !== dadosProfessor.turmasId.length) {
+    if (turmas.length !== dadosProfessor.turma.length) {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas.');
     }
 
