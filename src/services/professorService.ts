@@ -23,7 +23,8 @@ export class ProfessorService {
       email: string;
       nomeCompleto: string;
       numeroMatricula: string;
-      turmasId: number[];
+      cpf: string;
+      turma: number[];
     },
     adminCriadorId: number | null
   ) {
@@ -31,10 +32,10 @@ export class ProfessorService {
 
     // Buscar turmas associadas
     const turmas = await this.turmaRepository.find({
-      where: { id: In(dadosProfessor.turmasId) }
+      where: { id: In(dadosProfessor.turma) }
     });
 
-    if (turmas.length !== dadosProfessor.turmasId.length) {
+    if (turmas.length !== dadosProfessor.turma.length) {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas.');
     }
 
@@ -43,6 +44,7 @@ export class ProfessorService {
       email: dadosProfessor.email,
       nomeCompleto: dadosProfessor.nomeCompleto,
       numeroMatricula: dadosProfessor.numeroMatricula,
+      cpf: dadosProfessor.cpf,
       tipoConta: TipoConta.PROFESSOR,
       adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
@@ -90,7 +92,8 @@ export class ProfessorService {
       senha?: string;
       nomeCompleto?: string;
       numeroMatricula?: string;
-      turmasIds?: number[];
+      cpf?: string;
+      turma?: number[];
     }>
   ) {
     await this.iniciarDatabase();
@@ -106,27 +109,27 @@ export class ProfessorService {
 
     const membro = professorExistente.membro;
 
-    // Atualizar senha (criptografada)
-    if (dadosProfessor.senha) {
-      dadosProfessor.senha = await criptografarSenha(dadosProfessor.senha);
-    }
-
-    // Atualizar os campos do membro
+    // Atualizar os dados do membro
     Object.assign(membro, {
       email: dadosProfessor.email ?? membro.email,
       nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
+      cpf: dadosProfessor.cpf ?? membro.cpf,
       numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula
     });
 
+    if (dadosProfessor.senha) {
+      membro.senha = await criptografarSenha(dadosProfessor.senha);
+    }
+
     await this.membrosRepository.save(membro);
 
-    // Atualizar as turmas associadas (se fornecido)
-    if (dadosProfessor.turmasIds) {
+    // Atualizar as turmas, se necessário
+    if (dadosProfessor.turma) {
       const turmas = await this.turmaRepository.findBy({
-        id: In(dadosProfessor.turmasIds)
+        id: In(dadosProfessor.turma)
       });
 
-      if (turmas.length !== dadosProfessor.turmasIds.length) {
+      if (turmas.length !== dadosProfessor.turma.length) {
         throw ErrorHandler.notFound(
           'Algumas turmas fornecidas não foram encontradas.'
         );
@@ -156,7 +159,10 @@ export class ProfessorService {
       throw ErrorHandler.notFound('Professor não encontrado.');
     }
 
-    await this.membrosRepository.remove(professorExistente.membro);
+    if (professorExistente.membro) {
+      await this.membrosRepository.remove(professorExistente.membro);
+    }
+
     await this.professorRepository.remove(professorExistente);
   }
 }
