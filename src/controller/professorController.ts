@@ -56,7 +56,7 @@ export class ProfessorController {
       const id = parseInt(req.params.id, 10);
 
       await this.professorService.deletarProfessor(id);
-      res.status(204).send();
+      res.status(204).send('Professor excluído com sucesso');
     } catch (error) {
       next(error);
     }

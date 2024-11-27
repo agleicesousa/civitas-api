@@ -155,6 +155,10 @@ export class ProfessorService {
       throw ErrorHandler.notFound('Professor não encontrado.');
     }
 
+    if (professorExistente.membro) {
+      await this.membrosRepository.remove(professorExistente.membro);
+    }
+
     await this.professorRepository.remove(professorExistente);
   }
 }
