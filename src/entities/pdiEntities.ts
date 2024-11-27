@@ -24,7 +24,7 @@ export class PDI extends BaseEntity {
   @JoinColumn({ name: 'alunoId' })
   aluno: Alunos;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true, length: 500 })
   consideracoes: string | null;
 
   @OneToMany(() => PdiSecao, (secao) => secao.pdi, {
@@ -32,10 +32,11 @@ export class PDI extends BaseEntity {
     eager: true,
     onDelete: 'CASCADE'
   })
+  @JoinColumn({ name: 'pdiSecao' })
   secoes: PdiSecao[];
 }
 
-@Entity()
+@Entity('pdiSecao')
 export class PdiSecao extends BaseEntity {
   @Column()
   titulo: string;
@@ -44,6 +45,7 @@ export class PdiSecao extends BaseEntity {
     cascade: true,
     eager: true
   })
+  @JoinColumn({ name: 'pdiRespostas' })
   respostas: PdiResposta[];
 
   @ManyToOne(() => PDI, (pdi) => pdi.secoes, {
@@ -65,7 +67,7 @@ export class PdiSecao extends BaseEntity {
   }
 }
 
-@Entity('respostas')
+@Entity('pdiRespostas')
 export class PdiResposta extends BaseEntity {
   @Column()
   pergunta: string;

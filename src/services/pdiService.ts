@@ -6,14 +6,11 @@ import { NivelDeSatisfacao } from '../entities/pdiEntities';
 export class PdiService {
   private alunosRepository = MysqlDataSource.getRepository(Alunos);
   private pdiRepository = MysqlDataSource.getRepository(PDI);
-  private secaoRepository = MysqlDataSource.getRepository(PdiSecao);
-  private respostaRepository = MysqlDataSource.getRepository(PdiResposta);
+
   async criarPDI(payload, comments, alunoId: number): Promise<PDI> {
     const aluno = await this.alunosRepository.findOne({
       where: { id: alunoId }
     });
-
-    console.log('aluno', aluno);
 
     if (!aluno) {
       throw new Error('Aluno não encontrado');
@@ -39,5 +36,17 @@ export class PdiService {
       pdi.secoes.push(secao);
     }
     return await this.pdiRepository.save(pdi);
+  }
+
+  async deletearPdi(pdiId: number) {
+    const pdi = await this.pdiRepository.findOne({
+      where: { id: pdiId }
+    });
+
+    if (!pdi) {
+      throw new Error('PDI não encontrado');
+    }
+
+    await this.pdiRepository.delete(pdiId);
   }
 }
