@@ -26,6 +26,9 @@ export class Membros extends BaseEntity {
   @Column({ nullable: true })
   nomeCompleto: string;
 
+  @Column({ nullable: true })
+  cpf: string;
+
   @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
