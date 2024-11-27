@@ -13,7 +13,7 @@ import { Admin } from './adminEntities';
 
 @Entity('professores')
 export class Professor extends BaseEntity {
-  @OneToOne(() => Membros, { eager: true })
+  @OneToOne(() => Membros, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 

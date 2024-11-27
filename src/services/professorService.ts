@@ -106,21 +106,20 @@ export class ProfessorService {
 
     const membro = professorExistente.membro;
 
-    // Atualizar senha (criptografada)
-    if (dadosProfessor.senha) {
-      dadosProfessor.senha = await criptografarSenha(dadosProfessor.senha);
-    }
-
-    // Atualizar os campos do membro
+    // Atualizar os dados do membro
     Object.assign(membro, {
       email: dadosProfessor.email ?? membro.email,
       nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
       numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula
     });
 
+    if (dadosProfessor.senha) {
+      membro.senha = await criptografarSenha(dadosProfessor.senha);
+    }
+
     await this.membrosRepository.save(membro);
 
-    // Atualizar as turmas associadas (se fornecido)
+    // Atualizar as turmas, se necessário
     if (dadosProfessor.turmasIds) {
       const turmas = await this.turmaRepository.findBy({
         id: In(dadosProfessor.turmasIds)
@@ -156,7 +155,6 @@ export class ProfessorService {
       throw ErrorHandler.notFound('Professor não encontrado.');
     }
 
-    await this.membrosRepository.remove(professorExistente.membro);
     await this.professorRepository.remove(professorExistente);
   }
 }
