@@ -93,7 +93,7 @@ export class ProfessorService {
       nomeCompleto?: string;
       numeroMatricula?: string;
       cpf?: string;
-      turmasIds?: number[];
+      turma?: number[];
     }>
   ) {
     await this.iniciarDatabase();
@@ -124,12 +124,12 @@ export class ProfessorService {
     await this.membrosRepository.save(membro);
 
     // Atualizar as turmas, se necessário
-    if (dadosProfessor.turmasIds) {
+    if (dadosProfessor.turma) {
       const turmas = await this.turmaRepository.findBy({
-        id: In(dadosProfessor.turmasIds)
+        id: In(dadosProfessor.turma)
       });
 
-      if (turmas.length !== dadosProfessor.turmasIds.length) {
+      if (turmas.length !== dadosProfessor.turma.length) {
         throw ErrorHandler.notFound(
           'Algumas turmas fornecidas não foram encontradas.'
         );
