@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Alunos } from './alunosEntities';
+import { Professor } from './professorEntities';
 
 export enum NivelDeSatisfacao {
   MUITO_SATISFEITO = 5,
@@ -23,6 +24,10 @@ export class PDI extends BaseEntity {
   @ManyToOne(() => Alunos, (aluno) => aluno.pdi)
   @JoinColumn({ name: 'alunoId' })
   aluno: Alunos;
+
+  @ManyToOne(() => Professor, (professor) => professor.pdi)
+  @JoinColumn({ name: 'professorId' })
+  professor: Professor;
 
   @Column({ type: 'varchar', nullable: true, length: 500 })
   consideracoes: string | null;
