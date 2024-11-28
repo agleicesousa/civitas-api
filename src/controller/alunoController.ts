@@ -8,10 +8,7 @@ export class AlunoController {
     try {
       const adminLogadoId = req.user?.id || null;
 
-      const novoAluno = await this.alunoService.criarAluno(
-        req.body,
-        adminLogadoId
-      );
+      const novoAluno = await this.alunoService.criarAluno(req.body, adminLogadoId);
 
       res.status(201).json(novoAluno);
     } catch (error) {

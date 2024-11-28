@@ -1,11 +1,10 @@
-import { In } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import { Alunos } from '../entities/alunosEntities';
 import { Turma } from '../entities/turmasEntities';
 import { TipoConta } from '../entities/baseEntity';
-import { criptografarSenha } from '../utils/senhaUtils';
 import ErrorHandler from '../errors/errorHandler';
+import { criptografarSenha } from '../utils/senhaUtils';
 
 export class AlunoService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -30,36 +29,36 @@ export class AlunoService {
   ) {
     await this.iniciarDatabase();
 
-    //  Buscar turmas
-    const turma = await this.turmaRepository.find({
-      where: { id: In(dadosAluno.turma) }
+    // Buscar a turma pelo ID
+    const turma = await this.turmaRepository.findOne({
+      where: { id: dadosAluno.turma },
     });
 
-    if (!turma.length) {
+    if (!turma) {
       throw ErrorHandler.notFound('Turma não encontrada');
     }
 
-    //  Criar membro
+    // Criar membro
+    const senhaCriptografada = await criptografarSenha(dadosAluno.numeroMatricula);
     const membro = this.membrosRepository.create({
       email: dadosAluno.email,
       nomeCompleto: dadosAluno.nomeCompleto,
-      nuneroMatricula: dadosAluno.numeroMatricula,
-      turma: dadosAluno.turma,
+      numeroMatricula: dadosAluno.numeroMatricula,
       cpf: dadosAluno.cpf,
-      senha: dadosAluno.numeroMatricula,
+      senha: senhaCriptografada,
       tipoConta: TipoConta.ALUNO,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
+      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null,
     });
 
     await this.membrosRepository.save(membro);
 
-    //  Cria aluno e associa ao membro
-    const aluno = this.alunoRepository.crete({
+    // Criar aluno e associar ao membro e à turma
+    const aluno = this.alunoRepository.create({
       membro,
-      turma
+      turma,
     });
 
-    const novoAluno = this.alunoRepository.save(aluno);
+    const novoAluno = await this.alunoRepository.save(aluno);
 
     return novoAluno;
   }
