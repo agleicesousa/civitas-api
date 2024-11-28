@@ -39,9 +39,12 @@ export class ProfessorService {
       throw ErrorHandler.notFound('Algumas turmas não foram encontradas.');
     }
 
+    const senhaCriptografada = await criptografarSenha(dadosProfessor.numeroMatricula)
+
     // Criar o membro
     const membro = this.membrosRepository.create({
       email: dadosProfessor.email,
+      senha: senhaCriptografada,
       nomeCompleto: dadosProfessor.nomeCompleto,
       numeroMatricula: dadosProfessor.numeroMatricula,
       cpf: dadosProfessor.cpf,
@@ -89,7 +92,6 @@ export class ProfessorService {
     id: number,
     dadosProfessor: Partial<{
       email?: string;
-      senha?: string;
       nomeCompleto?: string;
       numeroMatricula?: string;
       cpf?: string;
@@ -108,18 +110,16 @@ export class ProfessorService {
     }
 
     const membro = professorExistente.membro;
+    const senhaCriptografada = await criptografarSenha(membro.numeroMatricula);
 
     // Atualizar os dados do membro
     Object.assign(membro, {
       email: dadosProfessor.email ?? membro.email,
       nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
       cpf: dadosProfessor.cpf ?? membro.cpf,
-      numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula
+      numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula,
+      senha: senhaCriptografada
     });
-
-    if (dadosProfessor.senha) {
-      membro.senha = await criptografarSenha(dadosProfessor.senha);
-    }
 
     await this.membrosRepository.save(membro);
 
