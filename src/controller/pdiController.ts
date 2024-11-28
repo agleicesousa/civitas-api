@@ -8,14 +8,14 @@ export class PdiController {
 
   async criarPdi(req: Request, res: Response) {
     try {
-      //TODO:
-      //Vincular PDI a professor
-      const { studentId, pdiValues, comments } = req.body;
-
+      const { pdiValues, comments } = req.body;
+      const alunoId = Number(req.params.id);
+      const professorId = req.user.id;
       const pdi = await this.pdiService.criarPDI(
         { pdiValues },
         comments,
-        studentId
+        alunoId,
+        professorId
       );
 
       return res.status(201).json({
@@ -64,14 +64,12 @@ export class PdiController {
       await this.pdiService.deletearPdi(pdiId);
 
       return res.status(200).json({
-        success: true,
         message: 'PDI removido com sucesso'
       });
     } catch (error) {
       console.error('Erro ao remover PDI:', error.message);
 
       return res.status(400).json({
-        success: false,
         message: 'Erro ao remover PDI',
         error: error.message
       });
