@@ -1,6 +1,14 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+  BeforeUpdate
+} from 'typeorm';
 import { BaseEntity, TipoConta } from './baseEntity';
 import { Admin } from './adminEntities';
+import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
@@ -28,7 +36,19 @@ export class Membros extends BaseEntity {
   @Column({ type: 'enum', enum: TipoConta })
   tipoConta: TipoConta;
 
-  @ManyToOne(() => Admin, { eager: true, nullable: false })
+  @ManyToOne(() => Admin, { eager: true, nullable: true })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async handleCriptografiaSenha(): Promise<void> {
+    if (this.senha && this.isSenhaPlanText()) {
+      this.senha = await criptografarSenha(this.senha);
+    }
+  }
+
+  private isSenhaPlanText(): boolean {
+    return !this.senha.startsWith('$2b$');
+  }
 }

@@ -1,9 +1,9 @@
-import { hash } from 'bcrypt';
 import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import ErrorHandler from '../errors/errorHandler';
 import { TipoConta } from '../entities/baseEntity';
+import { hash } from 'bcrypt';
 
 interface NovoAdminData {
   email: string;
@@ -19,10 +19,6 @@ export class AdminService {
     this.membroRepository = MysqlDataSource.getRepository(Membros);
   }
 
-  /**
-   * Lista todos os administradores cadastrados.
-   * @returns Lista de administradores.
-   */
   async listarAdmins() {
     return this.membroRepository.find({
       where: { tipoConta: TipoConta.ADMIN },
@@ -30,12 +26,6 @@ export class AdminService {
     });
   }
 
-  /**
-   * Obtém um administrador pelo ID.
-   * @param id ID do administrador.
-   * @returns Administrador encontrado.
-   * @throws Error se não encontrar o administrador ou se não for um admin.
-   */
   async obterAdminPorId(id: number) {
     const admin = await this.membroRepository.findOne({
       where: { id, tipoConta: TipoConta.ADMIN },
@@ -49,14 +39,8 @@ export class AdminService {
     return admin;
   }
 
-  /**
-   * Cria um novo administrador.
-   * @param dados Dados do novo administrador.
-   * @returns Dados do administrador criado.
-   * @throws Error se o e-mail já estiver em uso.
-   */
   async criarAdmin(dados: NovoAdminData) {
-    const { email, senha, nomeCompleto, tipoConta } = dados;
+    const { email, senha, nomeCompleto } = dados;
 
     const emailExistente = await this.membroRepository.findOne({
       where: { email }
@@ -72,7 +56,7 @@ export class AdminService {
       email,
       senha: senhaCriptografada,
       nomeCompleto,
-      tipoConta
+      tipoConta: TipoConta.ADMIN
     });
 
     await this.membroRepository.save(novoAdmin);
@@ -85,13 +69,6 @@ export class AdminService {
     };
   }
 
-  /**
-   * Atualiza os dados de um administrador.
-   * @param id ID do administrador a ser atualizado.
-   * @param dados Dados a serem atualizados.
-   * @returns Dados do administrador atualizado.
-   * @throws Error se o administrador não for encontrado ou o e-mail já estiver em uso.
-   */
   async atualizarAdmin(id: number, dados: Partial<NovoAdminData>) {
     const adminExistente = await this.membroRepository.findOne({
       where: { id, tipoConta: TipoConta.ADMIN }
@@ -125,11 +102,6 @@ export class AdminService {
     return adminAtualizado;
   }
 
-  /**
-   * Deleta um administrador pelo ID.
-   * @param id ID do administrador a ser deletado.
-   * @throws Error se o administrador não for encontrado.
-   */
   async deletaAdmin(id: number) {
     const adminExistente = await this.membroRepository.findOne({
       where: { id, tipoConta: TipoConta.ADMIN }
