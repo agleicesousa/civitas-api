@@ -8,18 +8,20 @@ export class MembrosService {
     }
   }
 
-  async listarMembros(adminId: number) {
+  async listarMembros(adminCriadorId: number) {
     await this.iniciarDatabase();
     const membrosRepository = MysqlDataSource.getRepository(Membros);
-    return await membrosRepository.find({ where: { admin: { id: adminId } } });
+    return await membrosRepository.find({
+      where: { admin: { id: adminCriadorId } }
+    });
   }
 
-  async buscarMembroPorId(adminId: number, id: string) {
+  async buscarMembroPorId(adminCriadorId: number, id: string) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
     return await membrosRepository.findOne({
-      where: { id: idNumber, admin: { id: adminId } }
+      where: { id: idNumber, admin: { id: adminCriadorId } }
     });
   }
 
@@ -33,7 +35,7 @@ export class MembrosService {
   }
 
   async atualizarMembro(
-    adminId: number,
+    adminCriadorId: number,
     id: string,
     dadosMembro: Partial<Membros>
   ) {
@@ -42,7 +44,7 @@ export class MembrosService {
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const membroExistente = await membrosRepository.findOne({
-      where: { id: idNumber, admin: { id: adminId } }
+      where: { id: idNumber, admin: { id: adminCriadorId } }
     });
 
     if (!membroExistente) {
@@ -55,13 +57,13 @@ export class MembrosService {
     return await membrosRepository.findOneBy({ id: idNumber });
   }
 
-  async deletarMembro(adminId: number, id: string) {
+  async deletarMembro(adminCriadorId: number, id: string) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
     const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     const membroExistente = await membrosRepository.findOne({
-      where: { id: idNumber, admin: { id: adminId } }
+      where: { id: idNumber, admin: { id: adminCriadorId } }
     });
 
     if (!membroExistente) {

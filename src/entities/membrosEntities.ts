@@ -2,6 +2,7 @@ import {
   Entity,
   Column,
   ManyToOne,
+  OneToOne,
   JoinColumn,
   BeforeInsert,
   BeforeUpdate
@@ -12,33 +13,28 @@ import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
-  @Column({ unique: true, nullable: true })
-  numeroMatricula: string;
+  @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'adminCriadorId' })
+  adminCriadorId: Admin;
 
-  @Column({ nullable: true })
-  email: string;
-
-  @Column({ nullable: true })
-  senha: string;
-
-  @Column({ nullable: true })
-  nomeCompleto: string;
-
-  @Column({ type: 'date', nullable: true })
-  dataNascimento: Date;
-
-  @Column({ unique: true, nullable: true })
-  rg: string;
-
-  @Column({ unique: true, nullable: true })
-  cpf: string;
-
-  @Column({ type: 'enum', enum: TipoConta })
-  tipoConta: TipoConta;
-
-  @ManyToOne(() => Admin, { eager: true, nullable: true })
+  @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'adminId' })
   admin: Admin;
+
+  @Column({ unique: true, nullable: false })
+  numeroMatricula: string;
+
+  @Column({ unique: true, nullable: false })
+  email: string;
+
+  @Column({ nullable: false })
+  senha: string;
+
+  @Column({ nullable: false })
+  nomeCompleto: string;
+
+  @Column({ type: 'enum', enum: TipoConta, nullable: false })
+  tipoConta: TipoConta;
 
   @BeforeInsert()
   @BeforeUpdate()
