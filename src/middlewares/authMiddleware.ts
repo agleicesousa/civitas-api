@@ -30,7 +30,7 @@ export async function authenticateJWT(
     const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
     req.user = {
       id: decoded.id,
-      numeroMatricula: decoded.numeroMatricula,
+      numeroMatricula: decoded.email,
       tipoConta: decoded.tipoConta,
       permissions: decoded.permissions
     };
