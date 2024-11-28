@@ -1,119 +1,64 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { ProfessorService } from '../services/professorService';
-import ErrorHandler from '../errors/errorHandler';
 
 export class ProfessorController {
   private professorService = new ProfessorService();
 
-  async criarProfessor(req: Request, res: Response) {
-    const {
-      nomeMembro,
-      cpf,
-      dataNascimento,
-      numeroMatricula,
-      email,
-      senha,
-      turmaIds
-    } = req.body;
-    const adminId = req.user.id;
-
+  async criarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
-      const professor = await this.professorService.criarProfessor(
-        nomeMembro,
-        cpf,
-        dataNascimento,
-        numeroMatricula,
-        email,
-        senha,
-        adminId,
-        turmaIds
+      const adminLogadoId = req.user?.id || null;
+
+      const novoProfessor = await this.professorService.criarProfessor(
+        req.body,
+        adminLogadoId
       );
-      return res.status(201).json(professor);
+
+      res.status(201).json(novoProfessor);
     } catch (error) {
-      if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-      return res
-        .status(500)
-        .json({ error: error.message, message: 'Erro ao criar professor' });
+      next(error);
     }
   }
 
-  async listarProfessores(req: Request, res: Response) {
-    const adminId = req.user.id;
-
+  async listarProfessores(req: Request, res: Response, next: NextFunction) {
     try {
-      const professores =
-        await this.professorService.listarProfessores(adminId);
-      return res.status(200).json(professores);
+      const professor = await this.professorService.listarProfessores();
+      res.json(professor);
     } catch (error) {
-      if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-      return res
-        .status(500)
-        .json({ error: error.message, message: 'Erro ao listar professores' });
+      next(error);
     }
   }
 
-  async buscarProfessorPorId(req: Request, res: Response) {
-    const professorId = parseInt(req.params.id);
-    const adminId = req.user.id;
-
+  async buscarProfessorPorId(req: Request, res: Response, next: NextFunction) {
     try {
-      const professor = await this.professorService.buscarProfessorPorId(
-        professorId,
-        adminId
-      );
-      return res.status(200).json(professor);
+      const id = parseInt(req.params.id, 10);
+      const professor = await this.professorService.buscarProfessorPorId(id);
+      res.json(professor);
     } catch (error) {
-      if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-      return res
-        .status(500)
-        .json({ error: error.message, message: 'Erro ao obter professor' });
+      next(error);
     }
   }
 
-  async editarProfessor(req: Request, res: Response) {
-    const professorId = parseInt(req.params.id);
-    const adminId = req.user.id;
-    const { email, senha, turmaIds } = req.body;
-
+  async atualizarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
-      const professor = await this.professorService.editarProfessor(
-        professorId,
-        adminId,
-        email,
-        senha,
-        turmaIds
-      );
-      return res.status(200).json(professor);
+      const id = parseInt(req.params.id, 10);
+
+      const professorAtualizado =
+        await this.professorService.atualizarProfessor(id, req.body);
+
+      res.status(200).json(professorAtualizado);
     } catch (error) {
-      if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-      return res
-        .status(500)
-        .json({ error: error.message, message: 'Erro ao editar professor' });
+      next(error);
     }
   }
 
-  async deletarProfessor(req: Request, res: Response) {
-    const professorId = parseInt(req.params.id);
-    const adminId = req.user.id;
-
+  async deletarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
-      await this.professorService.deletarProfessor(professorId, adminId);
-      return res.status(204).send();
+      const id = parseInt(req.params.id, 10);
+
+      await this.professorService.deletarProfessor(id);
+      res.status(204).send('Professor excluído com sucesso');
     } catch (error) {
-      if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-      return res
-        .status(500)
-        .json({ error: error.message, message: 'Erro ao excluir professor' });
+      next(error);
     }
   }
 }

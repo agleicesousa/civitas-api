@@ -6,6 +6,9 @@ import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha, validarSenha } from '../utils/senhaUtils';
 
 export class AdminService {
+  private membrosRepository = MysqlDataSource.getRepository(Membros);
+  private adminRepository = MysqlDataSource.getRepository(Admin);
+
   private async iniciarDatabase() {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
@@ -14,9 +17,8 @@ export class AdminService {
 
   async verificarEmailDuplicado(email: string) {
     await this.iniciarDatabase();
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    const emailExistente = await membrosRepository.findOne({
+    const emailExistente = await this.membrosRepository.findOne({
       where: { email }
     });
 
@@ -37,9 +39,6 @@ export class AdminService {
   ) {
     await this.iniciarDatabase();
 
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
-
     await this.verificarEmailDuplicado(dadosAdmin.email);
 
     if (!validarSenha(dadosAdmin.senha)) {
@@ -50,7 +49,7 @@ export class AdminService {
 
     const senhaCriptografada = await criptografarSenha(dadosAdmin.senha);
 
-    const membro = membrosRepository.create({
+    const membro = this.membrosRepository.create({
       email: dadosAdmin.email,
       senha: senhaCriptografada,
       nomeCompleto: dadosAdmin.nomeCompleto,
@@ -59,31 +58,29 @@ export class AdminService {
       adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
 
-    await membrosRepository.save(membro);
+    await this.membrosRepository.save(membro);
 
-    const admin = adminRepository.create({ membro });
-    const novoAdmin = await adminRepository.save(admin);
+    const admin = this.adminRepository.create({ membro });
+    const novoAdmin = await this.adminRepository.save(admin);
 
     membro.admin = novoAdmin;
-    await membrosRepository.save(membro);
+    await this.membrosRepository.save(membro);
 
     return novoAdmin;
   }
 
   async listarAdmins() {
     await this.iniciarDatabase();
-    const adminRepository = MysqlDataSource.getRepository(Admin);
 
-    return await adminRepository.find({
+    return await this.adminRepository.find({
       relations: ['membro']
     });
   }
 
   async buscarAdminPorId(id: number) {
     await this.iniciarDatabase();
-    const adminRepository = MysqlDataSource.getRepository(Admin);
 
-    const admin = await adminRepository.findOne({
+    const admin = await this.adminRepository.findOne({
       where: { id },
       relations: ['membro']
     });
@@ -105,10 +102,8 @@ export class AdminService {
     }>
   ) {
     await this.iniciarDatabase();
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
-    const adminExistente = await adminRepository.findOne({
+    const adminExistente = await this.adminRepository.findOne({
       where: { id },
       relations: ['membro']
     });
@@ -133,9 +128,9 @@ export class AdminService {
     }
 
     Object.assign(membro, dadosAdmin);
-    await membrosRepository.save(membro);
+    await this.membrosRepository.save(membro);
 
-    return await adminRepository.findOne({
+    return await this.adminRepository.findOne({
       where: { id },
       relations: ['membro']
     });
@@ -143,14 +138,12 @@ export class AdminService {
 
   async deletarAdmin(id: number, adminLogadoId: number) {
     await this.iniciarDatabase();
-    const adminRepository = MysqlDataSource.getRepository(Admin);
-    const membrosRepository = MysqlDataSource.getRepository(Membros);
 
     if (id === adminLogadoId) {
       throw ErrorHandler.badRequest('Você não pode excluir sua própria conta.');
     }
 
-    const adminExistente = await adminRepository.findOne({
+    const adminExistente = await this.adminRepository.findOne({
       where: { id },
       relations: ['membro']
     });
@@ -159,7 +152,7 @@ export class AdminService {
       throw ErrorHandler.notFound('Admin não encontrado.');
     }
 
-    await membrosRepository.remove(adminExistente.membro);
-    await adminRepository.remove(adminExistente);
+    await this.membrosRepository.remove(adminExistente.membro);
+    await this.adminRepository.remove(adminExistente);
   }
 }
