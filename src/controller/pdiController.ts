@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { PdiService } from '../services/pdiService';
 import { MysqlDataSource } from '../config/database';
 import { PDI } from '../entities/pdiEntities';
-
+import ErrorHandler from '../errors/errorHandler';
 export class PdiController {
   private pdiService = new PdiService();
 
@@ -23,9 +23,14 @@ export class PdiController {
         data: pdi
       });
     } catch (error) {
-      console.error(error.message);
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({
+          message: error.message
+        });
+      }
       return res.status(500).json({
-        message: 'Erro ao criar PDI'
+        message:
+          'Não foi possível carregar as informações. Erro interno do servidor.'
       });
     }
   }
