@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
-import Fabricas from '../seeds/fabricas';
-import { Seeds } from '../seeds/seeds';
+// import Fabricas from '../seeds/fabricas';
+// import { Seeds } from '../seeds/seeds';
 
 const options: DataSourceOptions & SeederOptions = {
   type: 'mysql',
@@ -13,9 +13,9 @@ const options: DataSourceOptions & SeederOptions = {
   database: process.env.DB_DATABASE,
   entities: ['src/entities/**/*.ts'],
   logging: false,
-  synchronize: true,
-  seeds: [Seeds],
-  factories: [...Fabricas]
+  synchronize: true
+  //  seeds: [Seeds],
+  //  factories: [...Fabricas]
 };
 
 export const MysqlDataSource = new DataSource(options);

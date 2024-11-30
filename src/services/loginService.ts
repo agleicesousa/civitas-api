@@ -1,8 +1,8 @@
 import { compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
 import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
+import { gerarToken } from '../utils/jwtUtils';
 import ErrorHandler from '../errors/errorHandler';
 
 export class LoginService {
@@ -28,11 +28,11 @@ export class LoginService {
     }
 
     // Gera o token JWT com o id, email e tipo de conta do usuário
-    const token = sign(
-      { id: user.id, email: user.email, tipoConta: user.tipoConta },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const token = gerarToken({
+      id: user.id,
+      email: user.email,
+      tipoConta: user.tipoConta
+    });
 
     return { token, tipoConta: user.tipoConta };
   }

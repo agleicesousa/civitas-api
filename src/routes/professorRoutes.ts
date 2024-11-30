@@ -1,42 +1,46 @@
-import { ProfessorController } from '../controller/professorController';
-import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 import { Router } from 'express';
+import { ProfessorController } from '../controller/professorController';
+import { validarEmail } from '../middlewares/validarEmail';
+// import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 
 const professorController = new ProfessorController();
 const professorRouter = Router();
 
 professorRouter.post(
   '/',
-  authenticateJWT,
-  hasPermission('MANAGE_USERS'),
-  (req, res) => professorController.criarProfessor(req, res)
+  validarEmail,
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
+  (req, res, next) => professorController.criarProfessor(req, res, next)
 );
+
 professorRouter.get(
   '/',
-  authenticateJWT,
-  hasPermission('MANAGE_USERS'),
-  (req, res) => professorController.listarProfessores(req, res)
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
+  (req, res, next) => professorController.listarProfessores(req, res, next)
 );
 
 professorRouter.get(
   '/:id',
-  authenticateJWT,
-  hasPermission('MANAGE_USERS'),
-  (req, res) => professorController.buscarProfessorPorId(req, res)
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
+  (req, res, next) => professorController.buscarProfessorPorId(req, res, next)
 );
 
 professorRouter.put(
   '/:id',
-  authenticateJWT,
-  hasPermission('MANAGE_USERS'),
-  (req, res) => professorController.editarProfessor(req, res)
+  validarEmail,
+  //  authenticateJWT,
+  //  hasPermission('MANAGE_USERS'),
+  (req, res, next) => professorController.atualizarProfessor(req, res, next)
 );
 
 professorRouter.delete(
   '/:id',
-  authenticateJWT,
-  hasPermission('MANAGE_USERS'),
-  (req, res) => professorController.deletarProfessor(req, res)
+  //  authenticateJWT,
+  //  hasPermission('MANAGER_USERS'),
+  (req, res, next) => professorController.deletarProfessor(req, res, next)
 );
 
 export default professorRouter;
