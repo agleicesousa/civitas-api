@@ -155,7 +155,7 @@ export class PdiService {
 
     return pdis.map((pdi: PDI) => ({
       id: pdi.id,
-      registrationDate: pdi.dataCriacao
+      registrationDate: new Date(pdi.dataCriacao).toLocaleDateString('pt-BR')
     }));
   }
 }
