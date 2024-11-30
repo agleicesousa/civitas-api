@@ -16,6 +16,26 @@ export class PdiService {
   private alunosRepository = MysqlDataSource.getRepository(Alunos);
   private pdiRepository = MysqlDataSource.getRepository(PDI);
   private professorRepository = MysqlDataSource.getRepository(Professor);
+
+  private pdiMap(pdi: PDI) {
+    const comments = pdi.consideracoes;
+    const responses = {};
+    pdi.secoes.forEach((secao) => {
+      secao.respostas.forEach((resposta) => {
+        responses[resposta.pergunta] = Number(resposta.valor);
+      });
+    });
+    const averages = pdi.secoes.map((secao) => Number(secao.media));
+    const registrationDate = pdi.dataCriacao;
+
+    return {
+      ...responses,
+      averages,
+      registrationDate,
+      comments
+    };
+  }
+
   async criarPDI(
     payload: CreatePDIPayload,
     comments: string,
@@ -84,8 +104,58 @@ export class PdiService {
         return resposta;
       });
 
-    // Cria todas as respostas em paralelo
+    // Insere todas as respostas em paralelo
     secao.respostas = await Promise.all(respostasPromises);
     return secao;
+  }
+
+  async detalhesPDI(idPDI: number) {
+    const pdi = await this.pdiRepository.findOne({
+      where: { id: idPDI },
+      relations: ['secoes']
+    });
+
+    if (!pdi) {
+      throw ErrorHandler.notFound('PDI não encontrado');
+    }
+    const idPdiAnterior = idPDI - 1;
+    const pdiAnterior = await this.pdiRepository.findOne({
+      relations: ['secoes'],
+      where: {
+        id: idPdiAnterior
+      }
+    });
+    console.log(pdiAnterior);
+
+    const pdiDetalhes = this.pdiMap(pdi);
+
+    const mediasAnteriores =
+      pdiAnterior?.secoes.map((secao) => Number(secao.media)) ?? [];
+
+    return {
+      ...pdiDetalhes,
+      previousIdpAverages: mediasAnteriores
+    };
+  }
+
+  async listaPdis(alunoId: number) {
+    const pdis = await this.pdiRepository.find({
+      where: {
+        aluno: {
+          id: alunoId
+        }
+      },
+      order: { dataCriacao: 'DESC' },
+      select: ['id', 'dataCriacao']
+    });
+
+    if (!pdis.length) {
+      return [];
+    }
+
+    return pdis.map((pdi: PDI) => ({
+      id: pdi.id,
+      registrationDate: pdi.dataCriacao
+    }));
   }
 }

@@ -1,16 +1,14 @@
 import { Request, Response } from 'express';
 import { PdiService } from '../services/pdiService';
-import { MysqlDataSource } from '../config/database';
-import { PDI } from '../entities/pdiEntities';
 import ErrorHandler from '../errors/errorHandler';
 export class PdiController {
   private pdiService = new PdiService();
 
   async criarPdi(req: Request, res: Response) {
+    const { pdiValues, comments } = req.body;
+    const alunoId = Number(req.params.id);
+    const professorId = req.user.id;
     try {
-      const { pdiValues, comments } = req.body;
-      const alunoId = Number(req.params.id);
-      const professorId = req.user.id;
       const pdi = await this.pdiService.criarPDI(
         { pdiValues },
         comments,
@@ -19,7 +17,7 @@ export class PdiController {
       );
 
       return res.status(201).json({
-        message: 'PDI criado com sucesso',
+        message: 'PDI cadastrado com sucesso',
         data: pdi
       });
     } catch (error) {
@@ -35,27 +33,36 @@ export class PdiController {
     }
   }
 
+  async obterDetalhesPDI(req: Request, res: Response): Promise<Response> {
+    const idPDI = Number(req.params.id);
+
+    try {
+      if (isNaN(idPDI)) {
+        res
+          .status(400)
+          .json({ message: 'O ID do PDI deve ser um número válido' });
+        return;
+      }
+      const detalhes = await this.pdiService.detalhesPDI(idPDI);
+      res.status(200).json(detalhes);
+    } catch (error) {
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({
+          message: error.message
+        });
+      }
+      return res.status(500).json({
+        message:
+          'Não foi possível carregar as informações. Erro interno do servidor.'
+      });
+    }
+  }
+
   async listarPDIs(req: Request, res: Response): Promise<Response> {
     try {
-      const pdiRepository = MysqlDataSource.getRepository(PDI);
-
-      const pdIs = await pdiRepository
-        .createQueryBuilder('pdi')
-        .leftJoinAndSelect('pdi.secoes', 'secao')
-        .leftJoinAndSelect('secao.respostas', 'resposta')
-        .leftJoinAndSelect('pdi.aluno', 'aluno')
-        .select([
-          'pdi.id',
-          'pdi.consideracoes',
-          'secao.titulo',
-          'secao.media',
-          'resposta.pergunta',
-          'resposta.valor',
-          'aluno.id'
-        ])
-        .getMany();
-
-      return res.status(200).json({ message: 'PDIs encontrados', data: pdIs });
+      const alunoId = Number(req.params.id);
+      const pdis = await this.pdiService.listaPdis(alunoId);
+      return res.status(200).json(pdis);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Erro ao listar PDIs' });
