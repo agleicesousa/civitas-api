@@ -7,7 +7,7 @@ export class PdiController {
   async criarPdi(req: Request, res: Response) {
     const { pdiValues, comments } = req.body;
     const alunoId = Number(req.params.id);
-    const professorId = req.user.id;
+    const professorId = req.user?.id;
     try {
       const pdi = await this.pdiService.criarPDI(
         { pdiValues },
@@ -35,7 +35,6 @@ export class PdiController {
 
   async obterDetalhesPDI(req: Request, res: Response): Promise<Response> {
     const idPDI = Number(req.params.id);
-
     try {
       if (isNaN(idPDI)) {
         res

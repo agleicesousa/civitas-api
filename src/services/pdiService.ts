@@ -104,24 +104,27 @@ export class PdiService {
   async detalhesPDI(idPDI: number) {
     const pdi = await this.pdiRepository.findOne({
       where: { id: idPDI },
-      relations: ['secoes']
+      relations: ['secoes', 'aluno']
     });
 
     if (!pdi) {
       throw ErrorHandler.notFound('PDI não encontrado');
     }
-    const idPdiAnterior = idPDI - 1;
-    const pdiAnterior = await this.pdiRepository.findOne({
+
+    const todosPdi = await this.pdiRepository.find({
+      where: { aluno: { id: pdi.aluno.id } },
       relations: ['secoes'],
-      where: {
-        id: idPdiAnterior
-      }
+      order: { dataCriacao: 'ASC' }
     });
+    const currentPdiIndex = todosPdi.findIndex((p) => p.id === idPDI);
+    const pdiAnterior =
+      currentPdiIndex > 0 ? todosPdi[currentPdiIndex - 1] : null;
 
     const pdiDetalhes = this.pdiMap(pdi);
 
-    const mediasAnteriores =
-      pdiAnterior?.secoes.map((secao) => Number(secao.media)) ?? [];
+    const mediasAnteriores = pdiAnterior
+      ? pdiAnterior.secoes.map((secao) => Number(secao.media))
+      : [];
 
     return {
       ...pdiDetalhes,
