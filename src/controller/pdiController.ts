@@ -35,6 +35,7 @@ export class PdiController {
 
   async obterDetalhesPDI(req: Request, res: Response): Promise<Response> {
     const idPDI = Number(req.params.id);
+
     try {
       if (isNaN(idPDI)) {
         res
