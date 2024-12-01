@@ -64,14 +64,11 @@ export class PdiService {
     }
 
     const pdi = new PDI();
-    pdi.secoes = [];
     pdi.aluno = aluno;
     pdi.consideracoes = comments;
     pdi.professor = professor;
-    pdi.secoes = await Promise.all(
-      payload.pdiValues.map((sectionData) =>
-        this.criarSecaoComRespostas(sectionData)
-      )
+    pdi.secoes = payload.pdiValues.map((sectionData) =>
+      this.criarSecaoComRespostas(sectionData)
     );
 
     return await this.pdiRepository.save(pdi);
@@ -89,13 +86,10 @@ export class PdiService {
     await this.pdiRepository.delete(pdiId);
   }
 
-  private async criarSecaoComRespostas(sectionData): Promise<PdiSecao> {
+  private criarSecaoComRespostas(sectionData): PdiSecao {
     const secao = new PdiSecao();
     secao.titulo = sectionData.section;
-    secao.respostas = [];
-
-    // Prepara os dados das respostas
-    const respostasPromises = Object.entries(sectionData)
+    secao.respostas = Object.entries(sectionData)
       .filter(([key]) => key !== 'section')
       .map(([key, value]) => {
         const resposta = new PdiResposta();
@@ -104,8 +98,6 @@ export class PdiService {
         return resposta;
       });
 
-    // Insere todas as respostas em paralelo
-    secao.respostas = await Promise.all(respostasPromises);
     return secao;
   }
 
