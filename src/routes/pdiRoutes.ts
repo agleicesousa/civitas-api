@@ -25,7 +25,5 @@ pdiRouter.get(
   (req, res) => pdiController.listarPDIs(req, res)
 );
 
-pdiRouter.get('/', (req, res) => pdiController.listarPDIs(req, res));
-
 // pdiRouter.delete('/:id', (req, res) => pdiController.deletarPDI(req, res));
 export default pdiRouter;
