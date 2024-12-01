@@ -125,7 +125,6 @@ export class PdiService {
         id: idPdiAnterior
       }
     });
-    console.log(pdiAnterior);
 
     const pdiDetalhes = this.pdiMap(pdi);
 
