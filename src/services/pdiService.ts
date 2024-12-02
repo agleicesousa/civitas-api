@@ -74,7 +74,7 @@ export class PdiService {
 
     aluno.desempenho = aluno.calcularDesempenho(pdi.secoes);
     await this.alunosRepository.save(aluno);
-    
+
     return novoPdi;
   }
 
@@ -107,8 +107,10 @@ export class PdiService {
   async detalhesPDI(idPDI: number) {
     const pdi = await this.pdiRepository.findOne({
       where: { id: idPDI },
-      relations: ['secoes', 'aluno']
+      relations: ['secoes', 'aluno', 'professor', 'aluno.turma']
     });
+    const aluno = pdi.aluno;
+    const professor = pdi.professor;
 
     if (!pdi) {
       throw ErrorHandler.notFound('PDI não encontrado');
@@ -128,9 +130,12 @@ export class PdiService {
     const mediasAnteriores = pdiAnterior
       ? pdiAnterior.secoes.map((secao) => Number(secao.media))
       : [];
-
     return {
       ...pdiDetalhes,
+      studentName: aluno.membro.nomeCompleto,
+      classroomName: aluno.turma ? aluno.turma.turmaApelido : '',
+      teacherName: professor.membro.nomeCompleto,
+      enrollmentNumber: aluno.membro.numeroMatricula,
       previousIdpAverages: mediasAnteriores
     };
   }
