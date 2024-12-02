@@ -51,9 +51,6 @@ export class Membros extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async handleCriptografiaSenha(): Promise<void> {
-    if (!this.senha) {
-      this.senha = await this.numeroMatricula;
-    }
 
     if (this.senha && this.isSenhaPlanText()) {
       this.senha = await criptografarSenha(this.senha);
