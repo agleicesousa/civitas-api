@@ -10,6 +10,7 @@ import { Like } from 'typeorm';
 // import { Professor } from '../entities/professorEntities';
 import { MysqlDataSource } from '../config/database';
 import { ConflictError } from '../errors/ConflitctError';
+import ErrorHandler from '../errors/errorHandler';
 // import { In } from 'typeorm';
 
 /**
@@ -144,5 +145,28 @@ export class TurmasService {
    */
   async buscarPorId(id: number): Promise<Turma | null> {
     return await this.turmasRepository.findOneBy({ id });
+  }
+
+  async buscarAlunosPorTurma(turmaId: number) {
+    const turma = await this.turmasRepository.findOne({
+      where: { id: turmaId },
+      relations: ['alunos', 'alunos.membro']
+    });
+
+    if (!turma) {
+      throw ErrorHandler.notFound('Turma não encontrada');
+    }
+
+    if (!turma.alunos || turma.alunos.length === 0) {
+      return [];
+    }
+
+    const listaAlunos = turma.alunos.map((aluno) => ({
+      id: aluno.id,
+      name: aluno.membro.nomeCompleto,
+      performance: aluno.desempenho
+    }));
+
+    return listaAlunos;
   }
 }

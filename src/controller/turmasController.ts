@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { TurmasService } from '../services/turmasService';
 import { ConflictError } from '../errors/ConflitctError';
 import { getPaginationParams } from '../utils/paramsPagination';
+import ErrorHandler from '../errors/errorHandler';
 /**
  * Controlador para gerenciar as rotas relacionadas a turmas.
  */
@@ -114,6 +115,36 @@ export class TurmasController {
       return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
       return res.status(404).json({ message: error.message });
+    }
+  }
+
+  async buscarAlunosTurma(req: Request, res: Response): Promise<Response> {
+    try {
+      const turmaId = Number(req.params.id);
+
+      if (!turmaId) {
+        return res.status(400).json({
+          message: 'O ID da turma é inválido.'
+        });
+      }
+
+      const alunos = await this.turmasService.buscarAlunosPorTurma(
+        Number(turmaId)
+      );
+
+      return res.status(200).json({
+        message: 'Alunos da turma encontrados com sucesso.',
+        alunos
+      });
+    } catch (error) {
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({
+          message: error.message
+        });
+      }
+      return res.status(500).json({
+        message: 'Não foi possível carregar os alunos. Erro interno do servidor'
+      });
     }
   }
 }
