@@ -5,10 +5,10 @@ export class PdiController {
   private pdiService = new PdiService();
 
   async criarPdi(req: Request, res: Response) {
-    const { pdiValues, comments } = req.body;
-    const alunoId = Number(req.params.id);
-    const professorId = req.user?.id;
     try {
+      const { pdiValues, comments } = req.body;
+      const alunoId = Number(req.params.id);
+      const professorId = req.user?.id;
       const pdi = await this.pdiService.criarPDI(
         { pdiValues },
         comments,
@@ -34,9 +34,8 @@ export class PdiController {
   }
 
   async obterDetalhesPDI(req: Request, res: Response): Promise<Response> {
-    const idPDI = Number(req.params.id);
-
     try {
+      const idPDI = Number(req.params.id);
       if (isNaN(idPDI)) {
         res
           .status(400)
@@ -72,9 +71,7 @@ export class PdiController {
   async deletarPDI(req: Request, res: Response): Promise<Response> {
     try {
       const pdiId = Number(req.params.id);
-
       await this.pdiService.deletearPdi(pdiId);
-
       return res.status(200).json({
         message: 'PDI removido com sucesso'
       });
