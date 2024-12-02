@@ -70,8 +70,12 @@ export class PdiService {
     pdi.secoes = payload.pdiValues.map((sectionData) =>
       this.criarSecaoComRespostas(sectionData)
     );
+    const novoPdi = await this.pdiRepository.save(pdi);
 
-    return await this.pdiRepository.save(pdi);
+    aluno.desempenho = aluno.calcularDesempenho(pdi.secoes);
+    await this.alunosRepository.save(aluno);
+    
+    return novoPdi;
   }
 
   async deletearPdi(pdiId: number) {
@@ -100,7 +104,6 @@ export class PdiService {
 
     return secao;
   }
-
   async detalhesPDI(idPDI: number) {
     const pdi = await this.pdiRepository.findOne({
       where: { id: idPDI },
