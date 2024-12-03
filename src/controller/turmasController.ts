@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { TurmasService } from '../services/turmasService';
-import { getPaginationParams } from '../utils/paramsPagination';
+import { getPaginacao } from '../utils/paginacaoUtils';
 import ErrorHandler from '../errors/errorHandler';
 
 export class TurmasController {
@@ -35,7 +35,7 @@ export class TurmasController {
   }
 
   async listarTurmas(req: Request, res: Response): Promise<Response> {
-    const { page, perPage } = getPaginationParams(req);
+    const { page, perPage } = getPaginacao(req);
     const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
     const adminId = Number(req.user.id);
     try {
@@ -93,7 +93,6 @@ export class TurmasController {
       return res
         .status(500)
         .json({ error: error.message, message: 'Erro ao excluir turma' });
-      
     }
   }
 }
