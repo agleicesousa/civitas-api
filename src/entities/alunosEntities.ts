@@ -15,7 +15,7 @@ import { PDI, PdiSecao } from './pdiEntities';
 const tabelaDeDesempenho = {
   5: 'Exemplar',
   4: 'Engajado',
-  3: 'Evolução',
+  3: 'Evoluindo',
   2: 'Atenção',
   1: 'Crítico'
 };
@@ -50,7 +50,6 @@ export class Alunos extends BaseEntity {
       (soma, secao) => soma + Number(secao.media),
       0
     );
-    console.log(somaDesempenho);
     const mediaDesempenho = Math.floor(somaDesempenho / secoes.length);
     // Garante que a chave fique dentro do intervalo de 1 a 5
     return tabelaDeDesempenho[Math.min(Math.max(mediaDesempenho, 1), 5)];
