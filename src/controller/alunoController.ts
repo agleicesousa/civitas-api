@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { AlunoService } from "../services/alunoService";
+import { Request, Response } from 'express';
+import { AlunoService } from '../services/alunoService';
 
 export class AlunoController {
   private alunoService = new AlunoService();
@@ -26,7 +26,7 @@ export class AlunoController {
   async listarAlunos(req: Request, res: Response) {
     try {
       const { page, perPage } = req.query;
-      const searchTerm = req.query.searchTerm ?? "";
+      const searchTerm = req.query.searchTerm ?? '';
       const adminLogadoId = req.user?.id || null;
 
       const resultado = await this.alunoService.listarAlunos(
@@ -41,7 +41,7 @@ export class AlunoController {
         page,
         perPage,
         total: resultado.total,
-        data: resultado.data,
+        data: resultado.data
       });
     } catch (error) {
       return res

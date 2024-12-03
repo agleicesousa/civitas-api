@@ -93,7 +93,6 @@ export class TurmasController {
       return res
         .status(500)
         .json({ error: error.message, message: 'Erro ao excluir turma' });
-      
     }
   }
 }

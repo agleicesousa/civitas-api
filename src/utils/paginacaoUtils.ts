@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { Request } from 'express';
 
 export const getPaginacao = (req: Request) => {
   const page = parseInt(req.query.page as string) || 1;

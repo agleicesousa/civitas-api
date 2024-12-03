@@ -5,14 +5,14 @@ import {
   OneToOne,
   JoinColumn,
   BeforeInsert,
-  BeforeUpdate,
-} from "typeorm";
-import { BaseEntity, TipoConta } from "./baseEntity";
-import { Admin } from "./adminEntities";
-import { Professor } from "./professorEntities";
-import { criptografarSenha } from "../utils/senhaUtils";
+  BeforeUpdate
+} from 'typeorm';
+import { BaseEntity, TipoConta } from './baseEntity';
+import { Admin } from './adminEntities';
+import { Professor } from './professorEntities';
+import { criptografarSenha } from '../utils/senhaUtils';
 
-@Entity("membros")
+@Entity('membros')
 export class Membros extends BaseEntity {
   @Column({ unique: true, nullable: true })
   numeroMatricula: string;
@@ -29,22 +29,22 @@ export class Membros extends BaseEntity {
   @Column({ nullable: true })
   cpf: string;
 
-  @Column({ type: "enum", enum: TipoConta, nullable: false })
+  @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
-  @ManyToOne(() => Admin, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "adminCriadorId" })
+  @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'adminCriadorId' })
   adminCriadorId: Admin;
 
   @OneToOne(() => Professor, {
     nullable: true,
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE'
   })
   professor: Professor;
 
   @OneToOne(() => Admin, {
     nullable: true,
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE'
   })
   admin: Admin;
 
@@ -57,6 +57,6 @@ export class Membros extends BaseEntity {
   }
 
   private isSenhaPlanText(): boolean {
-    return !this.senha.startsWith("$2b$");
+    return !this.senha.startsWith('$2b$');
   }
 }

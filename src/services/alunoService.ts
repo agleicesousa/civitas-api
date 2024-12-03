@@ -1,11 +1,11 @@
-import { MysqlDataSource } from "../config/database";
-import { Membros } from "../entities/membrosEntities";
-import { Alunos } from "../entities/alunosEntities";
-import { Turma } from "../entities/turmasEntities";
-import { TipoConta } from "../entities/baseEntity";
-import ErrorHandler from "../errors/errorHandler";
-import { criptografarSenha } from "../utils/senhaUtils";
-import { Like } from "typeorm";
+import { MysqlDataSource } from '../config/database';
+import { Membros } from '../entities/membrosEntities';
+import { Alunos } from '../entities/alunosEntities';
+import { Turma } from '../entities/turmasEntities';
+import { TipoConta } from '../entities/baseEntity';
+import ErrorHandler from '../errors/errorHandler';
+import { criptografarSenha } from '../utils/senhaUtils';
+import { Like } from 'typeorm';
 
 export class AlunoService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -25,7 +25,7 @@ export class AlunoService {
       email: aluno.membro.email,
       numeroMatricula: aluno.membro.numeroMatricula,
       cpf: aluno.membro.cpf,
-      turma: aluno.turma ? { id: aluno.turma.id } : null,
+      turma: aluno.turma ? { id: aluno.turma.id } : null
     };
   }
 
@@ -42,11 +42,11 @@ export class AlunoService {
     await this.iniciarDatabase();
 
     const turma = await this.turmaRepository.findOne({
-      where: { id: dadosAluno.turma },
+      where: { id: dadosAluno.turma }
     });
     if (!turma) {
       throw ErrorHandler.badRequest(
-        "Turma não encontrada. Por favor, verifique o ID informado."
+        'Turma não encontrada. Por favor, verifique o ID informado.'
       );
     }
 
@@ -60,7 +60,7 @@ export class AlunoService {
       cpf: dadosAluno.cpf,
       senha: senhaCriptografada,
       tipoConta: TipoConta.ALUNO,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null,
+      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
     });
 
     await this.membrosRepository.save(membro);
@@ -68,7 +68,7 @@ export class AlunoService {
     const aluno = this.alunoRepository.create({ membro, turma });
     await this.alunoRepository.save(aluno);
 
-    return { message: "Aluno cadastrado com sucesso.", aluno };
+    return { message: 'Aluno cadastrado com sucesso.', aluno };
   }
 
   async listarAlunos(
@@ -80,30 +80,30 @@ export class AlunoService {
     const pular = (paginaNumero - 1) * paginaTamanho;
 
     const [alunos, total] = await this.alunoRepository.findAndCount({
-      relations: ["membro"],
+      relations: ['membro'],
       where: {
         admin: { id: adminId },
         ...(termoDeBusca && {
-          membro: { nomeCompleto: Like(`%${termoDeBusca}%`) },
-        }),
+          membro: { nomeCompleto: Like(`%${termoDeBusca}%`) }
+        })
       },
-      order: { membro: { nomeCompleto: "ASC" } },
+      order: { membro: { nomeCompleto: 'ASC' } },
       skip: pular,
-      take: paginaTamanho,
+      take: paginaTamanho
     });
 
     if (alunos.length === 0) {
       throw ErrorHandler.notFound(
         termoDeBusca
           ? `Nenhum aluno encontrado com o termo "${termoDeBusca}".`
-          : "Nenhum aluno cadastrado no momento."
+          : 'Nenhum aluno cadastrado no momento.'
       );
     }
 
     return {
-      message: "Alunos listados com sucesso.",
+      message: 'Alunos listados com sucesso.',
       data: alunos.map(this.dadosAluno),
-      total,
+      total
     };
   }
 
@@ -122,19 +122,19 @@ export class AlunoService {
 
     const aluno = await this.alunoRepository.findOne({
       where: { id: alunoId },
-      relations: ["membro", "turma"],
+      relations: ['membro', 'turma']
     });
 
     if (!aluno || aluno.admin.id !== adminId) {
-      throw ErrorHandler.notFound("Aluno não encontrado ou acesso negado.");
+      throw ErrorHandler.notFound('Aluno não encontrado ou acesso negado.');
     }
 
     if (dadosAtualizados.turma) {
       const turma = await this.turmaRepository.findOneBy({
-        id: dadosAtualizados.turma,
+        id: dadosAtualizados.turma
       });
       if (!turma) {
-        throw ErrorHandler.badRequest("A turma informada não existe.");
+        throw ErrorHandler.badRequest('A turma informada não existe.');
       }
       aluno.turma = turma;
     }
@@ -144,7 +144,7 @@ export class AlunoService {
     await this.membrosRepository.save(aluno.membro);
     await this.alunoRepository.save(aluno);
 
-    return { message: "Dados do aluno atualizados com sucesso.", aluno };
+    return { message: 'Dados do aluno atualizados com sucesso.', aluno };
   }
 
   async excluirAluno(alunoId: number, adminId: number) {
@@ -152,15 +152,15 @@ export class AlunoService {
 
     const aluno = await this.alunoRepository.findOne({
       where: { id: alunoId },
-      relations: ["membro", "admin"],
+      relations: ['membro', 'admin']
     });
 
     if (!aluno || aluno.admin.id !== adminId) {
-      throw ErrorHandler.notFound("Aluno não encontrado ou acesso negado.");
+      throw ErrorHandler.notFound('Aluno não encontrado ou acesso negado.');
     }
 
     await this.alunoRepository.remove(aluno);
 
-    return { message: "Aluno excluído com sucesso." };
+    return { message: 'Aluno excluído com sucesso.' };
   }
 }
