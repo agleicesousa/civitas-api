@@ -49,4 +49,25 @@ export class AlunoController {
         .json({ message: error.message });
     }
   }
+
+  async atualizarAluno(req: Request, res: Response) {
+    try {
+      const adminLogadoId = req.user?.id || null;
+      const alunoId = parseInt(req.params.id);
+
+      const resultado = await this.alunoService.atualizarAluno(
+        alunoId,
+        req.body,
+        adminLogadoId
+      );
+
+      return res
+        .status(200)
+        .json({ message: resultado.message, aluno: resultado.aluno });
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
 }

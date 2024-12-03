@@ -5,7 +5,7 @@ import { Turma } from "../entities/turmasEntities";
 import { TipoConta } from "../entities/baseEntity";
 import ErrorHandler from "../errors/errorHandler";
 import { criptografarSenha } from "../utils/senhaUtils";
-import { Like } from 'typeorm';
+import { Like } from "typeorm";
 
 export class AlunoService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -25,9 +25,7 @@ export class AlunoService {
       email: aluno.membro.email,
       numeroMatricula: aluno.membro.numeroMatricula,
       cpf: aluno.membro.cpf,
-      turma: aluno.turma
-        ? { id: aluno.turma.id }
-        : null,
+      turma: aluno.turma ? { id: aluno.turma.id } : null,
     };
   }
 
@@ -107,5 +105,45 @@ export class AlunoService {
       data: alunos.map(this.dadosAluno),
       total,
     };
+  }
+
+  async atualizarAluno(
+    alunoId: number,
+    dadosAtualizados: {
+      email?: string;
+      nomeCompleto?: string;
+      numeroMatricula?: string;
+      cpf?: string;
+      turma?: number;
+    },
+    adminId: number
+  ) {
+    await this.iniciarDatabase();
+
+    const aluno = await this.alunoRepository.findOne({
+      where: { id: alunoId },
+      relations: ["membro", "turma"],
+    });
+
+    if (!aluno || aluno.admin.id !== adminId) {
+      throw ErrorHandler.notFound("Aluno não encontrado ou acesso negado.");
+    }
+
+    if (dadosAtualizados.turma) {
+      const turma = await this.turmaRepository.findOneBy({
+        id: dadosAtualizados.turma,
+      });
+      if (!turma) {
+        throw ErrorHandler.badRequest("A turma informada não existe.");
+      }
+      aluno.turma = turma;
+    }
+
+    Object.assign(aluno.membro, dadosAtualizados);
+
+    await this.membrosRepository.save(aluno.membro);
+    await this.alunoRepository.save(aluno);
+
+    return { message: "Dados do aluno atualizados com sucesso.", aluno };
   }
 }

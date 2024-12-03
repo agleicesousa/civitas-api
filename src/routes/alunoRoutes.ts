@@ -18,10 +18,17 @@ alunoRouter.post(
 
 alunoRouter.get(
   '/',
-  validarEmail,
   //  authenticateJWT,
   //  hasPermission('VIEW_MEMBERS'),
   (req, res) => alunoController.listarAlunos(req, res)
+);
+
+alunoRouter.put(
+  '/',
+  validarEmail,
+  //  authenticateJWT,
+  //  hasPermission('VIEW_MEMBERS'),
+  (req, res) => alunoController.atualizarAluno(req, res)
 );
 
 export default alunoRouter;
