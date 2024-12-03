@@ -1,4 +1,3 @@
-import { FindManyOptions, Like } from "typeorm";
 import { MysqlDataSource } from "../config/database";
 import { Membros } from "../entities/membrosEntities";
 import { Alunos } from "../entities/alunosEntities";
@@ -6,6 +5,7 @@ import { Turma } from "../entities/turmasEntities";
 import { TipoConta } from "../entities/baseEntity";
 import ErrorHandler from "../errors/errorHandler";
 import { criptografarSenha } from "../utils/senhaUtils";
+import { Like } from 'typeorm';
 
 export class AlunoService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -16,6 +16,19 @@ export class AlunoService {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
     }
+  }
+
+  private dadosAluno(aluno: Alunos) {
+    return {
+      id: aluno.id,
+      nomeCompleto: aluno.membro.nomeCompleto,
+      email: aluno.membro.email,
+      numeroMatricula: aluno.membro.numeroMatricula,
+      cpf: aluno.membro.cpf,
+      turma: aluno.turma
+        ? { id: aluno.turma.id }
+        : null,
+    };
   }
 
   async criarAluno(
@@ -30,17 +43,18 @@ export class AlunoService {
   ) {
     await this.iniciarDatabase();
 
-    const turma = await this.turmaRepository.findOneBy({
-      id: dadosAluno.turma,
+    const turma = await this.turmaRepository.findOne({
+      where: { id: dadosAluno.turma },
     });
     if (!turma) {
-      throw ErrorHandler.notFound("Turma não encontrada");
+      throw ErrorHandler.badRequest(
+        "Turma não encontrada. Por favor, verifique o ID informado."
+      );
     }
 
     const senhaCriptografada = await criptografarSenha(
       dadosAluno.numeroMatricula
     );
-
     const membro = this.membrosRepository.create({
       email: dadosAluno.email,
       nomeCompleto: dadosAluno.nomeCompleto,
@@ -50,14 +64,13 @@ export class AlunoService {
       tipoConta: TipoConta.ALUNO,
       adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null,
     });
+
     await this.membrosRepository.save(membro);
 
-    const aluno = this.alunoRepository.create({
-      membro,
-      turma,
-    });
+    const aluno = this.alunoRepository.create({ membro, turma });
+    await this.alunoRepository.save(aluno);
 
-    return this.alunoRepository.save(aluno);
+    return { message: "Aluno cadastrado com sucesso.", aluno };
   }
 
   async listarAlunos(
@@ -66,44 +79,32 @@ export class AlunoService {
     termoDeBusca: string,
     adminId: number
   ) {
-    await this.iniciarDatabase();
-
     const pular = (paginaNumero - 1) * paginaTamanho;
 
-    const opcoesBusca: FindManyOptions<Alunos> = {
-      relations: ["membro", "turma"],
+    const [alunos, total] = await this.alunoRepository.findAndCount({
+      relations: ["membro"],
       where: {
         admin: { id: adminId },
         ...(termoDeBusca && {
           membro: { nomeCompleto: Like(`%${termoDeBusca}%`) },
         }),
       },
-      order: {
-        membro: {
-          nomeCompleto: "ASC",
-        },
-      },
-    };
+      order: { membro: { nomeCompleto: "ASC" } },
+      skip: pular,
+      take: paginaTamanho,
+    });
 
-    if (paginaTamanho && paginaTamanho > 0) {
-      opcoesBusca.skip = pular;
-      opcoesBusca.take = paginaTamanho;
+    if (alunos.length === 0) {
+      throw ErrorHandler.notFound(
+        termoDeBusca
+          ? `Nenhum aluno encontrado com o termo "${termoDeBusca}".`
+          : "Nenhum aluno cadastrado no momento."
+      );
     }
 
-    const [alunos, total] = await this.alunoRepository.findAndCount(
-      opcoesBusca
-    );
-
-    const alunosMap = alunos.map((aluno) => ({
-      id: aluno.id,
-      nomeCompleto: aluno.membro.nomeCompleto,
-      email: aluno.membro.email,
-      numeroMatricula: aluno.membro.numeroMatricula,
-      turma: aluno.turma?.id ?? null,
-    }));
-
     return {
-      data: alunosMap,
+      message: "Alunos listados com sucesso.",
+      data: alunos.map(this.dadosAluno),
       total,
     };
   }

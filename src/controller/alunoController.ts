@@ -1,46 +1,52 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { AlunoService } from "../services/alunoService";
-import { getPaginacao } from "../utils/paginacaoUtils";
 
 export class AlunoController {
   private alunoService = new AlunoService();
 
-  async criarAluno(req: Request, res: Response, next: NextFunction) {
+  async criarAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id || null;
 
-      const novoAluno = await this.alunoService.criarAluno(
+      const resultado = await this.alunoService.criarAluno(
         req.body,
         adminLogadoId
       );
 
-      res.status(201).json(novoAluno);
+      return res
+        .status(201)
+        .json({ message: resultado.message, aluno: resultado.aluno });
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
     }
   }
 
-  async listarAlunos(req: Request, res: Response, next: NextFunction) {
-    const { page, perPage } = getPaginacao(req);
-    const searchTerm = req.query.searchTerm || "";
-    const adminLogadoId = req.user?.id || null;
-
+  async listarAlunos(req: Request, res: Response) {
     try {
-      const { data, total } = await this.alunoService.listarAlunos(
-        +page,
-        +perPage,
+      const { page, perPage } = req.query;
+      const searchTerm = req.query.searchTerm ?? "";
+      const adminLogadoId = req.user?.id || null;
+
+      const resultado = await this.alunoService.listarAlunos(
+        Number(page) || 1,
+        Number(perPage) || 10,
         searchTerm as string,
         adminLogadoId
       );
 
-      res.status(200).json({
-        page: +page,
-        perPage: +perPage,
-        total,
-        data,
+      return res.status(200).json({
+        message: resultado.message,
+        page,
+        perPage,
+        total: resultado.total,
+        data: resultado.data,
       });
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
     }
   }
 }

@@ -13,7 +13,7 @@ alunoRouter.post(
   validarEmail,
   //  authenticateJWT,
   //  hasPermission('VIEW_MEMBERS'),
-  (req, res, next) => alunoController.criarAluno(req, res, next)
+  (req, res) => alunoController.criarAluno(req, res)
 );
 
 alunoRouter.get(
@@ -21,7 +21,7 @@ alunoRouter.get(
   validarEmail,
   //  authenticateJWT,
   //  hasPermission('VIEW_MEMBERS'),
-  (req, res, next) => alunoController.listarAlunos(req, res, next)
+  (req, res) => alunoController.listarAlunos(req, res)
 );
 
 export default alunoRouter;
