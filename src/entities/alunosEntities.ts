@@ -6,12 +6,11 @@ import { Admin } from './adminEntities';
 
 @Entity('alunos')
 export class Alunos extends BaseEntity {
-  @OneToOne(() => Membros, { eager: true })
+  @OneToOne(() => Membros, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'membroId' })
   membro: Membros;
 
-  @ManyToOne(() => Admin, { eager: true, nullable: false })
-  @JoinColumn({ name: 'adminId' })
+  @ManyToOne(() => Admin, { nullable: true })
   admin: Admin;
 
   @ManyToOne(() => Turma, (turma) => turma.alunos, { nullable: true })
