@@ -16,4 +16,12 @@ alunoRouter.post(
   (req, res, next) => alunoController.criarAluno(req, res, next)
 );
 
+alunoRouter.get(
+  '/',
+  validarEmail,
+  //  authenticateJWT,
+  //  hasPermission('VIEW_MEMBERS'),
+  (req, res, next) => alunoController.listarAlunos(req, res, next)
+);
+
 export default alunoRouter;
