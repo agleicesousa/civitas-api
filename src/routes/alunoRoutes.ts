@@ -31,4 +31,11 @@ alunoRouter.put(
   (req, res) => alunoController.atualizarAluno(req, res)
 );
 
+alunoRouter.delete(
+  '/',
+  //  authenticateJWT,
+  //  hasPermission('VIEW_MEMBERS'),
+  (req, res) => alunoController.excluirAluno(req, res)
+);
+
 export default alunoRouter;

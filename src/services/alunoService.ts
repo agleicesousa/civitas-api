@@ -146,4 +146,21 @@ export class AlunoService {
 
     return { message: "Dados do aluno atualizados com sucesso.", aluno };
   }
+
+  async excluirAluno(alunoId: number, adminId: number) {
+    await this.iniciarDatabase();
+
+    const aluno = await this.alunoRepository.findOne({
+      where: { id: alunoId },
+      relations: ["membro", "admin"],
+    });
+
+    if (!aluno || aluno.admin.id !== adminId) {
+      throw ErrorHandler.notFound("Aluno não encontrado ou acesso negado.");
+    }
+
+    await this.alunoRepository.remove(aluno);
+
+    return { message: "Aluno excluído com sucesso." };
+  }
 }
