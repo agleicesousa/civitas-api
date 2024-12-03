@@ -26,7 +26,9 @@ export class PdiService {
       });
     });
     const averages = pdi.secoes.map((secao) => Number(secao.media));
-    const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString('pt-BR');
+    const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString(
+      'pt-BR'
+    );
 
     return {
       ...responses,
@@ -56,11 +58,11 @@ export class PdiService {
     ]);
 
     if (!professor) {
-      throw ErrorHandler.badRequest('Professor não encontrado');
+      throw ErrorHandler.notFound('Professor não encontrado');
     }
 
     if (!aluno) {
-      throw ErrorHandler.badRequest('Aluno não encontrado');
+      throw ErrorHandler.notFound('Aluno não encontrado');
     }
 
     const pdi = new PDI();
@@ -133,14 +135,14 @@ export class PdiService {
     return {
       ...pdiDetalhes,
       studentName: aluno.membro.nomeCompleto,
-      classroomName: aluno.turma ? aluno.turma.turmaApelido : '',
+      classroomName: aluno.turma ? aluno.turma.turmaApelido : 'Sem Turma',
       teacherName: professor.membro.nomeCompleto,
       enrollmentNumber: aluno.membro.numeroMatricula,
       previousIdpAverages: mediasAnteriores
     };
   }
 
-  async listaPdis(alunoId: number) {
+  async pdisDoAluno(alunoId: number) {
     const pdis = await this.pdiRepository.find({
       where: {
         aluno: {
@@ -159,5 +161,33 @@ export class PdiService {
       id: pdi.id,
       registrationDate: new Date(pdi.dataCriacao).toLocaleDateString('pt-BR')
     }));
+  }
+
+  async resumoProfessorAluno(alunoId: number, professorId: number) {
+    const [aluno, professor] = await Promise.all([
+      this.alunosRepository.findOne({
+        where: { id: alunoId },
+        relations: ['membro', 'turma']
+      }),
+      this.professorRepository.findOne({
+        where: { membro: { id: professorId } },
+        relations: ['membro']
+      })
+    ]);
+
+    if (!aluno) {
+      throw ErrorHandler.notFound('Aluno não encontrado');
+    }
+
+    if (!professor) {
+      throw ErrorHandler.notFound('Professor não encontrado');
+    }
+
+    return {
+      classroomName: aluno.turma ? aluno.turma.turmaApelido : 'Sem turma',
+      studentName: aluno.membro.nomeCompleto,
+      teacherName: professor.membro.nomeCompleto,
+      enrollmentNumber: aluno.membro.numeroMatricula
+    };
   }
 }

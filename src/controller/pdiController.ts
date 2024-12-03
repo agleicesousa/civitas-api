@@ -57,10 +57,10 @@ export class PdiController {
     }
   }
 
-  async listarPDIs(req: Request, res: Response): Promise<Response> {
+  async listarPDIsDoAluno(req: Request, res: Response): Promise<Response> {
     try {
       const alunoId = Number(req.params.id);
-      const pdis = await this.pdiService.listaPdis(alunoId);
+      const pdis = await this.pdiService.pdisDoAluno(alunoId);
       return res.status(200).json(pdis);
     } catch (error) {
       console.error(error);
@@ -81,6 +81,42 @@ export class PdiController {
       return res.status(400).json({
         message: 'Erro ao remover PDI',
         error: error.message
+      });
+    }
+  }
+
+  async obterResumoProfessorAluno(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const alunoId = Number(req.params.id);
+      const professorId = Number(req.user.id);
+
+      if (isNaN(alunoId) || isNaN(professorId)) {
+        return res.status(400).json({
+          message: 'Os IDs do aluno ou professor devem ser números válidos'
+        });
+      }
+
+      const dados = await this.pdiService.resumoProfessorAluno(
+        alunoId,
+        professorId
+      );
+
+      return res.status(200).json({
+        message: 'Dados obtido com sucesso.',
+        ...dados
+      });
+    } catch (error) {
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({
+          message: error.message
+        });
+      }
+      return res.status(500).json({
+        message:
+          'Não foi possível carregar as informações. Erro interno do servidor.'
       });
     }
   }

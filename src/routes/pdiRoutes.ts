@@ -23,10 +23,17 @@ pdiRouter.get(
 );
 
 pdiRouter.get(
+  '/alunos/:id/dados',
+  authenticateJWT,
+  hasPermission('VIEW_ALUNOS_IN_OWN_TURMAS'),
+  (req, res) => pdiController.obterResumoProfessorAluno(req, res)
+);
+
+pdiRouter.get(
   '/alunos/:id/registros',
   authenticateJWT,
   hasPermission('VIEW_ALUNOS_IN_OWN_TURMAS'),
-  (req, res) => pdiController.listarPDIs(req, res)
+  (req, res) => pdiController.listarPDIsDoAluno(req, res)
 );
 
 pdiRouter.get(
