@@ -26,7 +26,7 @@ export class PdiService {
       });
     });
     const averages = pdi.secoes.map((secao) => Number(secao.media));
-    const registrationDate = pdi.dataCriacao;
+    const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString('pt-BR');
 
     return {
       ...responses,
