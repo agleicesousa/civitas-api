@@ -159,6 +159,7 @@ export class AlunoService {
       throw ErrorHandler.notFound('Aluno não encontrado ou acesso negado.');
     }
 
+    await this.membrosRepository.remove(aluno.membro);
     await this.alunoRepository.remove(aluno);
 
     return { message: 'Aluno excluído com sucesso.' };

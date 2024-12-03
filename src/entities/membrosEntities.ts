@@ -10,6 +10,7 @@ import {
 import { BaseEntity, TipoConta } from './baseEntity';
 import { Admin } from './adminEntities';
 import { Professor } from './professorEntities';
+import { Alunos } from './alunosEntities';
 import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
@@ -47,6 +48,12 @@ export class Membros extends BaseEntity {
     onDelete: 'CASCADE'
   })
   admin: Admin;
+
+  @OneToOne(() => Alunos, {
+    nullable: true,
+    onDelete: 'CASCADE'
+  })
+  aluno: Alunos;
 
   @BeforeInsert()
   @BeforeUpdate()
