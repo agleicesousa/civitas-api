@@ -7,7 +7,6 @@ import { Membros } from '../entities/membrosEntities';
 const membrosRouter = Router();
 const membrosController = new MembrosController();
 
-// Usando permissaoAdminMiddleware com Membros como entidade
 membrosRouter.post(
   '/',
   authMiddleware,

@@ -8,7 +8,7 @@ interface EntityWithId {
 }
 
 export function permissaoAdminMiddleware<T extends EntityWithId>(
-  entityClass: EntityTarget<T>, // Usamos EntityTarget para garantir a tipagem correta
+  entityClass: EntityTarget<T>,
   entityType: string
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
