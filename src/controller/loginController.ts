@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
 import { LoginService } from '../services/loginService';
 
-export class loginController {
+export class LoginController {
   private loginService = new LoginService();
 
   async login(req: Request, res: Response): Promise<Response> {
     const { email, senha } = req.body;
     const erros = [];
 
-    // Valida campos obrigatórios
     if (!email) {
       erros.push({ campo: 'email', message: 'E-mail é obrigatório' });
     }
@@ -20,12 +19,18 @@ export class loginController {
     }
 
     try {
-      // Realiza o login e retorna o token e o tipo de conta
       const { token, tipoConta } = await this.loginService.login(email, senha);
       return res.json({ token, tipoConta });
     } catch (error) {
-      return res.status(401).json({
-        message: error.message || 'Seu e-mail ou senha estão incorretos.'
+      if (error instanceof Error) {
+        return res.status(401).json({
+          message: error.message || 'Erro de autenticação.'
+        });
+      }
+
+      // Caso o erro não seja uma instância de Error
+      return res.status(500).json({
+        message: 'Ocorreu um erro inesperado.'
       });
     }
   }

@@ -11,7 +11,7 @@ import { BaseEntity, TipoConta } from './baseEntity';
 import { Admin } from './adminEntities';
 import { Professor } from './professorEntities';
 import { Alunos } from './alunosEntities';
-import { criptografarSenha } from '../utils/senhaUtils';
+import { criptografarSenha } from '../utils/validarSenhaUtils';
 
 @Entity('membros')
 export class Membros extends BaseEntity {
@@ -37,33 +37,20 @@ export class Membros extends BaseEntity {
   @JoinColumn({ name: 'adminCriadorId' })
   adminCriadorId: Admin;
 
-  @OneToOne(() => Professor, {
-    nullable: true,
-    onDelete: 'CASCADE'
-  })
+  @OneToOne(() => Professor, { nullable: true, onDelete: 'CASCADE' })
   professor: Professor;
 
-  @OneToOne(() => Admin, {
-    nullable: true,
-    onDelete: 'CASCADE'
-  })
+  @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
   admin: Admin;
 
-  @OneToOne(() => Alunos, {
-    nullable: true,
-    onDelete: 'CASCADE'
-  })
+  @OneToOne(() => Alunos, { nullable: true, onDelete: 'CASCADE' })
   aluno: Alunos;
 
   @BeforeInsert()
   @BeforeUpdate()
   async handleCriptografiaSenha(): Promise<void> {
-    if (this.senha && this.isSenhaPlanText()) {
+    if (this.senha && !this.senha.startsWith('$2b$')) {
       this.senha = await criptografarSenha(this.senha);
     }
-  }
-
-  private isSenhaPlanText(): boolean {
-    return !this.senha.startsWith('$2b$');
   }
 }
