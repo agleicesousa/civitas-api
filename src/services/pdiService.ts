@@ -50,10 +50,8 @@ export class PdiService {
         where: { id: alunoId }
       }),
       this.professorRepository.findOne({
-        where: {
-          membro: {
-            id: professorId
-          }
+        where: {  
+          id: professorId
         }
       })
     ]);
