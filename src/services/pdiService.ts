@@ -27,7 +27,8 @@ export class PdiService {
     });
     const averages = pdi.secoes.map((secao) => Number(secao.media));
     const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString(
-      'pt-BR'
+      'pt-BR',
+      { timeZone: 'America/Sao_Paulo' }
     );
 
     return {
@@ -159,7 +160,9 @@ export class PdiService {
 
     return pdis.map((pdi: PDI) => ({
       id: pdi.id,
-      registrationDate: new Date(pdi.dataCriacao).toLocaleDateString('pt-BR')
+      registrationDate: new Date(pdi.dataCriacao).toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo'
+      })
     }));
   }
 
