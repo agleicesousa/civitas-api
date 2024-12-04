@@ -35,6 +35,9 @@ export function verificarToken(token: string): JwtPayload {
   try {
     return jwt.verify(token, SECRET_KEY) as JwtPayload;
   } catch (error) {
-    throw new Error('Token inválido ou expirado.');
+    if (error.name === 'TokenExpiredError') {
+      throw new Error('Token expirado.');
+    }
+    throw new Error('Token inválido.');
   }
 }

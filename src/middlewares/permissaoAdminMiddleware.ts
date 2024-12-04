@@ -1,18 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
-import { Repository } from 'typeorm';
+import { Repository, EntityTarget } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 
-interface IdDoAdmin {
-  admin: { id: number };
+interface EntityWithId {
+  id: number;
+  adminCriadorId: number;
 }
 
-export function checarPermissoesAdmin<T extends IdDoAdmin>(
-  entityClass: new () => T,
+export function permissaoAdminMiddleware<T extends EntityWithId>(
+  entityClass: EntityTarget<T>, // Usamos EntityTarget para garantir a tipagem correta
   entityType: string
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
       const { user } = req;
 
       if (!user || user.tipoConta !== 'admin') {
@@ -21,22 +21,47 @@ export function checarPermissoesAdmin<T extends IdDoAdmin>(
           .json({ error: 'Acesso negado. Permissão de admin necessária.' });
       }
 
-      const entityRepository: Repository<T> = MysqlDataSource.getRepository(entityClass);
+      if (req.method === 'POST') {
+        return next();
+      }
 
-      const entityRecord = await entityRepository.findOne({
-        where: { id: Number(id) } as any,
-        relations: ['admin'],
-      });
+      const { id } = req.params;
+
+      const entityRepository: Repository<T> =
+        MysqlDataSource.getRepository(entityClass);
+
+      if (!id) {
+        const entityRecords = await entityRepository
+          .createQueryBuilder('entity')
+          .where('entity.adminCriadorId = :adminCriadorId', {
+            adminCriadorId: user.id
+          })
+          .getMany();
+
+        if (entityRecords.length === 0) {
+          return res
+            .status(404)
+            .json({ error: `Nenhum ${entityType} encontrado.` });
+        }
+
+        return res.status(200).json(entityRecords);
+      }
+
+      const idNumber = Number(id);
+      if (isNaN(idNumber)) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      const entityRecord = await entityRepository
+        .createQueryBuilder('entity')
+        .where('entity.id = :id AND entity.adminCriadorId = :adminCriadorId', {
+          id: idNumber,
+          adminCriadorId: user.id
+        })
+        .getOne();
 
       if (!entityRecord) {
         return res.status(404).json({ error: `${entityType} não encontrado.` });
-      }
-
-      if (entityRecord.admin.id !== user.id) {
-        return res.status(403).json({
-          error:
-            'Acesso negado. Você não tem permissão para gerenciar esta entidade.',
-        });
       }
 
       next();

@@ -35,7 +35,7 @@ export async function authMiddleware(
   }
 }
 
-export function verificarPermissao(necessaria: string) {
+export function permissoes(necessaria: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     const usuario = req.user;
     if (usuario?.permissions?.includes(necessaria)) {
