@@ -169,9 +169,7 @@ export class ProfessorService {
   async buscarProfessorTurmas(professorId: number) {
     const professor = await this.professorRepository.findOne({
       where: {
-        membro: {
-          id: professorId
-        }
+        id: professorId
       },
       relations: ['turmas']
     });

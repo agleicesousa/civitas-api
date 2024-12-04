@@ -173,7 +173,7 @@ export class PdiService {
         relations: ['membro', 'turma']
       }),
       this.professorRepository.findOne({
-        where: { membro: { id: professorId } },
+        where: { id: professorId },
         relations: ['membro']
       })
     ]);
