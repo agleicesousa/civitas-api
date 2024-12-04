@@ -33,15 +33,15 @@ export class Membros extends BaseEntity {
   @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
+  @Column({ nullable: true })
+  adminCriadorId: number;
+
   @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'adminCriadorId' })
-  adminCriadorId: Admin;
+  admin: Admin;
 
   @OneToOne(() => Professor, { nullable: true, onDelete: 'CASCADE' })
   professor: Professor;
-
-  @OneToOne(() => Admin, { nullable: true, onDelete: 'CASCADE' })
-  admin: Admin;
 
   @OneToOne(() => Alunos, { nullable: true, onDelete: 'CASCADE' })
   aluno: Alunos;
