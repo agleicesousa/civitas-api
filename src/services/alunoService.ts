@@ -4,7 +4,7 @@ import { Alunos } from '../entities/alunosEntities';
 import { Turma } from '../entities/turmasEntities';
 import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
-import { criptografarSenha } from '../utils/senhaUtils';
+import { criptografarSenha } from '../utils/validarSenhaUtils';
 import { Like } from 'typeorm';
 
 export class AlunoService {

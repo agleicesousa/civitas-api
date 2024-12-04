@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AlunoController } from '../controller/alunoController';
-import { validarEmail } from '../middlewares/validarEmail';
+import { validarEmail } from '../utils/validarEmailUtils';
 //  import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 
 // TODO: as linhas comentadas ainda serão utilizadas.

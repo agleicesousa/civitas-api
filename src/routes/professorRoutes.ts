@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProfessorController } from '../controller/professorController';
-import { validarEmail } from '../middlewares/validarEmail';
+import { validarEmail } from '../utils/validarEmailUtils';
 // import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
 
 const professorController = new ProfessorController();

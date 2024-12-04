@@ -3,7 +3,7 @@ import { Professor } from '../entities/professorEntities';
 import { Membros } from '../entities/membrosEntities';
 import { Turma } from '../entities/turmasEntities';
 import { TipoConta } from '../entities/baseEntity';
-import { criptografarSenha } from '../utils/senhaUtils';
+import { criptografarSenha } from '../utils/validarSenhaUtils';
 import ErrorHandler from '../errors/errorHandler';
 import { MysqlDataSource } from '../config/database';
 

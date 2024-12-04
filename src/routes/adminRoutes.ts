@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
 // import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
-import { validarEmail } from '../middlewares/validarEmail';
-import { validarSenha } from '../utils/senhaUtils';
+import { validarEmail } from '../utils/validarEmailUtils';
+import { validarSenha } from '../utils/validarSenhaUtils';
 
 const adminRouter = Router();
 const adminController = new AdminController();

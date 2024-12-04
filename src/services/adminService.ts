@@ -3,7 +3,7 @@ import { Admin } from '../entities/adminEntities';
 import { Membros } from '../entities/membrosEntities';
 import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
-import { criptografarSenha, validarSenha } from '../utils/senhaUtils';
+import { criptografarSenha, validarSenha } from '../utils/validarSenhaUtils';
 
 export class AdminService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
