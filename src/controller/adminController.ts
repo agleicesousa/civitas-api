@@ -6,11 +6,11 @@ export class AdminController {
 
   async criarAdmin(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email } = req.body;
+      const adminLogadoId = req.user?.id;
 
-      const adminLogadoId = req.user?.id || null;
-
-      await this.adminService.verificarEmailDuplicado(email);
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
 
       const novoAdmin = await this.adminService.criarAdmin(
         req.body,
@@ -24,7 +24,13 @@ export class AdminController {
 
   async listarAdmins(req: Request, res: Response, next: NextFunction) {
     try {
-      const admins = await this.adminService.listarAdmins();
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
+      const admins = await this.adminService.listarAdmins(adminLogadoId);
       res.json(admins);
     } catch (error) {
       next(error);
@@ -33,8 +39,14 @@ export class AdminController {
 
   async buscarAdminPorId(req: Request, res: Response, next: NextFunction) {
     try {
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
       const id = parseInt(req.params.id, 10);
-      const admin = await this.adminService.buscarAdminPorId(id);
+      const admin = await this.adminService.buscarAdminPorId(id, adminLogadoId);
       res.json(admin);
     } catch (error) {
       next(error);
@@ -43,15 +55,17 @@ export class AdminController {
 
   async atualizarAdmin(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id, 10);
+      const adminLogadoId = req.user?.id;
 
-      if (req.body.email) {
-        await this.adminService.verificarEmailDuplicado(req.body.email);
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
       }
 
+      const id = parseInt(req.params.id, 10);
       const adminAtualizado = await this.adminService.atualizarAdmin(
         id,
-        req.body
+        req.body,
+        adminLogadoId
       );
       res.json(adminAtualizado);
     } catch (error) {
@@ -61,9 +75,13 @@ export class AdminController {
 
   async deletarAdmin(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id, 10);
-      const adminLogadoId = req.user.id;
+      const adminLogadoId = req.user?.id;
 
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
+      const id = parseInt(req.params.id, 10);
       await this.adminService.deletarAdmin(id, adminLogadoId);
       res.status(204).send();
     } catch (error) {
