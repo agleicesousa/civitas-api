@@ -22,7 +22,7 @@ export class AdminService {
       nomeCompleto: string;
       tipoConta: TipoConta;
     },
-    adminCriadorId: number | null
+    adminCriadorId: number
   ) {
     await this.iniciarDatabase();
 

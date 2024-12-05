@@ -6,7 +6,11 @@ export class ProfessorController {
 
   async criarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
-      const adminLogadoId = req.user?.id || null;
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
 
       const novoProfessor = await this.professorService.criarProfessor(
         req.body,
@@ -21,8 +25,15 @@ export class ProfessorController {
 
   async listarProfessores(req: Request, res: Response, next: NextFunction) {
     try {
-      const professor = await this.professorService.listarProfessores();
-      res.json(professor);
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
+      const professores =
+        await this.professorService.listarProfessores(adminLogadoId);
+      res.json(professores);
     } catch (error) {
       next(error);
     }
@@ -30,8 +41,22 @@ export class ProfessorController {
 
   async buscarProfessorPorId(req: Request, res: Response, next: NextFunction) {
     try {
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
       const id = parseInt(req.params.id, 10);
-      const professor = await this.professorService.buscarProfessorPorId(id);
+
+      if (isNaN(id)) {
+        throw new Error('ID inválido.');
+      }
+
+      const professor = await this.professorService.buscarProfessorPorId(
+        id,
+        adminLogadoId
+      );
       res.json(professor);
     } catch (error) {
       next(error);
@@ -40,10 +65,24 @@ export class ProfessorController {
 
   async atualizarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
       const id = parseInt(req.params.id, 10);
 
+      if (isNaN(id)) {
+        throw new Error('ID inválido.');
+      }
+
       const professorAtualizado =
-        await this.professorService.atualizarProfessor(id, req.body);
+        await this.professorService.atualizarProfessor(
+          id,
+          req.body,
+          adminLogadoId
+        );
 
       res.status(200).json(professorAtualizado);
     } catch (error) {
@@ -53,9 +92,19 @@ export class ProfessorController {
 
   async deletarProfessor(req: Request, res: Response, next: NextFunction) {
     try {
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw new Error('Admin não autenticado.');
+      }
+
       const id = parseInt(req.params.id, 10);
 
-      await this.professorService.deletarProfessor(id);
+      if (isNaN(id)) {
+        throw new Error('ID inválido.');
+      }
+
+      await this.professorService.deletarProfessor(id, adminLogadoId);
       res.status(204).send('Professor excluído com sucesso');
     } catch (error) {
       next(error);
