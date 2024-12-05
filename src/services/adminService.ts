@@ -22,7 +22,7 @@ export class AdminService {
       nomeCompleto: string;
       tipoConta: TipoConta;
     },
-    adminCriadorId: number
+    adminCriadorId: number | null
   ) {
     await this.iniciarDatabase();
 
@@ -41,14 +41,14 @@ export class AdminService {
       tipoConta: TipoConta.ADMIN,
       adminCriadorId
     });
+    console.log('Membro antes do save:', membro);
 
     await this.membrosRepository.save(membro);
 
     const admin = this.adminRepository.create({ membro });
     const novoAdmin = await this.adminRepository.save(admin);
 
-    membro.admin = novoAdmin;
-    await this.membrosRepository.save(membro);
+    membro.adminCriador = novoAdmin;
 
     return novoAdmin;
   }
