@@ -11,35 +11,35 @@ adminRouter.post(
   '/',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => adminController.criarAdmin(req, res, next)
+  (req, res) => adminController.criarAdmin(req, res)
 );
 
 adminRouter.get(
   '/',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => adminController.listarAdmins(req, res, next)
+  (req, res) => adminController.listarAdmins(req, res)
 );
 
 adminRouter.get(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => adminController.buscarAdminPorId(req, res, next)
+  (req, res) => adminController.buscarAdminPorId(req, res)
 );
 
 adminRouter.put(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => adminController.atualizarAdmin(req, res, next)
+  (req, res) => adminController.atualizarAdmin(req, res)
 );
 
 adminRouter.delete(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => adminController.deletarAdmin(req, res, next)
+  (req, res) => adminController.deletarAdmin(req, res)
 );
 
 export default adminRouter;

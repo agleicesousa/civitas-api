@@ -46,19 +46,17 @@ export class ProfessorService {
       numeroMatricula: dadosProfessor.numeroMatricula,
       cpf: dadosProfessor.cpf,
       tipoConta: TipoConta.PROFESSOR,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
+      adminCriadorId
     });
 
     await this.membrosRepository.save(membro);
 
-    // Criar o professor associado ao membro
     const professor = this.professorRepository.create({
       membro,
       turmas
     });
 
     const novoProfessor = await this.professorRepository.save(professor);
-
     return novoProfessor;
   }
 

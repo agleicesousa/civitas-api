@@ -1,64 +1,84 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { AdminService } from '../services/adminService';
+import ErrorHandler from '../errors/errorHandler';
 
 export class AdminController {
   private adminService = new AdminService();
 
-  async criarAdmin(req: Request, res: Response, next: NextFunction) {
+  async criarAdmin(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        res.status(401).json({ message: 'Admin não autenticado.' });
+        return;
       }
 
       const novoAdmin = await this.adminService.criarAdmin(
         req.body,
         adminLogadoId
       );
-      res.status(201).json(novoAdmin);
+      res.status(201).json({
+        message: 'Admin criado com sucesso.',
+        data: novoAdmin
+      });
     } catch (error) {
-      next(error);
+      res
+        .status(error instanceof ErrorHandler ? error.statusCode : 500)
+        .json({ message: error.message || 'Erro ao criar admin.' });
     }
   }
 
-  async listarAdmins(req: Request, res: Response, next: NextFunction) {
+  async listarAdmins(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        res.status(401).json({ message: 'Admin não autenticado.' });
+        return;
       }
 
       const admins = await this.adminService.listarAdmins(adminLogadoId);
-      res.json(admins);
+      res.status(200).json({
+        message: 'Admins listados com sucesso.',
+        data: admins
+      });
     } catch (error) {
-      next(error);
+      res
+        .status(error instanceof ErrorHandler ? error.statusCode : 500)
+        .json({ message: error.message || 'Erro ao listar admins.' });
     }
   }
 
-  async buscarAdminPorId(req: Request, res: Response, next: NextFunction) {
+  async buscarAdminPorId(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        res.status(401).json({ message: 'Admin não autenticado.' });
+        return;
       }
 
       const id = parseInt(req.params.id, 10);
       const admin = await this.adminService.buscarAdminPorId(id, adminLogadoId);
-      res.json(admin);
+      res.status(200).json({
+        message: 'Admin encontrado com sucesso.',
+        data: admin
+      });
     } catch (error) {
-      next(error);
+      res
+        .status(error instanceof ErrorHandler ? error.statusCode : 500)
+        .json({ message: error.message || 'Erro ao buscar admin.' });
     }
   }
 
-  async atualizarAdmin(req: Request, res: Response, next: NextFunction) {
+  async atualizarAdmin(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        res.status(401).json({ message: 'Admin não autenticado.' });
+        return;
       }
 
       const id = parseInt(req.params.id, 10);
@@ -67,25 +87,33 @@ export class AdminController {
         req.body,
         adminLogadoId
       );
-      res.json(adminAtualizado);
+      res.status(200).json({
+        message: 'Admin atualizado com sucesso.',
+        data: adminAtualizado
+      });
     } catch (error) {
-      next(error);
+      res
+        .status(error instanceof ErrorHandler ? error.statusCode : 500)
+        .json({ message: error.message || 'Erro ao atualizar admin.' });
     }
   }
 
-  async deletarAdmin(req: Request, res: Response, next: NextFunction) {
+  async deletarAdmin(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        res.status(401).json({ message: 'Admin não autenticado.' });
+        return;
       }
 
       const id = parseInt(req.params.id, 10);
       await this.adminService.deletarAdmin(id, adminLogadoId);
-      res.status(204).send();
+      res.status(204).json({ message: 'Admin excluído com sucesso.' });
     } catch (error) {
-      next(error);
+      res
+        .status(error instanceof ErrorHandler ? error.statusCode : 500)
+        .json({ message: error.message || 'Erro ao excluir admin.' });
     }
   }
 }
