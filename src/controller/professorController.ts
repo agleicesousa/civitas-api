@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProfessorService } from '../services/professorService';
+import ErrorHandler from '../errors/errorHandler';
 
 export class ProfessorController {
   private professorService = new ProfessorService();
@@ -9,15 +10,15 @@ export class ProfessorController {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
       }
 
-      const novoProfessor = await this.professorService.criarProfessor(
+      const resultado = await this.professorService.criarProfessor(
         req.body,
         adminLogadoId
       );
 
-      res.status(201).json(novoProfessor);
+      res.status(201).json(resultado);
     } catch (error) {
       next(error);
     }
@@ -28,12 +29,12 @@ export class ProfessorController {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
       }
 
       const professores =
         await this.professorService.listarProfessores(adminLogadoId);
-      res.json(professores);
+      res.status(200).json(professores);
     } catch (error) {
       next(error);
     }
@@ -44,20 +45,21 @@ export class ProfessorController {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
       }
 
       const id = parseInt(req.params.id, 10);
 
       if (isNaN(id)) {
-        throw new Error('ID inválido.');
+        throw ErrorHandler.badRequest('ID inválido.');
       }
 
       const professor = await this.professorService.buscarProfessorPorId(
         id,
         adminLogadoId
       );
-      res.json(professor);
+
+      res.status(200).json(professor);
     } catch (error) {
       next(error);
     }
@@ -68,23 +70,22 @@ export class ProfessorController {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
       }
 
       const id = parseInt(req.params.id, 10);
 
       if (isNaN(id)) {
-        throw new Error('ID inválido.');
+        throw ErrorHandler.badRequest('ID inválido.');
       }
 
-      const professorAtualizado =
-        await this.professorService.atualizarProfessor(
-          id,
-          req.body,
-          adminLogadoId
-        );
+      const resultado = await this.professorService.atualizarProfessor(
+        id,
+        req.body,
+        adminLogadoId
+      );
 
-      res.status(200).json(professorAtualizado);
+      res.status(200).json(resultado);
     } catch (error) {
       next(error);
     }
@@ -95,17 +96,21 @@ export class ProfessorController {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw new Error('Admin não autenticado.');
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
       }
 
       const id = parseInt(req.params.id, 10);
 
       if (isNaN(id)) {
-        throw new Error('ID inválido.');
+        throw ErrorHandler.badRequest('ID inválido.');
       }
 
-      await this.professorService.deletarProfessor(id, adminLogadoId);
-      res.status(204).send('Professor excluído com sucesso');
+      const resultado = await this.professorService.deletarProfessor(
+        id,
+        adminLogadoId
+      );
+
+      res.status(200).json(resultado);
     } catch (error) {
       next(error);
     }
