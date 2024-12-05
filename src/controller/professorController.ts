@@ -40,6 +40,33 @@ export class ProfessorController {
     }
   }
 
+  async listarProfessoresPagina(req: Request, res: Response) {
+    try {
+      const { page, perPage } = req.query;
+      const searchTerm = req.query.searchTerm ?? '';
+      const adminLogadoId = req.user?.id;
+
+      const resultado = await this.professorService.listarProfessoresPagina(
+        Number(page) || 1,
+        Number(perPage) || 10,
+        searchTerm as string,
+        adminLogadoId
+      );
+
+      return res.status(200).json({
+        message: resultado.message,
+        page,
+        perPage,
+        total: resultado.total,
+        data: resultado.data
+      });
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
+
   async buscarProfessorPorId(req: Request, res: Response, next: NextFunction) {
     try {
       const adminLogadoId = req.user?.id;

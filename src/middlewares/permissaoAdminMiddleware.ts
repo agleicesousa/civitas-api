@@ -27,6 +27,12 @@ export function permissaoAdminMiddleware<T extends EntityWithId>(
 
       const { id } = req.params;
 
+      if (req.method === 'GET') {
+        if (!id) {
+          return next();
+        }
+      }
+
       const entityRepository: Repository<T> =
         MysqlDataSource.getRepository(entityClass);
 

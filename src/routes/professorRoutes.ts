@@ -22,6 +22,13 @@ professorRouter.get(
 );
 
 professorRouter.get(
+  '/paginado',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
+  (req, res) => professorController.listarProfessoresPagina(req, res)
+);
+
+professorRouter.get(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),

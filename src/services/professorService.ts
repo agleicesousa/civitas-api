@@ -1,4 +1,4 @@
-import { In } from 'typeorm';
+import { In, Like } from 'typeorm';
 import { Professor } from '../entities/professorEntities';
 import { Membros } from '../entities/membrosEntities';
 import { Turma } from '../entities/turmasEntities';
@@ -16,6 +16,23 @@ export class ProfessorService {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
     }
+  }
+
+  private dadosProfessor(professor: Professor) {
+    return {
+      id: professor.id,
+      nomeCompleto: professor.membro.nomeCompleto,
+      numeroMatricula: professor.membro.numeroMatricula,
+      email: professor.membro.email,
+      cpf: professor.membro.cpf,
+      turmas: professor.turmas.map((turma) => ({
+        id: turma.id,
+        anoLetivo: turma.anoLetivo,
+        periodoLetivo: turma.periodoLetivo,
+        ensino: turma.ensino,
+        turmaApelido: turma.turmaApelido
+      }))
+    };
   }
 
   async criarProfessor(
@@ -82,6 +99,42 @@ export class ProfessorService {
     });
 
     return professores;
+  }
+
+  async listarProfessoresPagina(
+    paginaNumero: number,
+    paginaTamanho: number,
+    termoDeBusca: string,
+    adminLogadoId: number
+  ) {
+    const pular = (paginaNumero - 1) * paginaTamanho;
+
+    const [professores, total] = await this.professorRepository.findAndCount({
+      relations: ['membro'],
+      where: {
+        membro: {
+          adminCriadorId: adminLogadoId,
+          ...(termoDeBusca && { nomeCompleto: Like(`%${termoDeBusca}%`) })
+        }
+      },
+      order: { membro: { nomeCompleto: 'ASC' } },
+      skip: pular,
+      take: paginaTamanho
+    });
+
+    if (professores.length === 0) {
+      throw ErrorHandler.notFound(
+        termoDeBusca
+          ? `Nenhum professor encontrado com o termo "${termoDeBusca}".`
+          : 'Nenhum professor cadastrado no momento.'
+      );
+    }
+
+    return {
+      message: 'Professores listados com sucesso.',
+      data: professores.map(this.dadosProfessor),
+      total
+    };
   }
 
   async buscarProfessorPorId(id: number, adminLogadoId: number) {
