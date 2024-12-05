@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { ProfessorService } from '../services/professorService';
 import ErrorHandler from '../errors/errorHandler';
 
 export class ProfessorController {
   private professorService = new ProfessorService();
 
-  async criarProfessor(req: Request, res: Response, next: NextFunction) {
+  async criarProfessor(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -18,13 +18,17 @@ export class ProfessorController {
         adminLogadoId
       );
 
-      res.status(201).json(resultado);
+      res
+        .status(200)
+        .json({ message: resultado.message, professor: resultado.professor });
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro ao cadastrar professor', error: error.message });
     }
   }
 
-  async listarProfessores(req: Request, res: Response, next: NextFunction) {
+  async listarProfessores(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -36,7 +40,9 @@ export class ProfessorController {
         await this.professorService.listarProfessores(adminLogadoId);
       res.status(200).json(professores);
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro ao listar professores', error: error.message });
     }
   }
 
@@ -63,11 +69,11 @@ export class ProfessorController {
     } catch (error) {
       return res
         .status(error.statusCode || 500)
-        .json({ message: error.message });
+        .json({ message: 'Erro ao listar professores', error: error.message });
     }
   }
 
-  async buscarProfessorPorId(req: Request, res: Response, next: NextFunction) {
+  async buscarProfessorPorId(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -88,11 +94,13 @@ export class ProfessorController {
 
       res.status(200).json(professor);
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro buscar professor', error: error.message });
     }
   }
 
-  async atualizarProfessor(req: Request, res: Response, next: NextFunction) {
+  async atualizarProfessor(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -112,13 +120,17 @@ export class ProfessorController {
         adminLogadoId
       );
 
-      res.status(200).json(resultado);
+      res
+        .status(200)
+        .json({ message: resultado.message, professor: resultado.professor });
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro ao atualizar professor', error: error.message });
     }
   }
 
-  async deletarProfessor(req: Request, res: Response, next: NextFunction) {
+  async deletarProfessor(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -139,7 +151,9 @@ export class ProfessorController {
 
       res.status(200).json(resultado);
     } catch (error) {
-      next(error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro ao excluir professor', error: error.message });
     }
   }
 }
