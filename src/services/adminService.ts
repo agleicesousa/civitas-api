@@ -41,7 +41,6 @@ export class AdminService {
       tipoConta: TipoConta.ADMIN,
       adminCriadorId
     });
-    console.log('Membro antes do save:', membro);
 
     await this.membrosRepository.save(membro);
 
