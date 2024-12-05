@@ -10,12 +10,12 @@ export function validarSenha(senha: string): boolean {
 
 export async function criptografarSenha(senhaPlana: string): Promise<string> {
   const saltRounds = 10;
-  return await bcrypt.hash(senhaPlana, saltRounds);
+  return bcrypt.hash(senhaPlana, saltRounds);
 }
 
 export async function compararSenha(
   senhaPlana: string,
   senhaCriptografada: string
 ): Promise<boolean> {
-  return await bcrypt.compare(senhaPlana, senhaCriptografada);
+  return bcrypt.compare(senhaPlana, senhaCriptografada);
 }
