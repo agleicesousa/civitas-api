@@ -10,6 +10,7 @@ import {
 import { BaseEntity, TipoConta } from './baseEntity';
 import { Admin } from './adminEntities';
 import { Professor } from './professorEntities';
+import { Alunos } from './alunosEntities';
 import { criptografarSenha } from '../utils/senhaUtils';
 
 @Entity('membros')
@@ -48,13 +49,15 @@ export class Membros extends BaseEntity {
   })
   admin: Admin;
 
+  @OneToOne(() => Alunos, {
+    nullable: true,
+    onDelete: 'CASCADE'
+  })
+  aluno: Alunos;
+
   @BeforeInsert()
   @BeforeUpdate()
   async handleCriptografiaSenha(): Promise<void> {
-    if (!this.senha) {
-      this.senha = await this.numeroMatricula;
-    }
-
     if (this.senha && this.isSenhaPlanText()) {
       this.senha = await criptografarSenha(this.senha);
     }
