@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { MembrosService } from '../services/membrosService';
+import ErrorHandler from '../errors/errorHandler';
 
 export class MembrosController {
   private membrosService = new MembrosService();
@@ -13,14 +14,16 @@ export class MembrosController {
 
       const novoMembro = await this.membrosService.criarMembro({
         ...req.body,
-        adminCriadorId: adminCriadorId
+        adminCriadorId
       });
 
-      res.status(201).json(novoMembro);
+      res.status(201).json({
+        message: 'Membro criado com sucesso.',
+        data: novoMembro
+      });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'Erro ao criar membro', error: error.message });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao criar membro.' });
     }
   }
 
@@ -33,11 +36,13 @@ export class MembrosController {
 
       const membros = await this.membrosService.listarMembros(adminCriadorId);
 
-      res.json(membros);
+      res.json({
+        message: 'Membros listados com sucesso.',
+        data: membros
+      });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'Erro ao buscar membros', error: error.message });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao buscar membros.' });
     }
   }
 
@@ -50,16 +55,15 @@ export class MembrosController {
       }
 
       const id = req.params.id;
+      const membro = await this.membrosService.buscarMembroPorId(adminCriadorId, id);
 
-      const membro = await this.membrosService.buscarMembroPorId(
-        adminCriadorId,
-        id
-      );
-      res.json(membro);
+      res.json({
+        message: 'Membro encontrado com sucesso.',
+        data: membro
+      });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'Erro ao buscar membro', error: error.message });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao buscar membro.' });
     }
   }
 
@@ -72,17 +76,15 @@ export class MembrosController {
       }
 
       const id = req.params.id;
+      const membroAtualizado = await this.membrosService.atualizarMembro(adminCriadorId, id, req.body);
 
-      const membroAtualizado = await this.membrosService.atualizarMembro(
-        adminCriadorId,
-        id,
-        req.body
-      );
-      res.json(membroAtualizado);
+      res.json({
+        message: 'Membro atualizado com sucesso.',
+        data: membroAtualizado
+      });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'Erro ao atualizar membro', error: error.message });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao atualizar membro.' });
     }
   }
 
@@ -95,13 +97,12 @@ export class MembrosController {
       }
 
       const id = req.params.id;
-
       await this.membrosService.deletarMembro(adminCriadorId, id);
-      res.status(204).send();
+
+      res.status(204).json({ message: 'Membro deletado com sucesso.' });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'Erro ao deletar membro', error: error.message });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao deletar membro.' });
     }
   }
 }

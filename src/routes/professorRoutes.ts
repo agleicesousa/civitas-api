@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { ProfessorController } from '../controller/professorController';
-import { validarEmail } from '../utils/validarEmailUtils';
-// import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
+import { authMiddleware } from '../middlewares/authMiddleware';
+import { permissaoAdminMiddleware } from '../middlewares/permissaoAdminMiddleware';
+import { Membros } from '../entities/membrosEntities';
 
 const professorController = new ProfessorController();
 const professorRouter = Router();
@@ -64,9 +65,8 @@ const professorRouter = Router();
  */
 professorRouter.post(
   '/',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res, next) => professorController.criarProfessor(req, res, next)
 );
 
@@ -102,8 +102,8 @@ professorRouter.post(
  */
 professorRouter.get(
   '/',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res, next) => professorController.listarProfessores(req, res, next)
 );
 
@@ -146,9 +146,16 @@ professorRouter.get(
  *         description: Não autorizado.
  */
 professorRouter.get(
+  '/paginado',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
+  (req, res) => professorController.listarProfessoresPagina(req, res)
+);
+
+professorRouter.get(
   '/:id',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res, next) => professorController.buscarProfessorPorId(req, res, next)
 );
 
@@ -209,9 +216,8 @@ professorRouter.get(
  */
 professorRouter.put(
   '/:id',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res, next) => professorController.atualizarProfessor(req, res, next)
 );
 
@@ -241,8 +247,8 @@ professorRouter.put(
  */
 professorRouter.delete(
   '/:id',
-  //  authenticateJWT,
-  //  hasPermission('MANAGER_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res, next) => professorController.deletarProfessor(req, res, next)
 );
 

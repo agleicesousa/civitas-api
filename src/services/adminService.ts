@@ -47,8 +47,7 @@ export class AdminService {
     const admin = this.adminRepository.create({ membro });
     const novoAdmin = await this.adminRepository.save(admin);
 
-    membro.admin = novoAdmin;
-    await this.membrosRepository.save(membro);
+    membro.adminCriador = novoAdmin;
 
     return novoAdmin;
   }

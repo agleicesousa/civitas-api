@@ -1,6 +1,7 @@
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import { Admin } from '../entities/adminEntities';
+import ErrorHandler from '../errors/errorHandler';
 
 export class MembrosService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
@@ -16,7 +17,7 @@ export class MembrosService {
     await this.iniciarDatabase();
 
     if (!dadosMembro.adminCriadorId) {
-      throw new Error('Admin Criador não especificado.');
+      throw ErrorHandler.badRequest('Admin Criador não especificado.');
     }
 
     const adminCriador = await this.adminRepository.findOne({
@@ -24,7 +25,7 @@ export class MembrosService {
     });
 
     if (!adminCriador) {
-      throw new Error('Admin Criador não encontrado.');
+      throw ErrorHandler.notFound('Admin Criador não encontrado.');
     }
 
     const novoMembro = this.membrosRepository.create({
@@ -32,20 +33,23 @@ export class MembrosService {
       adminCriadorId: adminCriador.id
     });
 
-    return await this.membrosRepository.save(novoMembro);
+    try {
+      await this.membrosRepository.save(novoMembro);
+      return novoMembro;
+    } catch (error) {
+      throw ErrorHandler.internalServerError('Erro ao salvar novo membro.');
+    }
   }
 
   async listarMembros(adminCriadorId: number) {
     await this.iniciarDatabase();
 
     if (!adminCriadorId) {
-      throw new Error('ID do administrador não fornecido.');
+      throw ErrorHandler.badRequest('ID do administrador não fornecido.');
     }
 
     return await this.membrosRepository.find({
-      where: {
-        adminCriadorId: adminCriadorId
-      }
+      where: { adminCriadorId }
     });
   }
 
@@ -54,42 +58,34 @@ export class MembrosService {
     const idNumber = Number(id);
 
     if (isNaN(idNumber)) {
-      throw new Error('ID inválido');
+      throw ErrorHandler.badRequest('ID inválido.');
     }
 
     const membro = await this.membrosRepository.findOne({
-      where: { id: idNumber, adminCriadorId: adminCriadorId }
+      where: { id: idNumber, adminCriadorId }
     });
 
     if (!membro) {
-      throw new Error(
-        'Membro não encontrado ou você não tem permissão para acessá-lo.'
-      );
+      throw ErrorHandler.notFound('Membro não encontrado ou você não tem permissão para acessá-lo.');
     }
 
     return membro;
   }
 
-  async atualizarMembro(
-    adminCriadorId: number,
-    id: string,
-    dadosMembro: Partial<Membros>
-  ) {
+  async atualizarMembro(adminCriadorId: number, id: string, dadosMembro: Partial<Membros>) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
 
     if (isNaN(idNumber)) {
-      throw new Error('ID inválido');
+      throw ErrorHandler.badRequest('ID inválido.');
     }
 
     const membroExistente = await this.membrosRepository.findOne({
-      where: { id: idNumber, adminCriadorId: adminCriadorId }
+      where: { id: idNumber, adminCriadorId }
     });
 
     if (!membroExistente) {
-      throw new Error(
-        'Membro não encontrado ou você não tem permissão para atualizá-lo.'
-      );
+      throw ErrorHandler.notFound('Membro não encontrado ou você não tem permissão para atualizá-lo.');
     }
 
     await this.membrosRepository.update(idNumber, dadosMembro);
@@ -101,19 +97,17 @@ export class MembrosService {
     const idNumber = Number(id);
 
     if (isNaN(idNumber)) {
-      throw new Error('ID inválido');
+      throw ErrorHandler.badRequest('ID inválido.');
     }
 
     const membroExistente = await this.membrosRepository.findOne({
-      where: { id: idNumber, adminCriadorId: adminCriadorId }
+      where: { id: idNumber, adminCriadorId }
     });
 
     if (!membroExistente) {
-      throw new Error(
-        'Membro não encontrado ou você não tem permissão para deletá-lo.'
-      );
+      throw ErrorHandler.notFound('Membro não encontrado ou você não tem permissão para deletá-lo.');
     }
 
-    return await this.membrosRepository.delete(idNumber);
+    await this.membrosRepository.delete(idNumber);
   }
 }

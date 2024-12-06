@@ -83,7 +83,7 @@ export class AdminController {
 
       const id = parseInt(req.params.id, 10);
       await this.adminService.deletarAdmin(id, adminLogadoId);
-      res.status(204).send();
+      res.status(200).send({ message: 'Admin excluído com sucesso.' });
     } catch (error) {
       next(error);
     }
