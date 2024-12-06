@@ -59,6 +59,24 @@ export class AlunoController {
     }
   }
 
+  async listarAlunosCompleto(req: Request, res: Response) {
+    try {
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
+
+      const alunos =
+        await this.alunoService.listarAlunosCompleto(adminLogadoId);
+      res.status(200).json(alunos);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro ao listar alunos', error: error.message });
+    }
+  }
+
   async atualizarAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;

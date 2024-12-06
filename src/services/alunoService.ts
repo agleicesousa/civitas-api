@@ -71,6 +71,21 @@ export class AlunoService {
     return { message: 'Aluno cadastrado com sucesso.', aluno };
   }
 
+  async listarAlunosCompleto(adminLogadoId: number) {
+    await this.iniciarDatabase();
+
+    const alunos = await this.alunoRepository.find({
+      where: {
+        membro: {
+          adminCriadorId: adminLogadoId
+        }
+      },
+      relations: ['membro']
+    });
+
+    return alunos;
+  }
+
   async listarAlunos(
     paginaNumero: number,
     paginaTamanho: number,
