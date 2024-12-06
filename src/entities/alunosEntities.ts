@@ -29,7 +29,10 @@ export class Alunos extends BaseEntity {
   @ManyToOne(() => Admin, { nullable: true })
   admin: Admin;
 
-  @ManyToOne(() => Turma, (turma) => turma.alunos, { nullable: true })
+  @ManyToOne(() => Turma, (turma) => turma.alunos, {
+    eager: true,
+    nullable: true
+  })
   @JoinColumn({ name: 'turmaId' })
   turma: Turma;
 

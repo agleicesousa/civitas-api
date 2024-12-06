@@ -81,7 +81,7 @@ export class ProfessorService {
     const novoProfessor = await this.professorRepository.save(professor);
 
     return {
-      message: 'Professor criado com sucesso!',
+      message: 'Professor cadastrado com sucesso!',
       professor: novoProfessor
     };
   }
@@ -159,7 +159,7 @@ export class ProfessorService {
 
   async atualizarProfessor(
     id: number,
-    dadosProfessor: Partial<{
+    dadosAtualizados: Partial<{
       email?: string;
       senha?: string;
       nomeCompleto?: string;
@@ -178,37 +178,34 @@ export class ProfessorService {
           adminCriadorId: adminLogadoId
         }
       },
-      relations: ['membro', 'turmas']
+      relations: ['membro', 'turmas', 'admin']
     });
 
     if (!professorExistente) {
-      throw ErrorHandler.notFound('Professor não encontrado.');
+      throw ErrorHandler.notFound('Professor não encontrado ou acesso negado.');
     }
 
     const membro = professorExistente.membro;
 
-    const senhaCriptografada = await criptografarSenha(
-      dadosProfessor.numeroMatricula ?? membro.numeroMatricula
-    );
-
     Object.assign(membro, {
-      email: dadosProfessor.email ?? membro.email,
-      nomeCompleto: dadosProfessor.nomeCompleto ?? membro.nomeCompleto,
-      cpf: dadosProfessor.cpf ?? membro.cpf,
-      numeroMatricula: dadosProfessor.numeroMatricula ?? membro.numeroMatricula,
-      senha: dadosProfessor.senha
-        ? await criptografarSenha(dadosProfessor.senha)
-        : senhaCriptografada
+      email: dadosAtualizados.email ?? membro.email,
+      nomeCompleto: dadosAtualizados.nomeCompleto ?? membro.nomeCompleto,
+      cpf: dadosAtualizados.cpf ?? membro.cpf,
+      numeroMatricula:
+        dadosAtualizados.numeroMatricula ?? membro.numeroMatricula,
+      senha: dadosAtualizados.senha
+        ? await criptografarSenha(dadosAtualizados.senha)
+        : membro.senha
     });
 
     await this.membrosRepository.save(membro);
 
-    if (dadosProfessor.turma) {
+    if (dadosAtualizados.turma) {
       const turmas = await this.turmaRepository.findBy({
-        id: In(dadosProfessor.turma)
+        id: In(dadosAtualizados.turma)
       });
 
-      if (turmas.length !== dadosProfessor.turma.length) {
+      if (turmas.length !== dadosAtualizados.turma.length) {
         throw ErrorHandler.notFound(
           'Algumas turmas fornecidas não foram encontradas.'
         );
@@ -228,7 +225,7 @@ export class ProfessorService {
   async deletarProfessor(id: number, adminLogadoId: number) {
     await this.iniciarDatabase();
 
-    const professorExistente = await this.professorRepository.findOne({
+    const professor = await this.professorRepository.findOne({
       where: {
         membro: {
           id,
@@ -238,12 +235,11 @@ export class ProfessorService {
       relations: ['membro']
     });
 
-    if (!professorExistente) {
-      throw ErrorHandler.notFound('Professor não encontrado.');
+    if (!professor) {
+      throw ErrorHandler.notFound('Professor não encontrado ou acesso negado.');
     }
 
-    await this.membrosRepository.remove(professorExistente.membro);
-    await this.professorRepository.remove(professorExistente);
+    await this.professorRepository.remove(professor);
 
     return { message: 'Professor excluído com sucesso!' };
   }

@@ -1,40 +1,51 @@
 import { Router } from 'express';
 import { AlunoController } from '../controller/alunoController';
-import { validarEmail } from '../utils/validarEmailUtils';
-//  import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
-
-// TODO: as linhas comentadas ainda serão utilizadas.
+import { authMiddleware } from '../middlewares/authMiddleware';
+import { permissaoAdminMiddleware } from '../middlewares/permissaoAdminMiddleware';
+import { Membros } from '../entities/membrosEntities';
 
 const alunoRouter = Router();
 const alunoController = new AlunoController();
 
 alunoRouter.post(
   '/',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.criarAluno(req, res)
 );
 
 alunoRouter.get(
-  '/',
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  '/paginado',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.listarAlunos(req, res)
 );
 
-alunoRouter.put(
+alunoRouter.get(
   '/',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
+  (req, res) => alunoController.listarAlunosCompleto(req, res)
+);
+
+alunoRouter.get(
+  '/:id',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
+  (req, res) => alunoController.buscarAlunoPorId(req, res)
+);
+
+alunoRouter.put(
+  '/:id',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.atualizarAluno(req, res)
 );
 
 alunoRouter.delete(
-  '/',
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  '/:id',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.excluirAluno(req, res)
 );
 

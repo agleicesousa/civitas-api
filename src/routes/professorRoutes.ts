@@ -11,14 +11,14 @@ professorRouter.post(
   '/',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => professorController.criarProfessor(req, res, next)
+  (req, res) => professorController.criarProfessor(req, res)
 );
 
 professorRouter.get(
   '/',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => professorController.listarProfessores(req, res, next)
+  (req, res) => professorController.listarProfessores(req, res)
 );
 
 professorRouter.get(
@@ -32,21 +32,21 @@ professorRouter.get(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => professorController.buscarProfessorPorId(req, res, next)
+  (req, res) => professorController.buscarProfessorPorId(req, res)
 );
 
 professorRouter.put(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => professorController.atualizarProfessor(req, res, next)
+  (req, res) => professorController.atualizarProfessor(req, res)
 );
 
 professorRouter.delete(
   '/:id',
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res, next) => professorController.deletarProfessor(req, res, next)
+  (req, res) => professorController.deletarProfessor(req, res)
 );
 
 export default professorRouter;
