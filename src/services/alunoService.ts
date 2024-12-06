@@ -100,7 +100,7 @@ export class AlunoService {
     });
 
     if (!aluno) {
-      throw ErrorHandler.notFound('Professor não encontrado.');
+      throw ErrorHandler.notFound('Aluno não encontrado.');
     }
 
     return aluno;
@@ -130,8 +130,8 @@ export class AlunoService {
     if (aluno.length === 0) {
       throw ErrorHandler.notFound(
         termoDeBusca
-          ? `Nenhum professor encontrado com o termo "${termoDeBusca}".`
-          : 'Nenhum professor cadastrado no momento.'
+          ? `Nenhum Aluno encontrado com o termo "${termoDeBusca}".`
+          : 'Nenhum Aluno cadastrado no momento.'
       );
     }
 
