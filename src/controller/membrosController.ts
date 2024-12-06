@@ -1,74 +1,108 @@
 import { Request, Response } from 'express';
 import { MembrosService } from '../services/membrosService';
+import ErrorHandler from '../errors/errorHandler';
 
 export class MembrosController {
   private membrosService = new MembrosService();
 
+  async criarMembro(req: Request, res: Response) {
+    try {
+      const adminCriadorId = req.user?.id;
+      if (!adminCriadorId) {
+        return res.status(401).json({ error: 'Admin não logado.' });
+      }
+
+      const novoMembro = await this.membrosService.criarMembro({
+        ...req.body,
+        adminCriadorId
+      });
+
+      res.status(201).json({
+        message: 'Membro criado com sucesso.',
+        data: novoMembro
+      });
+    } catch (error) {
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao criar membro.' });
+    }
+  }
+
   async listarMembros(req: Request, res: Response) {
     try {
-      const adminCriadorId = req.user.id;
+      const adminCriadorId = req.user?.id;
+      if (!adminCriadorId) {
+        return res.status(401).json({ error: 'Admin não logado.' });
+      }
+
       const membros = await this.membrosService.listarMembros(adminCriadorId);
-      res.json(membros);
+
+      res.json({
+        message: 'Membros listados com sucesso.',
+        data: membros
+      });
     } catch (error) {
-      res.status(500).json({ message: 'Erro ao buscar membros' });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao buscar membros.' });
     }
   }
 
   async buscarMembroPorId(req: Request, res: Response) {
     try {
-      const adminCriadorId = req.user.id;
-      const id = req.params.id;
+      const adminCriadorId = req.user?.id;
 
-      const membro = await this.membrosService.buscarMembroPorId(
-        adminCriadorId,
-        id
-      );
-      if (membro) {
-        res.json(membro);
-      } else {
-        res.status(404).json({ error: 'Membro não encontrado' });
+      if (!adminCriadorId) {
+        return res.status(400).json({ error: 'Admin não autenticado.' });
       }
-    } catch (error) {
-      res.status(500).json({ message: 'Erro ao buscar membro' });
-    }
-  }
 
-  async criarMembro(req: Request, res: Response) {
-    try {
-      const novoMembro = await this.membrosService.criarMembro(req.body);
-      res.status(201).json(novoMembro);
+      const id = req.params.id;
+      const membro = await this.membrosService.buscarMembroPorId(adminCriadorId, id);
+
+      res.json({
+        message: 'Membro encontrado com sucesso.',
+        data: membro
+      });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: 'Erro ao criar membro', error: error.message });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao buscar membro.' });
     }
   }
 
   async atualizarMembro(req: Request, res: Response) {
     try {
-      const adminCriadorId = req.user.id;
-      const id = req.params.id;
+      const adminCriadorId = req.user?.id;
 
-      const membroAtualizado = await this.membrosService.atualizarMembro(
-        adminCriadorId,
-        id,
-        req.body
-      );
-      res.json(membroAtualizado);
+      if (!adminCriadorId) {
+        return res.status(400).json({ error: 'Admin não autenticado.' });
+      }
+
+      const id = req.params.id;
+      const membroAtualizado = await this.membrosService.atualizarMembro(adminCriadorId, id, req.body);
+
+      res.json({
+        message: 'Membro atualizado com sucesso.',
+        data: membroAtualizado
+      });
     } catch (error) {
-      res.status(500).json({ message: 'Erro ao atualizar membro' });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao atualizar membro.' });
     }
   }
 
   async deletarMembro(req: Request, res: Response) {
     try {
-      const adminCriadorId = req.user.id;
-      const id = req.params.id;
+      const adminCriadorId = req.user?.id;
 
+      if (!adminCriadorId) {
+        return res.status(400).json({ error: 'Admin não autenticado.' });
+      }
+
+      const id = req.params.id;
       await this.membrosService.deletarMembro(adminCriadorId, id);
-      res.status(204).send();
+
+      res.status(204).json({ message: 'Membro deletado com sucesso.' });
     } catch (error) {
-      res.status(500).json({ message: 'Erro ao deletar membro' });
+      const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
+      res.status(statusCode).json({ message: error.message || 'Erro ao deletar membro.' });
     }
   }
 }

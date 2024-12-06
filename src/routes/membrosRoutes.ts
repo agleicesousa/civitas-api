@@ -1,45 +1,44 @@
 import { Router } from 'express';
 import { MembrosController } from '../controller/membrosController';
-// import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
-import { validarEmail } from '../middlewares/validarEmail';
+import { authMiddleware } from '../middlewares/authMiddleware';
+import { permissaoAdminMiddleware } from '../middlewares/permissaoAdminMiddleware';
+import { Membros } from '../entities/membrosEntities';
 
 const membrosRouter = Router();
 const membrosController = new MembrosController();
 
 membrosRouter.post(
   '/',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => membrosController.criarMembro(req, res)
 );
 
 membrosRouter.get(
   '/',
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => membrosController.listarMembros(req, res)
 );
 
 membrosRouter.get(
   '/:id',
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => membrosController.buscarMembroPorId(req, res)
 );
 
 membrosRouter.put(
   '/:id',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => membrosController.atualizarMembro(req, res)
 );
 
 membrosRouter.delete(
   '/:id',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => membrosController.deletarMembro(req, res)
 );
 

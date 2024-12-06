@@ -5,7 +5,7 @@ declare global {
     export interface Request {
       user?: {
         id: number;
-        numeroMatricula: string;
+        email: string;
         tipoConta: string;
         permissions: string[];
       };
