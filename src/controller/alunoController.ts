@@ -6,7 +6,7 @@ export class AlunoController {
 
   async criarAluno(req: Request, res: Response) {
     try {
-      const adminLogadoId = req.user?.id || null;
+      const adminLogadoId = req.user?.id;
 
       const resultado = await this.alunoService.criarAluno(
         req.body,
@@ -19,7 +19,7 @@ export class AlunoController {
     } catch (error) {
       return res
         .status(error.statusCode || 500)
-        .json({ message: error.message });
+        .json({ message: 'Erro ao cadastrar aluno', error: error.message });
     }
   }
 
