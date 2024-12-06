@@ -5,7 +5,14 @@ import ErrorHandler from '../errors/errorHandler';
 export class ProfessorController {
   private professorService = new ProfessorService();
 
-  async criarProfessor(req: Request, res: Response, next: NextFunction) {
+  /**
+   * Cria um novo professor.
+   */
+  async criarProfessor(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -24,7 +31,14 @@ export class ProfessorController {
     }
   }
 
-  async listarProfessores(req: Request, res: Response, next: NextFunction) {
+  /**
+   * Lista todos os professores.
+   */
+  async listarProfessores(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -92,7 +106,14 @@ export class ProfessorController {
     }
   }
 
-  async atualizarProfessor(req: Request, res: Response, next: NextFunction) {
+  /**
+   * Atualiza os dados de um professor.
+   */
+  async atualizarProfessor(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -118,7 +139,14 @@ export class ProfessorController {
     }
   }
 
-  async deletarProfessor(req: Request, res: Response, next: NextFunction) {
+  /**
+   * Deleta um professor pelo ID.
+   */
+  async deletarProfessor(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const adminLogadoId = req.user?.id;
 
@@ -141,5 +169,16 @@ export class ProfessorController {
     } catch (error) {
       next(error);
     }
+  }
+
+  /**
+   * Valida o ID do parâmetro da requisição.
+   */
+  private validarId(idParam: string): number {
+    const id = parseInt(idParam, 10);
+    if (isNaN(id) || id <= 0) {
+      throw new Error('ID inválido');
+    }
+    return id;
   }
 }
