@@ -105,21 +105,29 @@ export class AlunoController {
     try {
       const adminLogadoId = req.user?.id;
 
-      const alunoId = parseInt(req.params.id);
+      if (!adminLogadoId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
+
+      const id = parseInt(req.params.id, 10);
+
+      if (isNaN(id)) {
+        throw ErrorHandler.badRequest('ID inválido.');
+      }
 
       const resultado = await this.alunoService.atualizarAluno(
-        alunoId,
+        id,
         req.body,
         adminLogadoId
       );
 
-      return res
+      res
         .status(200)
-        .json({ message: resultado.message, aluno: resultado.aluno });
+        .json({ message: resultado.message, professor: resultado.aluno });
     } catch (error) {
       return res
         .status(error.statusCode || 500)
-        .json({ message: error.message });
+        .json({ message: 'Erro ao atualizar aluno', error: error.message });
     }
   }
 

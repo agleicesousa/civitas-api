@@ -143,43 +143,66 @@ export class AlunoService {
   }
 
   async atualizarAluno(
-    alunoId: number,
+    id: number,
     dadosAtualizados: {
       email?: string;
       nomeCompleto?: string;
+      senha?: string;
       numeroMatricula?: string;
       cpf?: string;
       turma?: number;
     },
-    adminId: number
+    adminLogadoId: number
   ) {
     await this.iniciarDatabase();
 
+    // Busca o aluno garantindo que pertence ao admin logado
     const aluno = await this.alunoRepository.findOne({
-      where: { id: alunoId },
-      relations: ['membro', 'turma']
+      where: {
+        membro: {
+          id,
+          adminCriadorId: adminLogadoId
+        }
+      },
+      relations: ['membro', 'turma', 'admin']
     });
 
-    if (!aluno || aluno.admin.id !== adminId) {
+    if (!aluno) {
       throw ErrorHandler.notFound('Aluno não encontrado ou acesso negado.');
     }
 
+    const membro = aluno.membro;
+    Object.assign(membro, {
+      email: dadosAtualizados.email ?? membro.email,
+      nomeCompleto: dadosAtualizados.nomeCompleto ?? membro.nomeCompleto,
+      cpf: dadosAtualizados.cpf ?? membro.cpf,
+      numeroMatricula:
+        dadosAtualizados.numeroMatricula ?? membro.numeroMatricula,
+      senha: dadosAtualizados.senha
+        ? await criptografarSenha(dadosAtualizados.senha)
+        : membro.senha
+    });
+
+    await this.membrosRepository.save(membro);
+
     if (dadosAtualizados.turma) {
-      const turma = await this.turmaRepository.findOneBy({
-        id: dadosAtualizados.turma
+      const turma = await this.turmaRepository.findOne({
+        where: { id: dadosAtualizados.turma }
       });
+
       if (!turma) {
         throw ErrorHandler.badRequest('A turma informada não existe.');
       }
+
       aluno.turma = turma;
     }
 
-    Object.assign(aluno.membro, dadosAtualizados);
-
-    await this.membrosRepository.save(aluno.membro);
     await this.alunoRepository.save(aluno);
 
-    return { message: 'Dados do aluno atualizados com sucesso.', aluno };
+    return {
+      message: 'Dados do aluno atualizados com sucesso.',
+      aluno: this.dadosAluno(aluno)
+    };
   }
 
   async excluirAluno(alunoId: number, adminId: number) {

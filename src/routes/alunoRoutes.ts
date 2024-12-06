@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { AlunoController } from '../controller/alunoController';
-import { validarEmail } from '../utils/validarEmailUtils';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { permissaoAdminMiddleware } from '../middlewares/permissaoAdminMiddleware';
 import { Membros } from '../entities/membrosEntities';
@@ -37,10 +36,9 @@ alunoRouter.get(
 );
 
 alunoRouter.put(
-  '/',
-  validarEmail,
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  '/:id',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.atualizarAluno(req, res)
 );
 
