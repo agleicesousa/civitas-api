@@ -95,4 +95,34 @@ export class TurmasController {
         .json({ error: error.message, message: 'Erro ao excluir turma' });
     }
   }
+
+  async buscarAlunosTurma(req: Request, res: Response): Promise<Response> {
+    try {
+      const turmaId = Number(req.params.id);
+
+      if (!turmaId) {
+        return res.status(400).json({
+          message: 'O ID da turma é inválido.'
+        });
+      }
+
+      const alunos = await this.turmasService.buscarAlunosPorTurma(
+        Number(turmaId)
+      );
+
+      return res.status(200).json({
+        message: 'Alunos da turma encontrados com sucesso.',
+        alunos
+      });
+    } catch (error) {
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({
+          message: error.message
+        });
+      }
+      return res.status(500).json({
+        message: 'Não foi possível carregar os alunos. Erro interno do servidor'
+      });
+    }
+  }
 }

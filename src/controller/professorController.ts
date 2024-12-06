@@ -142,4 +142,25 @@ export class ProfessorController {
       next(error);
     }
   }
+
+  async professorTurmas(req: Request, res: Response) {
+    try {
+      const professorId = req.user?.id;
+      if (!professorId) {
+        return res.status(400).json({ message: 'Usuário não identificado' });
+      }
+      const turmas =
+        await this.professorService.buscarProfessorTurmas(professorId);
+      return res.status(200).json(turmas);
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: 'Não foi possível carregar as turmas. Erro interno do servidor'
+      });
+    }
+  }
 }

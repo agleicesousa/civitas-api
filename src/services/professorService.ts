@@ -247,4 +247,28 @@ export class ProfessorService {
 
     return { message: 'Professor excluído com sucesso!' };
   }
+
+  async buscarProfessorTurmas(professorId: number) {
+    const professor = await this.professorRepository.findOne({
+      where: {
+        membro: {
+          id: professorId
+        }
+      },
+      relations: ['turmas']
+    });
+
+    if (!professor) {
+      throw ErrorHandler.notFound('Professor não encontrado');
+    }
+
+    if (!professor.turmas || !Array.isArray(professor.turmas)) {
+      return [];
+    }
+
+    return professor.turmas.map((turma) => ({
+      id: turma.id,
+      turmaApelido: turma.turmaApelido
+    }));
+  }
 }

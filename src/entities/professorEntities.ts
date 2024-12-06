@@ -4,13 +4,14 @@ import {
   OneToOne,
   JoinColumn,
   JoinTable,
-  ManyToOne
+  ManyToOne,
+  OneToMany
 } from 'typeorm';
 import { BaseEntity } from './baseEntity';
 import { Membros } from './membrosEntities';
 import { Turma } from './turmasEntities';
 import { Admin } from './adminEntities';
-
+import { PDI } from './pdiEntities';
 @Entity('professores')
 export class Professor extends BaseEntity {
   @OneToOne(() => Membros, { eager: true, onDelete: 'CASCADE' })
@@ -27,4 +28,7 @@ export class Professor extends BaseEntity {
 
   @ManyToOne(() => Admin, { eager: true, nullable: true })
   admin: Admin;
+
+  @OneToMany(() => PDI, (pdi) => pdi.professor)
+  pdi: PDI[];
 }

@@ -43,7 +43,7 @@ export class Turma extends BaseEntity {
   @Column({ type: 'enum', enum: TipoEnsino })
   ensino: TipoEnsino;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 12 })
   turmaApelido: string;
 
   @ManyToOne(() => Admin, { eager: true, nullable: false })
