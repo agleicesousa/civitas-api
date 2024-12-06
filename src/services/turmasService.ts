@@ -137,12 +137,22 @@ export class TurmasService {
     return await this.turmasRepository.save(turmaExistente);
   }
 
-  async deletar(id: number) {
-    const turma = await this.turmasRepository.findOneBy({ id });
+  async deletar(id: number, adminCriadorId: number) {
+    const turmaExistente = await this.turmasRepository.findOne({
+      where: { id },
+      relations: ['admin', 'admin.membro']
+    });
 
-    if (!turma) {
+    if (!turmaExistente) {
       throw ErrorHandler.notFound('Turma não encontrada');
     }
+
+    if (turmaExistente.admin.membro.id !== adminCriadorId) {
+      throw ErrorHandler.unauthorized(
+        'Você não tem permissão para excluir esta turma'
+      );
+    }
+
     return await this.turmasRepository.delete(id);
   }
 

@@ -121,7 +121,13 @@ export class TurmasController {
   async deletarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      await this.turmasService.deletar(Number(id));
+      const adminCriadorId = req.user?.id;
+
+      if (!adminCriadorId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
+
+      await this.turmasService.deletar(Number(id), adminCriadorId);
 
       return res.status(200).json({ message: 'Turma excluída com sucesso' });
     } catch (error) {
