@@ -41,8 +41,13 @@ export const errorHandler = (
 ) => {
   console.error(err.stack);
 
-  res.status(err instanceof ErrorHandler ? err.statusCode : 500).json({
-    message: err.message || 'Algo deu errado!',
-    error: err.message
+  if (err instanceof ErrorHandler) {
+    return res.status(err.statusCode).json({
+      message: err.message
+    });
+  }
+
+  return res.status(500).json({
+    message: 'Algo deu errado. Por favor, tente novamente mais tarde.'
   });
 };

@@ -38,7 +38,7 @@ export class Membros extends BaseEntity {
 
   @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'adminCriadorId' })
-  admin: Admin;
+  adminCriador: Admin;
 
   @OneToOne(() => Professor, { nullable: true, onDelete: 'CASCADE' })
   professor: Professor;

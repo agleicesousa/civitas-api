@@ -15,31 +15,16 @@ export class AdminService {
     }
   }
 
-  async verificarEmailDuplicado(email: string) {
-    await this.iniciarDatabase();
-
-    const emailExistente = await this.membrosRepository.findOne({
-      where: { email }
-    });
-
-    if (emailExistente) {
-      throw ErrorHandler.badRequest('Email já cadastrado.');
-    }
-  }
-
   async criarAdmin(
     dadosAdmin: {
       email: string;
       senha: string;
       nomeCompleto: string;
-      numeroMatricula: string;
       tipoConta: TipoConta;
     },
-    adminCriadorId: number | null
+    adminCriadorId: number
   ) {
     await this.iniciarDatabase();
-
-    await this.verificarEmailDuplicado(dadosAdmin.email);
 
     if (!validarSenha(dadosAdmin.senha)) {
       throw ErrorHandler.badRequest(
@@ -53,9 +38,8 @@ export class AdminService {
       email: dadosAdmin.email,
       senha: senhaCriptografada,
       nomeCompleto: dadosAdmin.nomeCompleto,
-      numeroMatricula: dadosAdmin.numeroMatricula,
       tipoConta: TipoConta.ADMIN,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
+      adminCriadorId
     });
 
     await this.membrosRepository.save(membro);
@@ -63,21 +47,25 @@ export class AdminService {
     const admin = this.adminRepository.create({ membro });
     const novoAdmin = await this.adminRepository.save(admin);
 
-    membro.admin = novoAdmin;
-    await this.membrosRepository.save(membro);
+    membro.adminCriador = novoAdmin;
 
     return novoAdmin;
   }
 
-  async listarAdmins() {
+  async listarAdmins(adminLogadoId: number) {
     await this.iniciarDatabase();
 
     return await this.adminRepository.find({
+      where: {
+        membro: {
+          adminCriadorId: adminLogadoId
+        }
+      },
       relations: ['membro']
     });
   }
 
-  async buscarAdminPorId(id: number) {
+  async buscarAdminPorId(id: number, adminLogadoId: number) {
     await this.iniciarDatabase();
 
     const admin = await this.adminRepository.findOne({
@@ -87,6 +75,12 @@ export class AdminService {
 
     if (!admin) {
       throw ErrorHandler.notFound('Admin não encontrado.');
+    }
+
+    if (admin.membro.adminCriadorId !== adminLogadoId) {
+      throw ErrorHandler.badRequest(
+        'Você não pode acessar um admin que não foi criado por você.'
+      );
     }
 
     return admin;
@@ -99,7 +93,8 @@ export class AdminService {
       senha?: string;
       nomeCompleto?: string;
       numeroMatricula?: string;
-    }>
+    }>,
+    adminLogadoId: number
   ) {
     await this.iniciarDatabase();
 
@@ -114,8 +109,10 @@ export class AdminService {
 
     const membro = adminExistente.membro;
 
-    if (dadosAdmin.email && dadosAdmin.email !== membro.email) {
-      await this.verificarEmailDuplicado(dadosAdmin.email);
+    if (membro.adminCriadorId !== adminLogadoId) {
+      throw ErrorHandler.badRequest(
+        'Você não pode atualizar um admin que não foi criado por você.'
+      );
     }
 
     if (dadosAdmin.senha) {
@@ -139,10 +136,6 @@ export class AdminService {
   async deletarAdmin(id: number, adminLogadoId: number) {
     await this.iniciarDatabase();
 
-    if (id === adminLogadoId) {
-      throw ErrorHandler.badRequest('Você não pode excluir sua própria conta.');
-    }
-
     const adminExistente = await this.adminRepository.findOne({
       where: { id },
       relations: ['membro']
@@ -150,6 +143,12 @@ export class AdminService {
 
     if (!adminExistente) {
       throw ErrorHandler.notFound('Admin não encontrado.');
+    }
+
+    if (adminExistente.membro.adminCriadorId !== adminLogadoId) {
+      throw ErrorHandler.badRequest(
+        'Você não pode excluir um admin que não foi criado por você.'
+      );
     }
 
     await this.membrosRepository.remove(adminExistente.membro);
