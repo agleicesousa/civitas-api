@@ -75,34 +75,34 @@ export class AlunoService {
     paginaNumero: number,
     paginaTamanho: number,
     termoDeBusca: string,
-    adminId: number
+    adminLogadoId: number
   ) {
     const pular = (paginaNumero - 1) * paginaTamanho;
 
-    const [alunos, total] = await this.alunoRepository.findAndCount({
+    const [aluno, total] = await this.alunoRepository.findAndCount({
       relations: ['membro'],
       where: {
-        admin: { id: adminId },
-        ...(termoDeBusca && {
-          membro: { nomeCompleto: Like(`%${termoDeBusca}%`) }
-        })
+        membro: {
+          adminCriadorId: adminLogadoId,
+          ...(termoDeBusca && { nomeCompleto: Like(`%${termoDeBusca}%`) })
+        }
       },
       order: { membro: { nomeCompleto: 'ASC' } },
       skip: pular,
       take: paginaTamanho
     });
 
-    if (alunos.length === 0) {
+    if (aluno.length === 0) {
       throw ErrorHandler.notFound(
         termoDeBusca
-          ? `Nenhum aluno encontrado com o termo "${termoDeBusca}".`
-          : 'Nenhum aluno cadastrado no momento.'
+          ? `Nenhum professor encontrado com o termo "${termoDeBusca}".`
+          : 'Nenhum professor cadastrado no momento.'
       );
     }
 
     return {
       message: 'Alunos listados com sucesso.',
-      data: alunos.map(this.dadosAluno),
+      data: aluno.map(this.dadosAluno),
       total
     };
   }

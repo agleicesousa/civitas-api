@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AlunoService } from '../services/alunoService';
+import ErrorHandler from '../errors/errorHandler';
 
 export class AlunoController {
   private alunoService = new AlunoService();
@@ -7,6 +8,10 @@ export class AlunoController {
   async criarAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
 
       const resultado = await this.alunoService.criarAluno(
         req.body,
@@ -27,7 +32,11 @@ export class AlunoController {
     try {
       const { page, perPage } = req.query;
       const searchTerm = req.query.searchTerm ?? '';
-      const adminLogadoId = req.user?.id || null;
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
 
       const resultado = await this.alunoService.listarAlunos(
         Number(page) || 1,
@@ -52,7 +61,8 @@ export class AlunoController {
 
   async atualizarAluno(req: Request, res: Response) {
     try {
-      const adminLogadoId = req.user?.id || null;
+      const adminLogadoId = req.user?.id;
+
       const alunoId = parseInt(req.params.id);
 
       const resultado = await this.alunoService.atualizarAluno(
@@ -73,7 +83,8 @@ export class AlunoController {
 
   async excluirAluno(req: Request, res: Response) {
     try {
-      const adminLogadoId = req.user?.id || null;
+      const adminLogadoId = req.user?.id;
+
       const alunoId = parseInt(req.params.id);
 
       const resultado = await this.alunoService.excluirAluno(

@@ -16,9 +16,9 @@ alunoRouter.post(
 );
 
 alunoRouter.get(
-  '/',
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  '/paginado',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.listarAlunos(req, res)
 );
 
