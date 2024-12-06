@@ -178,18 +178,14 @@ export class ProfessorService {
           adminCriadorId: adminLogadoId
         }
       },
-      relations: ['membro', 'turmas']
+      relations: ['membro', 'turmas', 'admin']
     });
 
-    if (!professorExistente || professorExistente.admin.id !== adminLogadoId) {
+    if (!professorExistente) {
       throw ErrorHandler.notFound('Professor não encontrado ou acesso negado.');
     }
 
     const membro = professorExistente.membro;
-
-    const senhaCriptografada = await criptografarSenha(
-      dadosAtualizados.numeroMatricula ?? membro.numeroMatricula
-    );
 
     Object.assign(membro, {
       email: dadosAtualizados.email ?? membro.email,
@@ -199,7 +195,7 @@ export class ProfessorService {
         dadosAtualizados.numeroMatricula ?? membro.numeroMatricula,
       senha: dadosAtualizados.senha
         ? await criptografarSenha(dadosAtualizados.senha)
-        : senhaCriptografada
+        : membro.senha
     });
 
     await this.membrosRepository.save(membro);
@@ -239,11 +235,10 @@ export class ProfessorService {
       relations: ['membro']
     });
 
-    if (!professor || professor.admin.id !== adminLogadoId) {
-      throw ErrorHandler.notFound('Professor não encontrado.');
+    if (!professor) {
+      throw ErrorHandler.notFound('Professor não encontrado ou acesso negado.');
     }
 
-    await this.membrosRepository.remove(professor.membro);
     await this.professorRepository.remove(professor);
 
     return { message: 'Professor excluído com sucesso!' };
