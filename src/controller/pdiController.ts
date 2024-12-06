@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
-import { PdiService } from '../services/pdiService';
+import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
+import { PdiService } from '../services/pdiService';
+
 export class PdiController {
   private pdiService = new PdiService();
 
@@ -59,8 +61,9 @@ export class PdiController {
 
   async listarPDIsDoAluno(req: Request, res: Response): Promise<Response> {
     try {
+      const tipoConta = req.user.tipoConta as TipoConta;
       const alunoId = Number(req.params.id);
-      const pdis = await this.pdiService.pdisDoAluno(alunoId);
+      const pdis = await this.pdiService.pdisDoAluno(alunoId, tipoConta);
       return res.status(200).json(pdis);
     } catch (error) {
       console.error(error);

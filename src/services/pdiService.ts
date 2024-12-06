@@ -1,7 +1,12 @@
-import { Alunos } from '../entities/alunosEntities';
-import { PDI, PdiSecao, PdiResposta } from '../entities/pdiEntities';
 import { MysqlDataSource } from '../config/database';
-import { NivelDeSatisfacao } from '../entities/pdiEntities';
+import { Alunos } from '../entities/alunosEntities';
+import { TipoConta } from '../entities/baseEntity';
+import {
+  NivelDeSatisfacao,
+  PDI,
+  PdiResposta,
+  PdiSecao
+} from '../entities/pdiEntities';
 import { Professor } from '../entities/professorEntities';
 import ErrorHandler from '../errors/errorHandler';
 
@@ -27,8 +32,7 @@ export class PdiService {
     });
     const averages = pdi.secoes.map((secao) => Number(secao.media));
     const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString(
-      'pt-BR',
-      { timeZone: 'America/Sao_Paulo' }
+      'pt-BR'
     );
 
     return {
@@ -143,13 +147,14 @@ export class PdiService {
     };
   }
 
-  async pdisDoAluno(alunoId: number) {
+  async pdisDoAluno(alunoId: number, tipoConta: TipoConta) {
+    const where =
+      tipoConta === TipoConta.ALUNO
+        ? { aluno: { membro: { id: alunoId } } }
+        : { aluno: { id: alunoId } };
+
     const pdis = await this.pdiRepository.find({
-      where: {
-        aluno: {
-          id: alunoId
-        }
-      },
+      where,
       order: { dataCriacao: 'DESC' },
       select: ['id', 'dataCriacao']
     });
@@ -160,9 +165,7 @@ export class PdiService {
 
     return pdis.map((pdi: PDI) => ({
       id: pdi.id,
-      registrationDate: new Date(pdi.dataCriacao).toLocaleDateString('pt-BR', {
-        timeZone: 'America/Sao_Paulo'
-      })
+      registrationDate: new Date(pdi.dataCriacao).toLocaleDateString('pt-BR')
     }));
   }
 
