@@ -85,6 +85,25 @@ export class TurmasService {
     };
   }
 
+  async buscarTurmaPorId(id: number, adminCriadorId: number): Promise<Turma> {
+    const turma = await this.turmasRepository.findOne({
+      where: {
+        id,
+        admin: {
+          membro: { id: adminCriadorId }
+        }
+      }
+    });
+
+    if (!turma) {
+      throw ErrorHandler.notFound(
+        'Turma não encontrada ou não pertence ao admin logado.'
+      );
+    }
+
+    return turma;
+  }
+
   async editar(id: number, dadosTurma: Partial<Turma>) {
     const turmaExistente = await this.turmasRepository.findOneBy({ id });
     const { turmaApelido } = dadosTurma;
@@ -108,10 +127,6 @@ export class TurmasService {
       throw ErrorHandler.notFound('Turma não encontrada');
     }
     return await this.turmasRepository.delete(id);
-  }
-
-  async buscarPorId(id: number): Promise<Turma | null> {
-    return await this.turmasRepository.findOneBy({ id });
   }
 
   async buscarAlunosPorTurma(turmaId: number) {

@@ -14,18 +14,12 @@ turmasRouter.post(
   (req, res) => turmaController.criarTurma(req, res)
 );
 
-turmasRouter.get(
-  '/',
-  authMiddleware,
-  permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res) => turmaController.listarTurmas(req, res)
+turmasRouter.get('/', authMiddleware, (req, res) =>
+  turmaController.listarTurmas(req, res)
 );
 
-turmasRouter.get(
-  '/',
-  authMiddleware,
-  permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res) => turmaController.buscarTurma(req, res)
+turmasRouter.get('/:id', authMiddleware, (req, res) =>
+  turmaController.buscarTurmaId(req, res)
 );
 
 turmasRouter.put(

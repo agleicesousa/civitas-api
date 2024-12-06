@@ -62,15 +62,37 @@ export class TurmasController {
     }
   }
 
-  async buscarTurma(req: Request, res: Response): Promise<Response> {
+  async buscarTurmaId(req: Request, res: Response): Promise<Response> {
     try {
-      const { id } = req.params;
-      const turma = await this.turmasService.buscarPorId(Number(id));
-      return res.status(200).json(turma);
+      const turmaId = Number(req.params.id);
+      const adminCriadorId = req.user?.id;
+
+      if (!adminCriadorId) {
+        throw ErrorHandler.unauthorized('Usuário não autenticado.');
+      }
+
+      if (!turmaId) {
+        return res.status(400).json({
+          message: 'O ID da turma é inválido.'
+        });
+      }
+
+      const turma = await this.turmasService.buscarTurmaPorId(
+        turmaId,
+        adminCriadorId
+      );
+
+      return res.status(200).json({
+        message: 'Turma encontrada com sucesso.',
+        turma
+      });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: error.message, message: 'Erro ao obter turma' });
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: 'Erro ao buscar turma. Erro interno do servidor.'
+      });
     }
   }
 
