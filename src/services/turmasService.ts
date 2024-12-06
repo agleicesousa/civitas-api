@@ -62,7 +62,7 @@ export class TurmasService {
   }
 
   async listar(
-    adminId: number,
+    adminCriadorId: number,
     paginaNumero: number,
     paginaTamanho: number | null,
     searchTerm: string
@@ -71,7 +71,7 @@ export class TurmasService {
     const [turmas, total] = await this.turmasRepository.findAndCount({
       where: {
         admin: {
-          membro: { id: adminId }
+          membro: { id: adminCriadorId }
         },
         turmaApelido: Like(`%${searchTerm}%`)
       },
