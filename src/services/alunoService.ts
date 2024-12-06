@@ -86,6 +86,26 @@ export class AlunoService {
     return alunos;
   }
 
+  async buscarAlunoPorId(id: number, adminLogadoId: number) {
+    await this.iniciarDatabase();
+
+    const aluno = await this.alunoRepository.findOne({
+      where: {
+        membro: {
+          id,
+          adminCriadorId: adminLogadoId
+        }
+      },
+      relations: ['membro']
+    });
+
+    if (!aluno) {
+      throw ErrorHandler.notFound('Professor não encontrado.');
+    }
+
+    return aluno;
+  }
+
   async listarAlunos(
     paginaNumero: number,
     paginaTamanho: number,

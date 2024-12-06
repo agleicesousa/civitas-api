@@ -77,6 +77,30 @@ export class AlunoController {
     }
   }
 
+  async buscarAlunoPorId(req: Request, res: Response) {
+    try {
+      const adminLogadoId = req.user?.id;
+
+      if (!adminLogadoId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
+
+      const id = parseInt(req.params.id, 10);
+
+      if (isNaN(id)) {
+        throw ErrorHandler.badRequest('ID inválido.');
+      }
+
+      const aluno = await this.alunoService.buscarAlunoPorId(id, adminLogadoId);
+
+      res.status(200).json(aluno);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: 'Erro buscar aluno', error: error.message });
+    }
+  }
+
   async atualizarAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;

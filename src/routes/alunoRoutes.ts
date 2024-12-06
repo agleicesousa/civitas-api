@@ -29,6 +29,13 @@ alunoRouter.get(
   (req, res) => alunoController.listarAlunosCompleto(req, res)
 );
 
+alunoRouter.get(
+  '/:id',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
+  (req, res) => alunoController.buscarAlunoPorId(req, res)
+);
+
 alunoRouter.put(
   '/',
   validarEmail,
