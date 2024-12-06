@@ -205,15 +205,20 @@ export class AlunoService {
     };
   }
 
-  async excluirAluno(alunoId: number, adminId: number) {
+  async excluirAluno(id: number, adminId: number) {
     await this.iniciarDatabase();
 
     const aluno = await this.alunoRepository.findOne({
-      where: { id: alunoId },
-      relations: ['membro', 'admin']
+      where: {
+        membro: {
+          id,
+          adminCriadorId: adminId
+        }
+      },
+      relations: ['membro']
     });
 
-    if (!aluno || aluno.admin.id !== adminId) {
+    if (!aluno) {
       throw ErrorHandler.notFound('Aluno não encontrado ou acesso negado.');
     }
 

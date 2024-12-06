@@ -43,9 +43,9 @@ alunoRouter.put(
 );
 
 alunoRouter.delete(
-  '/',
-  //  authenticateJWT,
-  //  hasPermission('VIEW_MEMBERS'),
+  '/:id',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => alunoController.excluirAluno(req, res)
 );
 

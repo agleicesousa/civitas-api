@@ -135,7 +135,15 @@ export class AlunoController {
     try {
       const adminLogadoId = req.user?.id;
 
+      if (!adminLogadoId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
+
       const alunoId = parseInt(req.params.id);
+
+      if (isNaN(alunoId)) {
+        throw ErrorHandler.badRequest('ID inválido.');
+      }
 
       const resultado = await this.alunoService.excluirAluno(
         alunoId,
@@ -146,7 +154,7 @@ export class AlunoController {
     } catch (error) {
       return res
         .status(error.statusCode || 500)
-        .json({ message: error.message });
+        .json({ message: 'Erro ao excluir aluno', error: error.message });
     }
   }
 }
