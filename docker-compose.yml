@@ -12,7 +12,7 @@ services:
       - /app/node_modules
     ports:
       - 4444:4444
-    command: npm run start:dev
+    command: sh -c "npx typeorm-ts-node-commonjs migration:run -d src/config/database.ts && npm run start:dev"
     environment:
       NODE_ENV: development
       SERVER_PORT: 4444

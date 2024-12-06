@@ -13,7 +13,8 @@ const options: DataSourceOptions & SeederOptions = {
   database: process.env.DB_DATABASE,
   entities: ['src/entities/**/*.ts'],
   logging: false,
-  synchronize: true
+  synchronize: true,
+  migrations: ['src/migrations/*.ts']
   //  seeds: [Seeds],
   //  factories: [...Fabricas]
 };
