@@ -66,13 +66,19 @@ export class MembrosService {
     });
 
     if (!membro) {
-      throw ErrorHandler.notFound('Membro não encontrado ou você não tem permissão para acessá-lo.');
+      throw ErrorHandler.notFound(
+        'Membro não encontrado ou você não tem permissão para acessá-lo.'
+      );
     }
 
     return membro;
   }
 
-  async atualizarMembro(adminCriadorId: number, id: string, dadosMembro: Partial<Membros>) {
+  async atualizarMembro(
+    adminCriadorId: number,
+    id: string,
+    dadosMembro: Partial<Membros>
+  ) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
 
@@ -85,7 +91,9 @@ export class MembrosService {
     });
 
     if (!membroExistente) {
-      throw ErrorHandler.notFound('Membro não encontrado ou você não tem permissão para atualizá-lo.');
+      throw ErrorHandler.notFound(
+        'Membro não encontrado ou você não tem permissão para atualizá-lo.'
+      );
     }
 
     await this.membrosRepository.update(idNumber, dadosMembro);
@@ -105,7 +113,9 @@ export class MembrosService {
     });
 
     if (!membroExistente) {
-      throw ErrorHandler.notFound('Membro não encontrado ou você não tem permissão para deletá-lo.');
+      throw ErrorHandler.notFound(
+        'Membro não encontrado ou você não tem permissão para deletá-lo.'
+      );
     }
 
     await this.membrosRepository.delete(idNumber);
