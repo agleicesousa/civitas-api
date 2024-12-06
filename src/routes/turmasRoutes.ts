@@ -22,11 +22,8 @@ turmasRouter.get('/:id', authMiddleware, (req, res) =>
   turmaController.buscarTurmaId(req, res)
 );
 
-turmasRouter.put(
-  '/:id',
-  authMiddleware,
-  permissaoAdminMiddleware(Membros, 'Membro'),
-  (req, res) => turmaController.editarTurma(req, res)
+turmasRouter.put('/:id', authMiddleware, (req, res) =>
+  turmaController.editarTurma(req, res)
 );
 
 turmasRouter.delete(

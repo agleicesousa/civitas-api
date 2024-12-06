@@ -99,7 +99,14 @@ export class TurmasController {
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      await this.turmasService.editar(Number(id), req.body);
+      const adminCriadorId = req.user?.id;
+
+      if (!adminCriadorId) {
+        throw ErrorHandler.unauthorized('Admin não autenticado.');
+      }
+
+      await this.turmasService.editar(Number(id), req.body, adminCriadorId);
+
       return res.status(200).json({ message: 'Turma atualizada com sucesso' });
     } catch (error) {
       if (error instanceof ErrorHandler) {

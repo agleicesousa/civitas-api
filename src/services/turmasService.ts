@@ -5,7 +5,7 @@ import {
   Turma
 } from '../entities/turmasEntities';
 import { Admin } from '../entities/adminEntities';
-import { Like } from 'typeorm';
+import { Like, Not } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import ErrorHandler from '../errors/errorHandler';
 
@@ -86,7 +86,7 @@ export class TurmasService {
   }
 
   async buscarTurmaPorId(id: number, adminCriadorId: number): Promise<Turma> {
-    const turma = await this.turmasRepository.findOne({
+    const turmaExistente = await this.turmasRepository.findOne({
       where: {
         id,
         admin: {
@@ -95,25 +95,42 @@ export class TurmasService {
       }
     });
 
-    if (!turma) {
+    if (!turmaExistente) {
       throw ErrorHandler.notFound(
         'Turma não encontrada ou não pertence ao admin logado.'
       );
     }
 
-    return turma;
+    return turmaExistente;
   }
 
-  async editar(id: number, dadosTurma: Partial<Turma>) {
-    const turmaExistente = await this.turmasRepository.findOneBy({ id });
-    const { turmaApelido } = dadosTurma;
+  async editar(id: number, dadosTurma: Partial<Turma>, adminCriadorId: number) {
+    const turmaExistente = await this.turmasRepository.findOne({
+      where: { id },
+      relations: ['admin', 'admin.membro']
+    });
 
     if (!turmaExistente) {
       throw ErrorHandler.notFound('Turma não encontrada');
     }
 
-    if (turmaApelido && turmaApelido.length > 12) {
-      throw ErrorHandler.badRequest('O apelido da turma é muito longo');
+    if (turmaExistente.admin.membro.id !== adminCriadorId) {
+      throw ErrorHandler.unauthorized(
+        'Você não tem permissão para editar esta turma'
+      );
+    }
+
+    if (dadosTurma.turmaApelido) {
+      const apelidoExistente = await this.turmasRepository.findOne({
+        where: {
+          turmaApelido: dadosTurma.turmaApelido,
+          id: Not(id)
+        }
+      });
+
+      if (apelidoExistente) {
+        throw ErrorHandler.conflictError('O apelido da turma já existe');
+      }
     }
 
     Object.assign(turmaExistente, dadosTurma);
