@@ -1,6 +1,5 @@
 import { TipoConta } from '../entities/baseEntity';
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 
 export class InsertAdmin1733439199040 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -17,6 +16,7 @@ export class InsertAdmin1733439199040 implements MigrationInterface {
         email: 'admin@admin.com',
         senha: 'password123',
         nomeCompleto: 'Admin',
+        cpf: '145.272.680-90',
         tipoConta: TipoConta.ADMIN
       });
 
