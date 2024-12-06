@@ -23,7 +23,9 @@ export class MembrosController {
       });
     } catch (error) {
       const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
-      res.status(statusCode).json({ message: error.message || 'Erro ao criar membro.' });
+      res
+        .status(statusCode)
+        .json({ message: error.message || 'Erro ao criar membro.' });
     }
   }
 
@@ -42,7 +44,9 @@ export class MembrosController {
       });
     } catch (error) {
       const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
-      res.status(statusCode).json({ message: error.message || 'Erro ao buscar membros.' });
+      res
+        .status(statusCode)
+        .json({ message: error.message || 'Erro ao buscar membros.' });
     }
   }
 
@@ -55,7 +59,10 @@ export class MembrosController {
       }
 
       const id = req.params.id;
-      const membro = await this.membrosService.buscarMembroPorId(adminCriadorId, id);
+      const membro = await this.membrosService.buscarMembroPorId(
+        adminCriadorId,
+        id
+      );
 
       res.json({
         message: 'Membro encontrado com sucesso.',
@@ -63,7 +70,9 @@ export class MembrosController {
       });
     } catch (error) {
       const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
-      res.status(statusCode).json({ message: error.message || 'Erro ao buscar membro.' });
+      res
+        .status(statusCode)
+        .json({ message: error.message || 'Erro ao buscar membro.' });
     }
   }
 
@@ -76,7 +85,11 @@ export class MembrosController {
       }
 
       const id = req.params.id;
-      const membroAtualizado = await this.membrosService.atualizarMembro(adminCriadorId, id, req.body);
+      const membroAtualizado = await this.membrosService.atualizarMembro(
+        adminCriadorId,
+        id,
+        req.body
+      );
 
       res.json({
         message: 'Membro atualizado com sucesso.',
@@ -84,7 +97,9 @@ export class MembrosController {
       });
     } catch (error) {
       const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
-      res.status(statusCode).json({ message: error.message || 'Erro ao atualizar membro.' });
+      res
+        .status(statusCode)
+        .json({ message: error.message || 'Erro ao atualizar membro.' });
     }
   }
 
@@ -102,7 +117,9 @@ export class MembrosController {
       res.status(204).json({ message: 'Membro deletado com sucesso.' });
     } catch (error) {
       const statusCode = error instanceof ErrorHandler ? error.statusCode : 500;
-      res.status(statusCode).json({ message: error.message || 'Erro ao deletar membro.' });
+      res
+        .status(statusCode)
+        .json({ message: error.message || 'Erro ao deletar membro.' });
     }
   }
 }
