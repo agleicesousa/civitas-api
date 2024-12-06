@@ -10,7 +10,7 @@ export class ProfessorController {
       const adminLogadoId = req.user?.id;
 
       if (!adminLogadoId) {
-        throw ErrorHandler.unauthorized('Admin não autenticado.');
+        throw ErrorHandler.unauthorized('Usuário não autenticado.');
       }
 
       const resultado = await this.professorService.criarProfessor(

@@ -27,13 +27,13 @@ export class TurmasService {
     periodoLetivo: PeriodoLetivo,
     ensino: TipoEnsino,
     turmaApelido: string,
-    adminId: number
+    adminCriadorId: number
   ): Promise<Turma> {
     const turmaExistente = await this.turmasRepository.findOne({
       where: {
         turmaApelido,
         admin: {
-          membro: { id: adminId }
+          membro: { id: adminCriadorId }
         }
       }
     });
@@ -47,7 +47,7 @@ export class TurmasService {
     }
 
     const admin = await this.adminRepository.findOneBy({
-      membro: { id: adminId }
+      membro: { id: adminCriadorId }
     });
 
     const novaTurma = this.turmasRepository.create({

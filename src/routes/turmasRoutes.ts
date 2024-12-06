@@ -1,5 +1,7 @@
 import { TurmasController } from '../controller/turmasController';
-// import { authenticateJWT, hasPermission } from '../middlewares/authMiddleware';
+import { authMiddleware } from '../middlewares/authMiddleware';
+import { permissaoAdminMiddleware } from '../middlewares/permissaoAdminMiddleware';
+import { Membros } from '../entities/membrosEntities';
 import { Router } from 'express';
 
 const turmaController = new TurmasController();
@@ -7,36 +9,36 @@ const turmasRouter = Router();
 
 turmasRouter.post(
   '/',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => turmaController.criarTurma(req, res)
 );
 
 turmasRouter.get(
   '/',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => turmaController.listarTurmas(req, res)
 );
 
 turmasRouter.get(
-  '/:id',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  '/',
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => turmaController.buscarTurma(req, res)
 );
 
 turmasRouter.put(
   '/:id',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => turmaController.editarTurma(req, res)
 );
 
 turmasRouter.delete(
   '/:id',
-  //  authenticateJWT,
-  //  hasPermission('MANAGE_USERS'),
+  authMiddleware,
+  permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => turmaController.deletarTurma(req, res)
 );
 

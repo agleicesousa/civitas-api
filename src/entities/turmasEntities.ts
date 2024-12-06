@@ -34,6 +34,9 @@ export enum TipoEnsino {
 
 @Entity('turmas')
 export class Turma extends BaseEntity {
+  @Column({ type: 'varchar', length: 12 })
+  turmaApelido: string;
+
   @Column({ type: 'enum', enum: AnoLetivo })
   anoLetivo: AnoLetivo;
 
@@ -43,11 +46,11 @@ export class Turma extends BaseEntity {
   @Column({ type: 'enum', enum: TipoEnsino })
   ensino: TipoEnsino;
 
-  @Column({ type: 'varchar', length: 12 })
-  turmaApelido: string;
+  @Column({ nullable: true })
+  adminCriadorId: number;
 
   @ManyToOne(() => Admin, { eager: true, nullable: false })
-  @JoinColumn({ name: 'adminId' })
+  @JoinColumn({ name: 'adminCriadorId' })
   admin: Admin;
 
   @OneToMany(() => Alunos, (aluno) => aluno.turma)

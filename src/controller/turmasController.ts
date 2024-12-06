@@ -10,14 +10,18 @@ export class TurmasController {
     try {
       const { turmaApelido, periodoLetivo, anoLetivo, ensino } = req.body;
 
-      const adminId = Number(req.user.id);
+      const adminCriadorId = req.user?.id;
+
+      if (!adminCriadorId) {
+        throw ErrorHandler.unauthorized('Usuário não autenticado.');
+      }
 
       const novaTurma = await this.turmasService.criar(
         anoLetivo,
         periodoLetivo,
         ensino,
         turmaApelido,
-        adminId
+        adminCriadorId
       );
       return res
         .status(201)
@@ -37,10 +41,15 @@ export class TurmasController {
   async listarTurmas(req: Request, res: Response): Promise<Response> {
     const { page, perPage } = getPaginacao(req);
     const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
-    const adminId = Number(req.user.id);
+    const adminCriadorId = req.user?.id;
+
+    if (!adminCriadorId) {
+      throw ErrorHandler.unauthorized('Admin não autenticado.');
+    }
+
     try {
       const { data, total } = await this.turmasService.listar(
-        adminId,
+        adminCriadorId,
         page,
         perPage,
         searchTerm
