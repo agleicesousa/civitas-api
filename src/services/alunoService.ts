@@ -7,17 +7,30 @@ import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha } from '../utils/validarSenhaUtils';
 import { Like } from 'typeorm';
 
+/**
+ * Serviço responsável por gerenciar operações relacionadas a Alunos no sistema.
+ */
 export class AlunoService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
   private alunoRepository = MysqlDataSource.getRepository(Alunos);
   private turmaRepository = MysqlDataSource.getRepository(Turma);
 
+  /**
+   * Inicializa a conexão com o banco de dados caso ainda não esteja ativa.
+   * @private
+   */
   private async iniciarDatabase() {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
     }
   }
 
+  /**
+   * Formata os dados do aluno para retorno no formato desejado.
+   * @param aluno - Entidade do aluno.
+   * @returns Um objeto contendo os dados do aluno.
+   * @private
+   */
   private dadosAluno(aluno: Alunos) {
     return {
       id: aluno.id,
@@ -29,6 +42,13 @@ export class AlunoService {
     };
   }
 
+  /**
+   * Cria um novo aluno no sistema.
+   * @param dadosAluno - Dados necessários para criação do aluno.
+   * @param adminCriadorId - ID do administrador responsável pela criação.
+   * @throws ErrorHandler - Caso a turma não seja encontrada.
+   * @returns Mensagem de sucesso e os dados do aluno criado.
+   */
   async criarAluno(
     dadosAluno: {
       email: string;
@@ -44,6 +64,7 @@ export class AlunoService {
     const turma = await this.turmaRepository.findOne({
       where: { id: dadosAluno.turma }
     });
+
     if (!turma) {
       throw ErrorHandler.badRequest(
         'Turma não encontrada. Por favor, verifique o ID informado.'
@@ -53,6 +74,7 @@ export class AlunoService {
     const senhaCriptografada = await criptografarSenha(
       dadosAluno.numeroMatricula
     );
+
     const membro = this.membrosRepository.create({
       email: dadosAluno.email,
       nomeCompleto: dadosAluno.nomeCompleto,
@@ -71,6 +93,11 @@ export class AlunoService {
     return { message: 'Aluno cadastrado com sucesso.', aluno };
   }
 
+  /**
+   * Lista todos os alunos cadastrados vinculados a um administrador específico.
+   * @param adminLogadoId - ID do administrador logado.
+   * @returns Uma lista de alunos vinculados ao administrador.
+   */
   async listarAlunosCompleto(adminLogadoId: number) {
     await this.iniciarDatabase();
 
@@ -86,6 +113,13 @@ export class AlunoService {
     return alunos;
   }
 
+  /**
+   * Busca um aluno pelo ID, garantindo que pertence ao administrador logado.
+   * @param id - ID do aluno.
+   * @param adminLogadoId - ID do administrador logado.
+   * @throws ErrorHandler - Caso o aluno não seja encontrado.
+   * @returns Dados do aluno encontrado.
+   */
   async buscarAlunoPorId(id: number, adminLogadoId: number) {
     await this.iniciarDatabase();
 
@@ -106,6 +140,15 @@ export class AlunoService {
     return aluno;
   }
 
+  /**
+   * Lista os alunos com paginação e opção de busca por nome.
+   * @param paginaNumero - Número da página.
+   * @param paginaTamanho - Quantidade de itens por página.
+   * @param termoDeBusca - Termo de busca para filtrar alunos pelo nome.
+   * @param adminLogadoId - ID do administrador logado.
+   * @throws ErrorHandler - Caso nenhum aluno seja encontrado.
+   * @returns Um objeto com a lista de alunos paginada e o total de registros.
+   */
   async listarAlunos(
     paginaNumero: number,
     paginaTamanho: number,
@@ -114,7 +157,7 @@ export class AlunoService {
   ) {
     const pular = (paginaNumero - 1) * paginaTamanho;
 
-    const [aluno, total] = await this.alunoRepository.findAndCount({
+    const [alunos, total] = await this.alunoRepository.findAndCount({
       relations: ['membro'],
       where: {
         membro: {
@@ -127,21 +170,29 @@ export class AlunoService {
       take: paginaTamanho
     });
 
-    if (aluno.length === 0) {
+    if (alunos.length === 0) {
       throw ErrorHandler.notFound(
         termoDeBusca
-          ? `Nenhum Aluno encontrado com o termo "${termoDeBusca}".`
-          : 'Nenhum Aluno cadastrado no momento.'
+          ? `Nenhum aluno encontrado com o termo "${termoDeBusca}".`
+          : 'Nenhum aluno cadastrado no momento.'
       );
     }
 
     return {
       message: 'Alunos listados com sucesso.',
-      data: aluno.map(this.dadosAluno),
+      data: alunos.map(this.dadosAluno),
       total
     };
   }
 
+  /**
+   * Atualiza os dados de um aluno específico.
+   * @param id - ID do aluno a ser atualizado.
+   * @param dadosAtualizados - Novos dados do aluno.
+   * @param adminLogadoId - ID do administrador logado.
+   * @throws ErrorHandler - Caso o aluno não seja encontrado ou a turma informada não exista.
+   * @returns Mensagem de sucesso e os dados atualizados do aluno.
+   */
   async atualizarAluno(
     id: number,
     dadosAtualizados: {
@@ -156,7 +207,6 @@ export class AlunoService {
   ) {
     await this.iniciarDatabase();
 
-    // Busca o aluno garantindo que pertence ao admin logado
     const aluno = await this.alunoRepository.findOne({
       where: {
         membro: {
@@ -164,7 +214,7 @@ export class AlunoService {
           adminCriadorId: adminLogadoId
         }
       },
-      relations: ['membro', 'turma', 'admin']
+      relations: ['membro', 'turma']
     });
 
     if (!aluno) {
@@ -205,6 +255,13 @@ export class AlunoService {
     };
   }
 
+  /**
+   * Exclui um aluno do sistema.
+   * @param id - ID do aluno a ser excluído.
+   * @param adminId - ID do administrador logado.
+   * @throws ErrorHandler - Caso o aluno não seja encontrado ou o acesso seja negado.
+   * @returns Mensagem de confirmação da exclusão.
+   */
   async excluirAluno(id: number, adminId: number) {
     await this.iniciarDatabase();
 

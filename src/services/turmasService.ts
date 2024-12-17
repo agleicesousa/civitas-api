@@ -9,10 +9,18 @@ import { Like, Not } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import ErrorHandler from '../errors/errorHandler';
 
+/**
+ * Serviço responsável por operações relacionadas às Turmas.
+ */
 export class TurmasService {
   private turmasRepository = MysqlDataSource.getRepository(Turma);
   private adminRepository = MysqlDataSource.getRepository(Admin);
 
+  /**
+   * Mapeia os dados de uma turma para um formato simplificado.
+   * @param turma - Objeto da entidade Turma.
+   * @returns Um objeto com dados simplificados da turma.
+   */
   private mapTurma(turma: Turma) {
     const { id, turmaApelido, anoLetivo, periodoLetivo } = turma;
     return {
@@ -22,6 +30,17 @@ export class TurmasService {
       periodoLetivo
     };
   }
+
+  /**
+   * Cria uma nova turma associada a um administrador.
+   * @param anoLetivo - Ano letivo da turma.
+   * @param periodoLetivo - Período letivo (semestre, bimestre, etc.).
+   * @param ensino - Tipo de ensino (ex.: Fundamental, Médio).
+   * @param turmaApelido - Apelido ou nome da turma.
+   * @param adminCriadorId - ID do administrador criador.
+   * @returns A turma recém-criada.
+   * @throws Conflito caso a turma já exista ou erro de validação.
+   */
   async criar(
     anoLetivo: AnoLetivo,
     periodoLetivo: PeriodoLetivo,
@@ -61,6 +80,14 @@ export class TurmasService {
     return await this.turmasRepository.save(novaTurma);
   }
 
+  /**
+   * Lista as turmas associadas a um administrador, com suporte a paginação e busca.
+   * @param adminCriadorId - ID do administrador logado.
+   * @param paginaNumero - Número da página atual.
+   * @param paginaTamanho - Tamanho de itens por página.
+   * @param searchTerm - Termo de busca para filtrar turmas.
+   * @returns Um objeto contendo total de registros e dados paginados.
+   */
   async listar(
     adminCriadorId: number,
     paginaNumero: number,
@@ -85,6 +112,13 @@ export class TurmasService {
     };
   }
 
+  /**
+   * Busca uma turma específica pelo ID.
+   * @param id - ID da turma.
+   * @param adminCriadorId - ID do administrador logado.
+   * @returns A turma encontrada.
+   * @throws Erro caso a turma não exista ou não pertença ao administrador.
+   */
   async buscarTurmaPorId(id: number, adminCriadorId: number): Promise<Turma> {
     const turmaExistente = await this.turmasRepository.findOne({
       where: {
@@ -104,6 +138,14 @@ export class TurmasService {
     return turmaExistente;
   }
 
+  /**
+   * Edita os dados de uma turma específica.
+   * @param id - ID da turma a ser editada.
+   * @param dadosTurma - Novos dados da turma.
+   * @param adminCriadorId - ID do administrador logado.
+   * @returns A turma atualizada.
+   * @throws Erro caso a turma não exista, conflito de apelido ou falta de permissão.
+   */
   async editar(id: number, dadosTurma: Partial<Turma>, adminCriadorId: number) {
     const turmaExistente = await this.turmasRepository.findOne({
       where: { id },
@@ -137,6 +179,13 @@ export class TurmasService {
     return await this.turmasRepository.save(turmaExistente);
   }
 
+  /**
+   * Exclui uma turma pelo ID.
+   * @param id - ID da turma a ser deletada.
+   * @param adminCriadorId - ID do administrador logado.
+   * @returns O resultado da operação de exclusão.
+   * @throws Erro caso a turma não exista ou o administrador não tenha permissão.
+   */
   async deletar(id: number, adminCriadorId: number) {
     const turmaExistente = await this.turmasRepository.findOne({
       where: { id },
@@ -156,6 +205,12 @@ export class TurmasService {
     return await this.turmasRepository.delete(id);
   }
 
+  /**
+   * Busca os alunos associados a uma turma específica.
+   * @param turmaId - ID da turma.
+   * @returns Lista simplificada de alunos da turma.
+   * @throws Erro caso a turma não exista.
+   */
   async buscarAlunosPorTurma(turmaId: number) {
     const turma = await this.turmasRepository.findOne({
       where: { id: turmaId },

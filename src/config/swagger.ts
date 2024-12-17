@@ -1,5 +1,10 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
+/**
+ * Configuração do Swagger para documentar a API.
+ * Define a versão da especificação OpenAPI, informações da API,
+ * detalhes do servidor, esquemas de segurança e caminhos das rotas.
+ */
 export const swaggerConfig: swaggerJSDoc.Options = {
   definition: {
     openapi: '3.0.0',

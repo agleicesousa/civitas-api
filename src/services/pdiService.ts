@@ -17,11 +17,19 @@ interface CreatePDIPayload {
   }[];
 }
 
+/**
+ * Service responsável pelo gerenciamento dos PDI (Plano de Desenvolvimento Individual).
+ */
 export class PdiService {
   private alunosRepository = MysqlDataSource.getRepository(Alunos);
   private pdiRepository = MysqlDataSource.getRepository(PDI);
   private professorRepository = MysqlDataSource.getRepository(Professor);
 
+  /**
+   * Mapeia os dados de um PDI para um formato mais amigável.
+   * @param pdi O PDI a ser mapeado.
+   * @returns Dados formatados incluindo respostas, médias, comentários e data.
+   */
   private pdiMap(pdi: PDI) {
     const comments = pdi.consideracoes;
     const responses = {};
@@ -44,6 +52,15 @@ export class PdiService {
     };
   }
 
+  /**
+   * Cria um novo PDI para um aluno.
+   * @param payload Dados do PDI, incluindo seções e respostas.
+   * @param comments Comentários adicionais para o PDI.
+   * @param alunoId ID do aluno associado ao PDI.
+   * @param professorId ID do professor que criou o PDI.
+   * @returns O PDI recém-criado.
+   * @throws ErrorHandler Caso o aluno ou professor não sejam encontrados.
+   */
   async criarPDI(
     payload: CreatePDIPayload,
     comments: string,
@@ -86,6 +103,11 @@ export class PdiService {
     return novoPdi;
   }
 
+  /**
+   * Deleta um PDI específico pelo ID.
+   * @param pdiId ID do PDI a ser deletado.
+   * @throws Error Caso o PDI não seja encontrado.
+   */
   async deletearPdi(pdiId: number) {
     const pdi = await this.pdiRepository.findOne({
       where: { id: pdiId }
@@ -98,6 +120,11 @@ export class PdiService {
     await this.pdiRepository.delete(pdiId);
   }
 
+  /**
+   * Cria uma seção do PDI com suas respectivas respostas.
+   * @param sectionData Dados da seção, incluindo perguntas e respostas.
+   * @returns Uma nova instância de PdiSecao.
+   */
   private criarSecaoComRespostas(sectionData): PdiSecao {
     const secao = new PdiSecao();
     secao.titulo = sectionData.section;
@@ -112,17 +139,25 @@ export class PdiService {
 
     return secao;
   }
+
+  /**
+   * Retorna os detalhes de um PDI específico.
+   * @param idPDI ID do PDI.
+   * @returns Detalhes do PDI, incluindo histórico de médias anteriores.
+   * @throws ErrorHandler Caso o PDI não seja encontrado.
+   */
   async detalhesPDI(idPDI: number) {
     const pdi = await this.pdiRepository.findOne({
       where: { id: idPDI },
       relations: ['secoes', 'aluno', 'professor', 'aluno.turma']
     });
-    const aluno = pdi.aluno;
-    const professor = pdi.professor;
 
     if (!pdi) {
       throw ErrorHandler.notFound('PDI não encontrado');
     }
+
+    const aluno = pdi.aluno;
+    const professor = pdi.professor;
 
     const todosPdi = await this.pdiRepository.find({
       where: { aluno: { id: pdi.aluno.id } },
@@ -134,10 +169,10 @@ export class PdiService {
       currentPdiIndex > 0 ? todosPdi[currentPdiIndex - 1] : null;
 
     const pdiDetalhes = this.pdiMap(pdi);
-
     const mediasAnteriores = pdiAnterior
       ? pdiAnterior.secoes.map((secao) => Number(secao.media))
       : [];
+
     return {
       ...pdiDetalhes,
       studentName: aluno.membro.nomeCompleto,
@@ -148,6 +183,12 @@ export class PdiService {
     };
   }
 
+  /**
+   * Retorna a lista de PDIs de um aluno.
+   * @param alunoId ID do aluno.
+   * @param tipoConta Tipo de conta (ALUNO ou outro).
+   * @returns Lista de PDIs do aluno com data de registro.
+   */
   async pdisDoAluno(alunoId: number, tipoConta: TipoConta) {
     const where =
       tipoConta === TipoConta.ALUNO
@@ -172,6 +213,13 @@ export class PdiService {
     }));
   }
 
+  /**
+   * Retorna um resumo do aluno e professor relacionado.
+   * @param alunoId ID do aluno.
+   * @param professorId ID do professor.
+   * @returns Resumo com nomes e detalhes.
+   * @throws ErrorHandler Caso o aluno ou professor não sejam encontrados.
+   */
   async resumoProfessorAluno(alunoId: number, professorId: number) {
     const [aluno, professor] = await Promise.all([
       this.alunosRepository.findOne({
