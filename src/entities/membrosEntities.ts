@@ -33,6 +33,9 @@ export class Membros extends BaseEntity {
   @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
+  @Column({ default: true })
+  primeiroLogin: boolean;
+
   @Column({ nullable: true })
   adminCriadorId: number;
 

@@ -30,6 +30,24 @@ export class LoginService {
       tipoConta: user.tipoConta
     });
 
-    return { token, tipoConta: user.tipoConta };
+    return {
+      token,
+      tipoConta: user.tipoConta,
+      primeiroLogin: user.primeiroLogin
+    };
+  }
+
+  async atualizarSenhaPrimeiroLogin(id: number, novaSenha: string) {
+    const user = await this.membroRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw ErrorHandler.notFound('Usuário não encontrado.');
+    }
+
+    user.senha = novaSenha;
+    user.primeiroLogin = false;
+
+    await this.membroRepository.save(user);
+    return { message: 'Senha atualizada com sucesso.' };
   }
 }
