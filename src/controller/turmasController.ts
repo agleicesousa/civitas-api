@@ -3,9 +3,20 @@ import { TurmasService } from '../services/turmasService';
 import { getPaginacao } from '../utils/paginacaoUtils';
 import ErrorHandler from '../errors/errorHandler';
 
+/**
+ * Controller responsável pelo gerenciamento de turmas.
+ * Contém métodos para criar, listar, buscar, editar, excluir e buscar alunos de turmas.
+ */
 export class TurmasController {
   private turmasService = new TurmasService();
 
+  /**
+   * Cria uma nova turma.
+   *
+   * @param req - Objeto Request contendo as informações da turma no body.
+   * @param res - Objeto Response usado para retornar a resposta ao cliente.
+   * @returns Retorna um objeto JSON com a mensagem de sucesso e os dados da turma criada.
+   */
   async criarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { turmaApelido, periodoLetivo, anoLetivo, ensino } = req.body;
@@ -38,6 +49,13 @@ export class TurmasController {
     }
   }
 
+  /**
+   * Lista turmas paginadas com base em um termo de busca.
+   *
+   * @param req - Objeto Request contendo os parâmetros de paginação e busca.
+   * @param res - Objeto Response usado para retornar a resposta ao cliente.
+   * @returns Retorna uma lista de turmas paginadas.
+   */
   async listarTurmas(req: Request, res: Response): Promise<Response> {
     const { page, perPage } = getPaginacao(req);
     const searchTerm = req.query.searchTerm ? String(req.query.searchTerm) : '';
@@ -62,6 +80,13 @@ export class TurmasController {
     }
   }
 
+  /**
+   * Busca uma turma específica pelo ID.
+   *
+   * @param req - Objeto Request contendo o ID da turma nos parâmetros.
+   * @param res - Objeto Response usado para retornar a resposta ao cliente.
+   * @returns Retorna os detalhes da turma encontrada.
+   */
   async buscarTurmaId(req: Request, res: Response): Promise<Response> {
     try {
       const turmaId = Number(req.params.id);
@@ -96,6 +121,13 @@ export class TurmasController {
     }
   }
 
+  /**
+   * Edita os dados de uma turma existente.
+   *
+   * @param req - Objeto Request contendo o ID da turma nos parâmetros e os dados a serem atualizados no body.
+   * @param res - Objeto Response usado para retornar a resposta ao cliente.
+   * @returns Retorna uma mensagem de sucesso após a edição.
+   */
   async editarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -118,6 +150,13 @@ export class TurmasController {
     }
   }
 
+  /**
+   * Deleta uma turma específica pelo ID.
+   *
+   * @param req - Objeto Request contendo o ID da turma nos parâmetros.
+   * @param res - Objeto Response usado para retornar a resposta ao cliente.
+   * @returns Retorna uma mensagem de sucesso após a exclusão.
+   */
   async deletarTurma(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -140,6 +179,13 @@ export class TurmasController {
     }
   }
 
+  /**
+   * Busca todos os alunos associados a uma turma específica.
+   *
+   * @param req - Objeto Request contendo o ID da turma nos parâmetros.
+   * @param res - Objeto Response usado para retornar a resposta ao cliente.
+   * @returns Retorna uma lista de alunos da turma.
+   */
   async buscarAlunosTurma(req: Request, res: Response): Promise<Response> {
     try {
       const turmaId = Number(req.params.id);
