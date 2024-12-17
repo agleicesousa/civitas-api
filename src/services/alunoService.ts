@@ -60,7 +60,7 @@ export class AlunoService {
       cpf: dadosAluno.cpf,
       senha: senhaCriptografada,
       tipoConta: TipoConta.ALUNO,
-      adminCriadorId: adminCriadorId ? { id: adminCriadorId } : null
+      adminCriadorId
     });
 
     await this.membrosRepository.save(membro);
