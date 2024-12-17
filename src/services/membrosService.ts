@@ -3,16 +3,31 @@ import { Membros } from '../entities/membrosEntities';
 import { Admin } from '../entities/adminEntities';
 import ErrorHandler from '../errors/errorHandler';
 
+/**
+ * Serviço responsável pela lógica de negócios para manipulação de membros no sistema.
+ * Inclui operações CRUD (Create, Read, Update, Delete) relacionadas aos membros e verificações de permissão.
+ */
 export class MembrosService {
   private membrosRepository = MysqlDataSource.getRepository(Membros);
   private adminRepository = MysqlDataSource.getRepository(Admin);
 
+  /**
+   * Inicializa a conexão com o banco de dados caso ainda não esteja inicializada.
+   */
   private async iniciarDatabase() {
     if (!MysqlDataSource.isInitialized) {
       await MysqlDataSource.initialize();
     }
   }
 
+  /**
+   * Cria um novo membro no banco de dados.
+   * Verifica se o ID do administrador criador existe no banco antes de prosseguir.
+   *
+   * @param dadosMembro - Dados do novo membro a ser criado.
+   * @returns O membro criado no banco de dados.
+   * @throws Error caso o administrador criador não exista ou falhe ao salvar no banco de dados.
+   */
   async criarMembro(dadosMembro: Partial<Membros>) {
     await this.iniciarDatabase();
 
@@ -41,6 +56,13 @@ export class MembrosService {
     }
   }
 
+  /**
+   * Lista todos os membros criados por um administrador específico.
+   *
+   * @param adminCriadorId - ID do administrador responsável pelos membros.
+   * @returns Lista de membros associados ao administrador.
+   * @throws Error caso o ID do administrador não seja fornecido.
+   */
   async listarMembros(adminCriadorId: number) {
     await this.iniciarDatabase();
 
@@ -53,6 +75,15 @@ export class MembrosService {
     });
   }
 
+  /**
+   * Busca um membro pelo ID específico.
+   * Verifica se o membro existe e se o administrador tem permissão para acessá-lo.
+   *
+   * @param adminCriadorId - ID do administrador que tenta acessar o membro.
+   * @param id - ID do membro a ser buscado.
+   * @returns O membro encontrado no banco de dados.
+   * @throws Error caso o membro não seja encontrado ou caso o ID seja inválido.
+   */
   async buscarMembroPorId(adminCriadorId: number, id: string) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
@@ -74,6 +105,16 @@ export class MembrosService {
     return membro;
   }
 
+  /**
+   * Atualiza as informações de um membro específico.
+   * Verifica se o membro existe e se o administrador tem permissão para atualizá-lo.
+   *
+   * @param adminCriadorId - ID do administrador responsável pela operação.
+   * @param id - ID do membro a ser atualizado.
+   * @param dadosMembro - Dados que devem ser atualizados.
+   * @returns O membro atualizado no banco de dados.
+   * @throws Error caso o membro não seja encontrado ou caso o ID seja inválido.
+   */
   async atualizarMembro(
     adminCriadorId: number,
     id: string,
@@ -100,6 +141,14 @@ export class MembrosService {
     return await this.membrosRepository.findOneBy({ id: idNumber });
   }
 
+  /**
+   * Deleta um membro específico do banco de dados.
+   * Verifica se o membro existe e se o administrador tem permissão para deletá-lo.
+   *
+   * @param adminCriadorId - ID do administrador responsável pela operação.
+   * @param id - ID do membro a ser deletado.
+   * @throws Error caso o membro não seja encontrado ou caso o ID seja inválido.
+   */
   async deletarMembro(adminCriadorId: number, id: string) {
     await this.iniciarDatabase();
     const idNumber = Number(id);
