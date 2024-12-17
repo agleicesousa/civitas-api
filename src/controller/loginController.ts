@@ -1,9 +1,16 @@
 import { Request, Response } from 'express';
 import { LoginService } from '../services/loginService';
 
+/**
+ * Controlador responsável por gerenciar as rotas de login,
+ * recuperação e redefinição de senha.
+ */
 export class LoginController {
   private loginService = new LoginService();
 
+  /**
+   * Realiza o login do usuário verificando credenciais e retornando token.
+   */
   async login(req: Request, res: Response): Promise<Response> {
     const { email, senha } = req.body;
 
@@ -18,7 +25,7 @@ export class LoginController {
         email,
         senha
       );
-      return res.json({ token, tipoConta, primeiroLogin });
+      return res.status(200).json({ token, tipoConta, primeiroLogin });
     } catch (error) {
       return res
         .status(401)
@@ -26,6 +33,9 @@ export class LoginController {
     }
   }
 
+  /**
+   * Atualiza senha quando o usuário está no primeiro login.
+   */
   async atualizarSenhaPrimeiroLogin(
     req: Request,
     res: Response
@@ -42,7 +52,7 @@ export class LoginController {
         userId,
         novaSenha
       );
-      return res.json(result);
+      return res.status(200).json(result);
     } catch (error) {
       return res
         .status(400)
@@ -50,11 +60,14 @@ export class LoginController {
     }
   }
 
+  /**
+   * Solicita recuperação de senha através do envio de e-mail.
+   */
   async solicitarRecuperacao(req: Request, res: Response) {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ message: 'Email é obrigatório.' });
+      return res.status(400).json({ message: 'E-mail é obrigatório.' });
     }
 
     try {
@@ -67,6 +80,9 @@ export class LoginController {
     }
   }
 
+  /**
+   * Redefine senha através do token de recuperação.
+   */
   async resetarSenha(req: Request, res: Response) {
     const { token, novaSenha } = req.body;
 

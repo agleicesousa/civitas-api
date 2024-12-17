@@ -6,14 +6,27 @@ import { gerarToken, gerarTokenRecuperacao } from '../utils/jwtUtils';
 import ErrorHandler from '../errors/errorHandler';
 import { criptografarSenha } from '../utils/validarSenhaUtils';
 
+/**
+ * Serviço responsável por gerenciar a lógica de autenticação,
+ * recuperação de senha e redefinição de senhas de usuários.
+ */
 export class LoginService {
   private membroRepository: Repository<Membros>;
 
   constructor() {
+    // Configura o repositório do banco de dados com o Entity de membros.
     this.membroRepository = MysqlDataSource.getRepository(Membros);
   }
 
+  /**
+   * Realiza o login de um usuário verificando o e-mail e senha.
+   * @param email - O e-mail do usuário para autenticação.
+   * @param senha - Senha informada pelo usuário no login.
+   * @returns Retorna um token JWT, tipoConta e status do primeiro login.
+   * @throws ErrorHandler caso falhe na autenticação.
+   */
   async login(email: string, senha: string) {
+    // Busca usuário pelo e-mail.
     const user = await this.membroRepository.findOne({ where: { email } });
 
     if (!user) {
@@ -38,6 +51,13 @@ export class LoginService {
     };
   }
 
+  /**
+   * Atualiza a senha de um usuário no caso de primeiro login.
+   * @param id - ID do usuário que está realizando o primeiro login.
+   * @param novaSenha - Senha que será configurada no primeiro login.
+   * @returns Mensagem de sucesso.
+   * @throws ErrorHandler caso usuário não seja encontrado.
+   */
   async atualizarSenhaPrimeiroLogin(id: number, novaSenha: string) {
     const user = await this.membroRepository.findOne({ where: { id } });
 
@@ -49,9 +69,16 @@ export class LoginService {
     user.primeiroLogin = false;
 
     await this.membroRepository.save(user);
+
     return { message: 'Senha atualizada com sucesso.' };
   }
 
+  /**
+   * Solicita a recuperação da senha enviando um token para o e-mail.
+   * @param email - Email do usuário que deseja recuperar sua senha.
+   * @returns Mensagem confirmando envio do link de recuperação.
+   * @throws ErrorHandler caso o usuário não seja encontrado.
+   */
   async solicitarRecuperacao(email: string) {
     const membro = await this.membroRepository.findOne({ where: { email } });
 
@@ -61,17 +88,25 @@ export class LoginService {
 
     const token = gerarTokenRecuperacao();
     membro.resetToken = token;
-    membro.resetTokenExp = new Date(Date.now() + 3600000); // Token válido por 1 hora
+    membro.resetTokenExp = new Date(Date.now() + 3600000); // Token válido por 1 hora.
 
     await this.membroRepository.save(membro);
 
-    // Simula o envio do e-mail - uso interno
+    // TODO: Simula o envio do e-mail - uso interno.
     console.log(
       `Link para recuperação: https://localhost:4444/resetar-senha?token=${token}`
     );
+
     return { message: 'Link de recuperação enviado para o email.' };
   }
 
+  /**
+   * Redefine a senha utilizando um token válido.
+   * @param token - Token para redefinição gerado no processo de recuperação.
+   * @param novaSenha - Nova senha definida pelo usuário.
+   * @returns Mensagem confirmando a alteração.
+   * @throws ErrorHandler caso token inválido ou expirado.
+   */
   async resetarSenha(token: string, novaSenha: string) {
     const membro = await this.membroRepository.findOne({
       where: { resetToken: token, resetTokenExp: MoreThan(new Date()) }
@@ -90,6 +125,7 @@ export class LoginService {
     membro.resetTokenExp = null;
 
     await this.membroRepository.save(membro);
+
     return { message: 'Senha alterada com sucesso.' };
   }
 }
