@@ -15,4 +15,8 @@ loginRoutes.post('/solicitar-recuperacao', (req, res) =>
   controller.solicitarRecuperacao(req, res)
 );
 
+loginRoutes.post('/resetar-senha', (req, res) =>
+  controller.resetarSenha(req, res)
+);
+
 export default loginRoutes;

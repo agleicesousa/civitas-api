@@ -66,4 +66,17 @@ export class LoginController {
         .json({ message: error.message || 'Erro ao solicitar recuperação.' });
     }
   }
+
+  async resetarSenha(req: Request, res: Response) {
+    const { token, novaSenha } = req.body;
+
+    try {
+      const result = await this.loginService.resetarSenha(token, novaSenha);
+      return res.status(200).json(result);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message || 'Erro ao redefinir senha.' });
+    }
+  }
 }

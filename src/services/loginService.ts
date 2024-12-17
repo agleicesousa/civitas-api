@@ -1,9 +1,10 @@
 import { compare } from 'bcrypt';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
 import { gerarToken, gerarTokenRecuperacao } from '../utils/jwtUtils';
 import ErrorHandler from '../errors/errorHandler';
+import { criptografarSenha } from '../utils/validarSenhaUtils';
 
 export class LoginService {
   private membroRepository: Repository<Membros>;
@@ -64,10 +65,31 @@ export class LoginService {
 
     await this.membroRepository.save(membro);
 
-    // Simula o envio do e-mail
+    // Simula o envio do e-mail - uso interno
     console.log(
       `Link para recuperação: https://localhost:4444/resetar-senha?token=${token}`
     );
     return { message: 'Link de recuperação enviado para o email.' };
+  }
+
+  async resetarSenha(token: string, novaSenha: string) {
+    const membro = await this.membroRepository.findOne({
+      where: { resetToken: token, resetTokenExp: MoreThan(new Date()) }
+    });
+
+    if (!membro) {
+      throw ErrorHandler.badRequest('Token inválido ou expirado.');
+    }
+
+    if (!novaSenha) {
+      throw ErrorHandler.badRequest('A nova senha deve ser informada.');
+    }
+
+    membro.senha = await criptografarSenha(novaSenha);
+    membro.resetToken = null;
+    membro.resetTokenExp = null;
+
+    await this.membroRepository.save(membro);
+    return { message: 'Senha alterada com sucesso.' };
   }
 }
