@@ -2,7 +2,7 @@ import { compare } from 'bcrypt';
 import { Repository } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
-import { gerarToken } from '../utils/jwtUtils';
+import { gerarToken, gerarTokenRecuperacao } from '../utils/jwtUtils';
 import ErrorHandler from '../errors/errorHandler';
 
 export class LoginService {
@@ -49,5 +49,25 @@ export class LoginService {
 
     await this.membroRepository.save(user);
     return { message: 'Senha atualizada com sucesso.' };
+  }
+
+  async solicitarRecuperacao(email: string) {
+    const membro = await this.membroRepository.findOne({ where: { email } });
+
+    if (!membro) {
+      throw ErrorHandler.notFound('Usuário com este email não encontrado.');
+    }
+
+    const token = gerarTokenRecuperacao();
+    membro.resetToken = token;
+    membro.resetTokenExp = new Date(Date.now() + 3600000); // Token válido por 1 hora
+
+    await this.membroRepository.save(membro);
+
+    // Simula o envio do e-mail
+    console.log(
+      `Link para recuperação: https://localhost:4444/resetar-senha?token=${token}`
+    );
+    return { message: 'Link de recuperação enviado para o email.' };
   }
 }

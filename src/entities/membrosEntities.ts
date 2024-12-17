@@ -39,6 +39,12 @@ export class Membros extends BaseEntity {
   @Column({ nullable: true })
   adminCriadorId: number;
 
+  @Column({ nullable: true })
+  resetToken: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExp: Date;
+
   @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'adminCriadorId' })
   adminCriador: Admin;

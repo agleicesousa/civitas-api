@@ -49,4 +49,21 @@ export class LoginController {
         .json({ message: error.message || 'Erro ao atualizar senha.' });
     }
   }
+
+  async solicitarRecuperacao(req: Request, res: Response) {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email é obrigatório.' });
+    }
+
+    try {
+      const result = await this.loginService.solicitarRecuperacao(email);
+      return res.status(200).json(result);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message || 'Erro ao solicitar recuperação.' });
+    }
+  }
 }

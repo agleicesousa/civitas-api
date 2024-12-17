@@ -11,4 +11,8 @@ loginRoutes.post('/primeiro-login', authMiddleware, (req, res) =>
   controller.atualizarSenhaPrimeiroLogin(req, res)
 );
 
+loginRoutes.post('/solicitar-recuperacao', (req, res) =>
+  controller.solicitarRecuperacao(req, res)
+);
+
 export default loginRoutes;
