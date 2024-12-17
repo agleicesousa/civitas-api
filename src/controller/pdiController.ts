@@ -3,9 +3,17 @@ import { TipoConta } from '../entities/baseEntity';
 import ErrorHandler from '../errors/errorHandler';
 import { PdiService } from '../services/pdiService';
 
+/**
+ * Controlador para manipulação das operações relacionadas ao PDI (Plano de Desenvolvimento Individual).
+ */
 export class PdiController {
   private pdiService = new PdiService();
 
+  /**
+   * Cria um novo PDI.
+   * @param req Request contendo os valores do PDI e comentários.
+   * @param res Response com o status da operação e o PDI criado.
+   */
   async criarPdi(req: Request, res: Response) {
     try {
       const { pdiValues, comments } = req.body;
@@ -35,17 +43,22 @@ export class PdiController {
     }
   }
 
+  /**
+   * Obtém os detalhes de um PDI específico.
+   * @param req Request contendo o ID do PDI na URL.
+   * @param res Response com os detalhes do PDI.
+   */
   async obterDetalhesPDI(req: Request, res: Response): Promise<Response> {
     try {
       const idPDI = Number(req.params.id);
       if (isNaN(idPDI)) {
-        res
+        return res
           .status(400)
           .json({ message: 'O ID do PDI deve ser um número válido' });
-        return;
       }
+
       const detalhes = await this.pdiService.detalhesPDI(idPDI);
-      res.status(200).json(detalhes);
+      return res.status(200).json(detalhes);
     } catch (error) {
       if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({
@@ -59,11 +72,18 @@ export class PdiController {
     }
   }
 
+  /**
+   * Lista todos os PDIs de um aluno.
+   * @param req Request contendo o ID do aluno e tipo da conta.
+   * @param res Response com a lista de PDIs do aluno.
+   */
   async listarPDIsDoAluno(req: Request, res: Response): Promise<Response> {
     try {
       const tipoConta = req.user.tipoConta as TipoConta;
       const alunoId = Number(req.params.id);
+
       const pdis = await this.pdiService.pdisDoAluno(alunoId, tipoConta);
+
       return res.status(200).json(pdis);
     } catch (error) {
       console.error(error);
@@ -71,10 +91,16 @@ export class PdiController {
     }
   }
 
+  /**
+   * Deleta um PDI específico.
+   * @param req Request contendo o ID do PDI a ser deletado.
+   * @param res Response com o status da operação.
+   */
   async deletarPDI(req: Request, res: Response): Promise<Response> {
     try {
       const pdiId = Number(req.params.id);
       await this.pdiService.deletearPdi(pdiId);
+
       return res.status(200).json({
         message: 'PDI removido com sucesso'
       });
@@ -88,6 +114,11 @@ export class PdiController {
     }
   }
 
+  /**
+   * Obtém o resumo do relacionamento entre professor e aluno.
+   * @param req Request contendo os IDs do aluno e professor.
+   * @param res Response com o resumo das informações.
+   */
   async obterResumoProfessorAluno(
     req: Request,
     res: Response
@@ -108,7 +139,7 @@ export class PdiController {
       );
 
       return res.status(200).json({
-        message: 'Dados obtido com sucesso.',
+        message: 'Dados obtidos com sucesso.',
         ...dados
       });
     } catch (error) {
