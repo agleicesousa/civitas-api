@@ -10,28 +10,28 @@ export const swaggerConfig: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:4444', // URL do servidor de desenvolvimento
+        url: 'http://localhost:4444',
         description: 'Servidor Local'
       }
     ],
     externalDocs: {
       description: 'Swagger JSON',
-      url: '../swagger.json' // Confirme se esse caminho é acessível
+      url: '../swagger.json'
     },
     components: {
       securitySchemes: {
         BearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT' // Especifique que o formato esperado é JWT
+          bearerFormat: 'JWT'
         }
       }
     },
     security: [
       {
-        BearerAuth: [] // Aplica a autenticação BearerAuth globalmente (se necessário)
+        BearerAuth: []
       }
     ]
   },
-  apis: ['src/routes/*.ts', 'routes/*.js'] // Caminhos para buscar as rotas
+  apis: ['src/routes/*.ts', 'routes/*.js']
 };

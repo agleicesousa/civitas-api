@@ -13,18 +13,16 @@ import alunoRouter from './routes/alunoRoutes';
 import loginRouter from './routes/loginRoutes';
 import pdiRouter from './routes/pdiRoutes';
 
-// Função para iniciar o banco de dados
 const initializeDatabase = async () => {
   try {
     await MysqlDataSource.initialize();
     console.log('✅ Database initialized!');
   } catch (err) {
     console.error('❌ Database initialization failed:', err);
-    process.exit(1); // Encerra o processo em caso de erro
+    process.exit(1);
   }
 };
 
-// Função para configurar o Swagger
 const setupSwagger = (app: express.Application) => {
   const swaggerSpec = swaggerJSDoc(swaggerConfig);
   app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
@@ -37,11 +35,12 @@ const main = async () => {
 
   const app = express();
 
-  // Middlewares
   app.use(express.json());
   app.use(cors({ origin: true }));
+  app.use(errorHandler);
 
-  // Rotas
+  setupSwagger(app);
+
   app.use('/admin', adminRouter);
   app.use('/membros', membrosRouter);
   app.use('/turmas', turmasRouter);
@@ -50,20 +49,12 @@ const main = async () => {
   app.use('/alunos', alunoRouter);
   app.use('/auth', loginRouter);
 
-  // Configuração do Swagger
-  setupSwagger(app);
-
-  // Middleware de erros
-  app.use(errorHandler);
-
-  // Validação de variáveis de ambiente
   const PORT = process.env.SERVER_PORT || 3000;
   if (!PORT) {
     console.error('❌ SERVER_PORT não definido nas variáveis de ambiente.');
     process.exit(1);
   }
 
-  // Inicia o servidor
   app.listen(PORT, () => {
     console.log(`✅ Server listening on port ${PORT}`);
   });
