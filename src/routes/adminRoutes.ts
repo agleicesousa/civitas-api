@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { AdminController } from '../controller/adminController';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { permissaoAdminMiddleware } from '../middlewares/permissaoAdminMiddleware';
-import { validarSenha } from '../utils/validarSenhaUtils';
 import { Membros } from '../entities/membrosEntities';
 
 const adminRouter = Router();
@@ -10,7 +9,6 @@ const adminController = new AdminController();
 
 adminRouter.post(
   '/',
-  validarSenha,
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => adminController.criarAdmin(req, res)
@@ -32,7 +30,6 @@ adminRouter.get(
 
 adminRouter.put(
   '/:id',
-  validarSenha,
   authMiddleware,
   permissaoAdminMiddleware(Membros, 'Membro'),
   (req, res) => adminController.atualizarAdmin(req, res)
