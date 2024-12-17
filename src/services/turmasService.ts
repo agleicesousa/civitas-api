@@ -5,7 +5,7 @@ import {
   Turma
 } from '../entities/turmasEntities';
 import { Admin } from '../entities/adminEntities';
-import { Like } from 'typeorm';
+import { Like, Not } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import ErrorHandler from '../errors/errorHandler';
 
@@ -27,13 +27,13 @@ export class TurmasService {
     periodoLetivo: PeriodoLetivo,
     ensino: TipoEnsino,
     turmaApelido: string,
-    adminId: number
+    adminCriadorId: number
   ): Promise<Turma> {
     const turmaExistente = await this.turmasRepository.findOne({
       where: {
         turmaApelido,
         admin: {
-          membro: { id: adminId }
+          membro: { id: adminCriadorId }
         }
       }
     });
@@ -47,7 +47,7 @@ export class TurmasService {
     }
 
     const admin = await this.adminRepository.findOneBy({
-      membro: { id: adminId }
+      membro: { id: adminCriadorId }
     });
 
     const novaTurma = this.turmasRepository.create({
@@ -62,7 +62,7 @@ export class TurmasService {
   }
 
   async listar(
-    adminId: number,
+    adminCriadorId: number,
     paginaNumero: number,
     paginaTamanho: number | null,
     searchTerm: string
@@ -71,7 +71,7 @@ export class TurmasService {
     const [turmas, total] = await this.turmasRepository.findAndCount({
       where: {
         admin: {
-          membro: { id: adminId }
+          membro: { id: adminCriadorId }
         },
         turmaApelido: Like(`%${searchTerm}%`)
       },
@@ -85,33 +85,75 @@ export class TurmasService {
     };
   }
 
-  async editar(id: number, dadosTurma: Partial<Turma>) {
-    const turmaExistente = await this.turmasRepository.findOneBy({ id });
-    const { turmaApelido } = dadosTurma;
+  async buscarTurmaPorId(id: number, adminCriadorId: number): Promise<Turma> {
+    const turmaExistente = await this.turmasRepository.findOne({
+      where: {
+        id,
+        admin: {
+          membro: { id: adminCriadorId }
+        }
+      }
+    });
+
+    if (!turmaExistente) {
+      throw ErrorHandler.notFound(
+        'Turma não encontrada ou não pertence ao admin logado.'
+      );
+    }
+
+    return turmaExistente;
+  }
+
+  async editar(id: number, dadosTurma: Partial<Turma>, adminCriadorId: number) {
+    const turmaExistente = await this.turmasRepository.findOne({
+      where: { id },
+      relations: ['admin', 'admin.membro']
+    });
 
     if (!turmaExistente) {
       throw ErrorHandler.notFound('Turma não encontrada');
     }
 
-    if (turmaApelido && turmaApelido.length > 12) {
-      throw ErrorHandler.badRequest('O apelido da turma é muito longo');
+    if (turmaExistente.admin.membro.id !== adminCriadorId) {
+      throw ErrorHandler.unauthorized(
+        'Você não tem permissão para editar esta turma'
+      );
+    }
+
+    if (dadosTurma.turmaApelido) {
+      const apelidoExistente = await this.turmasRepository.findOne({
+        where: {
+          turmaApelido: dadosTurma.turmaApelido,
+          id: Not(id)
+        }
+      });
+
+      if (apelidoExistente) {
+        throw ErrorHandler.conflictError('O apelido da turma já existe');
+      }
     }
 
     Object.assign(turmaExistente, dadosTurma);
     return await this.turmasRepository.save(turmaExistente);
   }
 
-  async deletar(id: number) {
-    const turma = await this.turmasRepository.findOneBy({ id });
+  async deletar(id: number, adminCriadorId: number) {
+    const turmaExistente = await this.turmasRepository.findOne({
+      where: { id },
+      relations: ['admin', 'admin.membro']
+    });
 
-    if (!turma) {
+    if (!turmaExistente) {
       throw ErrorHandler.notFound('Turma não encontrada');
     }
-    return await this.turmasRepository.delete(id);
-  }
 
-  async buscarPorId(id: number): Promise<Turma | null> {
-    return await this.turmasRepository.findOneBy({ id });
+    if (turmaExistente.admin.membro.id !== adminCriadorId) {
+      throw ErrorHandler.unauthorized(
+        'Você não tem permissão para excluir esta turma'
+      );
+    }
+
+    return await this.turmasRepository.delete(id);
   }
 
   async buscarAlunosPorTurma(turmaId: number) {

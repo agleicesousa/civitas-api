@@ -54,7 +54,7 @@ export class Admin1733436982112 implements MigrationInterface {
     }
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('admin');
+  public async down(): Promise<void> {
+    console.log('Nenhuma ação executada no down.');
   }
 }

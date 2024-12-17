@@ -9,7 +9,7 @@
     "build": "npm run lint && npx tsc",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "test": "jest",
-    "seed": "ts-node ./node_modules/.bin/typeorm-extension seed:run -d ./src/config/database.ts"
+    "typeorm": "typeorm-ts-node-commonjs -d ./src/config/database.ts"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.2.0",
@@ -30,8 +30,8 @@
     "jsonwebtoken": "^9.0.2",
     "nodemon": "3.0.1",
     "ts-jest": "^29.2.5",
-    "ts-node": "10.9.1",
-    "typescript": "5.2.2"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -42,10 +42,10 @@
     "express-validator": "^7.2.0",
     "mongodb": "5.9.0",
     "mysql2": "3.11.3",
-    "reflect-metadata": "0.1.13",
+    "reflect-metadata": "^0.1.13",
     "swagger-jsdoc": "6.2.8",
     "swagger-ui-express": "5.0.1",
-    "typeorm": "0.3.20",
+    "typeorm": "^0.3.20",
     "typeorm-extension": "^3.6.2"
   }
 }
