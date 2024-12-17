@@ -1,9 +1,10 @@
 import { compare } from 'bcrypt';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { MysqlDataSource } from '../config/database';
 import { Membros } from '../entities/membrosEntities';
-import { gerarToken } from '../utils/jwtUtils';
+import { gerarToken, gerarTokenRecuperacao } from '../utils/jwtUtils';
 import ErrorHandler from '../errors/errorHandler';
+import { criptografarSenha } from '../utils/validarSenhaUtils';
 
 export class LoginService {
   private membroRepository: Repository<Membros>;
@@ -30,6 +31,65 @@ export class LoginService {
       tipoConta: user.tipoConta
     });
 
-    return { token, tipoConta: user.tipoConta };
+    return {
+      token,
+      tipoConta: user.tipoConta,
+      primeiroLogin: user.primeiroLogin
+    };
+  }
+
+  async atualizarSenhaPrimeiroLogin(id: number, novaSenha: string) {
+    const user = await this.membroRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw ErrorHandler.notFound('Usuário não encontrado.');
+    }
+
+    user.senha = novaSenha;
+    user.primeiroLogin = false;
+
+    await this.membroRepository.save(user);
+    return { message: 'Senha atualizada com sucesso.' };
+  }
+
+  async solicitarRecuperacao(email: string) {
+    const membro = await this.membroRepository.findOne({ where: { email } });
+
+    if (!membro) {
+      throw ErrorHandler.notFound('Usuário com este email não encontrado.');
+    }
+
+    const token = gerarTokenRecuperacao();
+    membro.resetToken = token;
+    membro.resetTokenExp = new Date(Date.now() + 3600000); // Token válido por 1 hora
+
+    await this.membroRepository.save(membro);
+
+    // Simula o envio do e-mail - uso interno
+    console.log(
+      `Link para recuperação: https://localhost:4444/resetar-senha?token=${token}`
+    );
+    return { message: 'Link de recuperação enviado para o email.' };
+  }
+
+  async resetarSenha(token: string, novaSenha: string) {
+    const membro = await this.membroRepository.findOne({
+      where: { resetToken: token, resetTokenExp: MoreThan(new Date()) }
+    });
+
+    if (!membro) {
+      throw ErrorHandler.badRequest('Token inválido ou expirado.');
+    }
+
+    if (!novaSenha) {
+      throw ErrorHandler.badRequest('A nova senha deve ser informada.');
+    }
+
+    membro.senha = await criptografarSenha(novaSenha);
+    membro.resetToken = null;
+    membro.resetTokenExp = null;
+
+    await this.membroRepository.save(membro);
+    return { message: 'Senha alterada com sucesso.' };
   }
 }

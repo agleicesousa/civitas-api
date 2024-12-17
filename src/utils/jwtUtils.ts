@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import crypto from 'crypto';
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
@@ -32,4 +33,8 @@ export function verificarToken(token: string): JwtPayload {
     }
     throw new Error('Token inválido.');
   }
+}
+
+export function gerarTokenRecuperacao(): string {
+  return crypto.randomBytes(32).toString('hex');
 }

@@ -33,8 +33,17 @@ export class Membros extends BaseEntity {
   @Column({ type: 'enum', enum: TipoConta, nullable: false })
   tipoConta: TipoConta;
 
+  @Column({ default: true })
+  primeiroLogin: boolean;
+
   @Column({ nullable: true })
   adminCriadorId: number;
+
+  @Column({ nullable: true })
+  resetToken: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExp: Date;
 
   @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'adminCriadorId' })
