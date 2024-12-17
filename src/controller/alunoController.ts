@@ -2,9 +2,18 @@ import { Request, Response } from 'express';
 import { AlunoService } from '../services/alunoService';
 import ErrorHandler from '../errors/errorHandler';
 
+/**
+ * Controlador responsável por gerenciar as requisições relacionadas a Alunos.
+ */
 export class AlunoController {
   private alunoService = new AlunoService();
 
+  /**
+   * Cria um novo aluno no sistema.
+   * @param req - Objeto da requisição contendo os dados do aluno no corpo.
+   * @param res - Objeto da resposta usado para retornar o resultado.
+   * @returns Resposta com status 201 e os dados do aluno cadastrado.
+   */
   async criarAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
@@ -28,6 +37,12 @@ export class AlunoController {
     }
   }
 
+  /**
+   * Lista os alunos de forma paginada e opcionalmente filtra por termo de busca.
+   * @param req - Objeto da requisição contendo parâmetros de paginação e busca.
+   * @param res - Objeto da resposta usado para retornar a lista de alunos.
+   * @returns Resposta com status 200 contendo lista de alunos paginada.
+   */
   async listarAlunos(req: Request, res: Response) {
     try {
       const { page, perPage } = req.query;
@@ -59,6 +74,12 @@ export class AlunoController {
     }
   }
 
+  /**
+   * Lista todos os alunos vinculados ao administrador logado.
+   * @param req - Objeto da requisição.
+   * @param res - Objeto da resposta usado para retornar a lista de alunos.
+   * @returns Resposta com status 200 contendo a lista completa de alunos.
+   */
   async listarAlunosCompleto(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
@@ -77,6 +98,12 @@ export class AlunoController {
     }
   }
 
+  /**
+   * Busca os detalhes de um aluno específico pelo ID.
+   * @param req - Objeto da requisição contendo o ID do aluno nos parâmetros.
+   * @param res - Objeto da resposta usado para retornar os dados do aluno.
+   * @returns Resposta com status 200 contendo os dados do aluno.
+   */
   async buscarAlunoPorId(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
@@ -101,6 +128,12 @@ export class AlunoController {
     }
   }
 
+  /**
+   * Atualiza os dados de um aluno específico.
+   * @param req - Objeto da requisição contendo os novos dados no corpo e o ID nos parâmetros.
+   * @param res - Objeto da resposta usado para retornar o resultado da atualização.
+   * @returns Resposta com status 200 e os dados atualizados do aluno.
+   */
   async atualizarAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
@@ -123,7 +156,7 @@ export class AlunoController {
 
       res
         .status(200)
-        .json({ message: resultado.message, professor: resultado.aluno });
+        .json({ message: resultado.message, aluno: resultado.aluno });
     } catch (error) {
       return res
         .status(error.statusCode || 500)
@@ -131,6 +164,12 @@ export class AlunoController {
     }
   }
 
+  /**
+   * Exclui um aluno do sistema pelo ID.
+   * @param req - Objeto da requisição contendo o ID do aluno nos parâmetros.
+   * @param res - Objeto da resposta usado para retornar a confirmação de exclusão.
+   * @returns Resposta com status 200 confirmando a exclusão do aluno.
+   */
   async excluirAluno(req: Request, res: Response) {
     try {
       const adminLogadoId = req.user?.id;
