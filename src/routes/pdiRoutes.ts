@@ -33,4 +33,5 @@ pdiRouter.get('/professor/turmas/:id/alunos', (req, res) =>
 );
 
 pdiRouter.delete('/:id', (req, res) => pdiController.deletarPDI(req, res));
+
 export default pdiRouter;

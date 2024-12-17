@@ -25,24 +25,11 @@ export async function authMiddleware(
     req.user = {
       id: decoded.id,
       email: decoded.email,
-      tipoConta: decoded.tipoConta,
-      permissions: decoded.permissions
+      tipoConta: decoded.tipoConta
     };
     next();
   } catch (error) {
     console.error('Erro ao verificar token:', error);
     return res.status(403).json({ error: 'Token inválido ou expirado.' });
   }
-}
-
-export function permissoes(necessaria: string) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const usuario = req.user;
-    if (usuario?.permissions?.includes(necessaria)) {
-      return next();
-    }
-    return res.status(403).json({
-      error: 'Acesso negado. Permissão insuficiente.'
-    });
-  };
 }

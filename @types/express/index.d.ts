@@ -7,7 +7,6 @@ declare global {
         id: number;
         email: string;
         tipoConta: string;
-        permissions: string[];
       };
     }
   }
