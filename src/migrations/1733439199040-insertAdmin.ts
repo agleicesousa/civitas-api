@@ -1,5 +1,7 @@
 import { TipoConta } from '../entities/baseEntity';
 import { MigrationInterface, QueryRunner } from 'typeorm';
+import 'dotenv/config';
+import { criptografarSenha } from '../utils/validarSenhaUtils';
 
 export class InsertAdmin1733439199040 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -11,12 +13,13 @@ export class InsertAdmin1733439199040 implements MigrationInterface {
         queryRunner.connection.getRepository('membros');
       const repositorioAdmin = queryRunner.connection.getRepository('admin');
 
+      const senhaCriptografada = await criptografarSenha(
+        process.env.ADMIN_PASSWORD
+      );
+
       const membro = repositorioMembros.create({
-        numeroMatricula: 'admin',
-        email: 'admin@admin.com',
-        senha: 'password123',
-        nomeCompleto: 'Admin',
-        cpf: '145.272.680-90',
+        email: process.env.ADMIN_EMAIL,
+        senha: senhaCriptografada,
         tipoConta: TipoConta.ADMIN
       });
 
@@ -29,11 +32,7 @@ export class InsertAdmin1733439199040 implements MigrationInterface {
     }
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
-    const repositorioMembros = queryRunner.connection.getRepository('membros');
-
-    await repositorioMembros.delete({
-      email: 'admin@admin.com'
-    });
+  public async down(): Promise<void> {
+    console.log('Nenhuma ação executada no down.');
   }
 }
