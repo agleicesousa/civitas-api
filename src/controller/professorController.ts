@@ -2,11 +2,6 @@ import { Request, Response } from 'express';
 import { ProfessorService } from '../services/professorService';
 import ErrorHandler from '../errors/errorHandler';
 
-/**
- * Controller responsável por gerenciar as operações relacionadas a professores.
- * Contém endpoints para criar, listar, buscar, atualizar e excluir professores,
- * bem como buscar as turmas associadas a um professor.
- */
 export class ProfessorController {
   private professorService = new ProfessorService();
 
@@ -72,7 +67,6 @@ export class ProfessorController {
 
   /**
    * Lista professores com paginação e busca por um termo específico.
-   * Permite ao administrador buscar professores com filtros de pesquisa.
    *
    * @async
    * @param req - Objeto da requisição Express contendo parâmetros de paginação e busca.
@@ -142,6 +136,38 @@ export class ProfessorController {
       return res
         .status(error.statusCode || 500)
         .json({ message: 'Erro buscar professor', error: error.message });
+    }
+  }
+
+  /**
+   * Recupera as turmas associadas ao professor atualmente autenticado.
+   *
+   * @async
+   * @param req - Objeto da requisição Express.
+   * @param res - Objeto da resposta Express.
+   * @returns {Promise<Response>} Lista de turmas do professor.
+   */
+  async professorTurmas(req: Request, res: Response) {
+    try {
+      const professorId = req.user?.id;
+
+      if (!professorId) {
+        return res.status(400).json({ message: 'Usuário não identificado' });
+      }
+
+      const turmas =
+        await this.professorService.buscarProfessorTurmas(professorId);
+
+      return res.status(200).json(turmas);
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: 'Não foi possível carregar as turmas. Erro interno do servidor'
+      });
     }
   }
 
@@ -219,38 +245,6 @@ export class ProfessorController {
       return res
         .status(error.statusCode || 500)
         .json({ message: 'Erro ao excluir professor', error: error.message });
-    }
-  }
-
-  /**
-   * Recupera as turmas associadas ao professor atualmente autenticado.
-   *
-   * @async
-   * @param req - Objeto da requisição Express.
-   * @param res - Objeto da resposta Express.
-   * @returns {Promise<Response>} Lista de turmas do professor.
-   */
-  async professorTurmas(req: Request, res: Response) {
-    try {
-      const professorId = req.user?.id;
-
-      if (!professorId) {
-        return res.status(400).json({ message: 'Usuário não identificado' });
-      }
-
-      const turmas =
-        await this.professorService.buscarProfessorTurmas(professorId);
-
-      return res.status(200).json(turmas);
-    } catch (error) {
-      console.error(error);
-
-      if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({ message: error.message });
-      }
-      return res.status(500).json({
-        message: 'Não foi possível carregar as turmas. Erro interno do servidor'
-      });
     }
   }
 }
