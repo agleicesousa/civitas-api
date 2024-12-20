@@ -1,4 +1,4 @@
-import { Membros } from '../models/Membros';
+import { Membros } from '../../entities/membrosEntities';
 
 declare global {
   namespace Express {
