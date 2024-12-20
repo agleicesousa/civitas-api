@@ -1,3 +1,5 @@
+import { Membros } from '../models/Membros';
+
 declare global {
   namespace Express {
     export interface Request {
