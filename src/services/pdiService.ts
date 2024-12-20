@@ -26,33 +26,6 @@ export class PdiService {
   private professorRepository = MysqlDataSource.getRepository(Professor);
 
   /**
-   * Mapeia os dados de um PDI para um formato mais amigável.
-   * @param pdi O PDI a ser mapeado.
-   * @returns Dados formatados incluindo respostas, médias, comentários e data.
-   */
-  private pdiMap(pdi: PDI) {
-    const comments = pdi.consideracoes;
-    const responses = {};
-    pdi.secoes.forEach((secao) => {
-      secao.respostas.forEach((resposta) => {
-        responses[resposta.pergunta] = Number(resposta.valor);
-      });
-    });
-    const averages = pdi.secoes.map((secao) => Number(secao.media));
-    const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString(
-      'pt-BR',
-      { timeZone: 'America/Sao_Paulo' }
-    );
-
-    return {
-      ...responses,
-      averages,
-      registrationDate,
-      comments
-    };
-  }
-
-  /**
    * Cria um novo PDI para um aluno.
    * @param payload Dados do PDI, incluindo seções e respostas.
    * @param comments Comentários adicionais para o PDI.
@@ -101,43 +74,6 @@ export class PdiService {
     await this.alunosRepository.save(aluno);
 
     return novoPdi;
-  }
-
-  /**
-   * Deleta um PDI específico pelo ID.
-   * @param pdiId ID do PDI a ser deletado.
-   * @throws Error Caso o PDI não seja encontrado.
-   */
-  async deletearPdi(pdiId: number) {
-    const pdi = await this.pdiRepository.findOne({
-      where: { id: pdiId }
-    });
-
-    if (!pdi) {
-      throw new Error('PDI não encontrado');
-    }
-
-    await this.pdiRepository.delete(pdiId);
-  }
-
-  /**
-   * Cria uma seção do PDI com suas respectivas respostas.
-   * @param sectionData Dados da seção, incluindo perguntas e respostas.
-   * @returns Uma nova instância de PdiSecao.
-   */
-  private criarSecaoComRespostas(sectionData): PdiSecao {
-    const secao = new PdiSecao();
-    secao.titulo = sectionData.section;
-    secao.respostas = Object.entries(sectionData)
-      .filter(([key]) => key !== 'section')
-      .map(([key, value]) => {
-        const resposta = new PdiResposta();
-        resposta.pergunta = key;
-        resposta.valor = value as NivelDeSatisfacao;
-        return resposta;
-      });
-
-    return secao;
   }
 
   /**
@@ -214,6 +150,58 @@ export class PdiService {
   }
 
   /**
+   * Atualiza um PDI existente com novos dados.
+   * @param pdiId ID do PDI a ser atualizado.
+   * @param payload Dados do PDI, incluindo seções e respostas.
+   * @param comments Comentários adicionais para o PDI.
+   * @returns O PDI atualizado.
+   * @throws ErrorHandler Caso o PDI não seja encontrado.
+   */
+  async atualizarPDI(
+    pdiId: number,
+    payload: CreatePDIPayload,
+    comments: string
+  ) {
+    const pdi = await this.pdiRepository.findOne({
+      where: { id: pdiId },
+      relations: ['aluno', 'secoes']
+    });
+
+    if (!pdi) {
+      throw ErrorHandler.notFound('PDI não encontrado');
+    }
+
+    pdi.consideracoes = comments;
+    pdi.secoes = payload.pdiValues.map((sectionData) =>
+      this.criarSecaoComRespostas(sectionData)
+    );
+
+    await this.pdiRepository.save(pdi);
+
+    pdi.aluno.desempenho = pdi.aluno.calcularDesempenho(pdi.secoes);
+    await this.alunosRepository.save(pdi.aluno);
+
+    return pdi;
+  }
+
+  /**
+   * Deleta um PDI específico pelo ID.
+   * @param pdiId ID do PDI a ser deletado.
+   * @throws Error Caso o PDI não seja encontrado.
+   */
+  async deletearPdi(pdiId: number) {
+    const pdi = await this.pdiRepository.findOne({
+      where: { id: pdiId }
+    });
+
+    if (!pdi) {
+      throw new Error('PDI não encontrado');
+    }
+
+    await this.pdiRepository.delete(pdiId);
+  }
+
+  /**
    * Retorna um resumo do aluno e professor relacionado.
    * @param alunoId ID do aluno.
    * @param professorId ID do professor.
@@ -246,5 +234,52 @@ export class PdiService {
       teacherName: professor.membro.nomeCompleto,
       enrollmentNumber: aluno.membro.numeroMatricula
     };
+  }
+
+  /**
+   * Mapeia os dados de um PDI para um formato mais amigável.
+   * @param pdi O PDI a ser mapeado.
+   * @returns Dados formatados incluindo respostas, médias, comentários e data.
+   */
+  private pdiMap(pdi: PDI) {
+    const comments = pdi.consideracoes;
+    const responses = {};
+    pdi.secoes.forEach((secao) => {
+      secao.respostas.forEach((resposta) => {
+        responses[resposta.pergunta] = Number(resposta.valor);
+      });
+    });
+    const averages = pdi.secoes.map((secao) => Number(secao.media));
+    const registrationDate = new Date(pdi.dataCriacao).toLocaleDateString(
+      'pt-BR',
+      { timeZone: 'America/Sao_Paulo' }
+    );
+
+    return {
+      ...responses,
+      averages,
+      registrationDate,
+      comments
+    };
+  }
+
+  /**
+   * Cria uma seção do PDI com suas respectivas respostas.
+   * @param sectionData Dados da seção, incluindo perguntas e respostas.
+   * @returns Uma nova instância de PdiSecao.
+   */
+  private criarSecaoComRespostas(sectionData): PdiSecao {
+    const secao = new PdiSecao();
+    secao.titulo = sectionData.section;
+    secao.respostas = Object.entries(sectionData)
+      .filter(([key]) => key !== 'section')
+      .map(([key, value]) => {
+        const resposta = new PdiResposta();
+        resposta.pergunta = key;
+        resposta.valor = value as NivelDeSatisfacao;
+        return resposta;
+      });
+
+    return secao;
   }
 }

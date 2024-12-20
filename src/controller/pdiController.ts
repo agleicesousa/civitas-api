@@ -11,14 +11,17 @@ export class PdiController {
 
   /**
    * Cria um novo PDI.
-   * @param req Request contendo os valores do PDI e comentários.
-   * @param res Response com o status da operação e o PDI criado.
+   * @async
+   * @param req - Request contendo os valores do PDI e comentários.
+   * @param res - Response com o status da operação e o PDI criado.
+   * @returns {Promise<Response>} - PDI criado com sucesso.
    */
-  async criarPdi(req: Request, res: Response) {
+  async criarPDI(req: Request, res: Response): Promise<Response> {
     try {
       const { pdiValues, comments } = req.body;
       const alunoId = Number(req.params.id);
       const professorId = req.user?.id;
+
       const pdi = await this.pdiService.criarPDI(
         { pdiValues },
         comments,
@@ -32,25 +35,25 @@ export class PdiController {
       });
     } catch (error) {
       if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({
-          message: error.message
-        });
+        return res.status(error.statusCode).json({ message: error.message });
       }
       return res.status(500).json({
-        message:
-          'Não foi possível carregar as informações. Erro interno do servidor.'
+        message: 'Erro interno ao criar PDI.'
       });
     }
   }
 
   /**
    * Obtém os detalhes de um PDI específico.
-   * @param req Request contendo o ID do PDI na URL.
-   * @param res Response com os detalhes do PDI.
+   * @async
+   * @param req - Request contendo o ID do PDI na URL.
+   * @param res - Response com os detalhes do PDI.
+   * @returns {Promise<Response>} - Detalhes do PDI.
    */
   async obterDetalhesPDI(req: Request, res: Response): Promise<Response> {
     try {
       const idPDI = Number(req.params.id);
+
       if (isNaN(idPDI)) {
         return res
           .status(400)
@@ -61,21 +64,20 @@ export class PdiController {
       return res.status(200).json(detalhes);
     } catch (error) {
       if (error instanceof ErrorHandler) {
-        return res.status(error.statusCode).json({
-          message: error.message
-        });
+        return res.status(error.statusCode).json({ message: error.message });
       }
       return res.status(500).json({
-        message:
-          'Não foi possível carregar as informações. Erro interno do servidor.'
+        message: 'Erro interno ao obter detalhes do PDI.'
       });
     }
   }
 
   /**
    * Lista todos os PDIs de um aluno.
-   * @param req Request contendo o ID do aluno e tipo da conta.
-   * @param res Response com a lista de PDIs do aluno.
+   * @async
+   * @param req - Request contendo o ID do aluno e tipo da conta.
+   * @param res - Response com a lista de PDIs do aluno.
+   * @returns {Promise<Response>} - Lista de PDIs.
    */
   async listarPDIsDoAluno(req: Request, res: Response): Promise<Response> {
     try {
@@ -86,38 +88,16 @@ export class PdiController {
 
       return res.status(200).json(pdis);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Erro ao listar PDIs' });
-    }
-  }
-
-  /**
-   * Deleta um PDI específico.
-   * @param req Request contendo o ID do PDI a ser deletado.
-   * @param res Response com o status da operação.
-   */
-  async deletarPDI(req: Request, res: Response): Promise<Response> {
-    try {
-      const pdiId = Number(req.params.id);
-      await this.pdiService.deletearPdi(pdiId);
-
-      return res.status(200).json({
-        message: 'PDI removido com sucesso'
-      });
-    } catch (error) {
-      console.error('Erro ao remover PDI:', error.message);
-
-      return res.status(400).json({
-        message: 'Erro ao remover PDI',
-        error: error.message
-      });
+      return res.status(500).json({ message: 'Erro ao listar PDIs.' });
     }
   }
 
   /**
    * Obtém o resumo do relacionamento entre professor e aluno.
-   * @param req Request contendo os IDs do aluno e professor.
-   * @param res Response com o resumo das informações.
+   * @async
+   * @param req - Request contendo os IDs do aluno e professor.
+   * @param res - Response com o resumo das informações.
+   * @returns {Promise<Response>} - Resumo do relacionamento.
    */
   async obterResumoProfessorAluno(
     req: Request,
@@ -129,7 +109,7 @@ export class PdiController {
 
       if (isNaN(alunoId) || isNaN(professorId)) {
         return res.status(400).json({
-          message: 'Os IDs do aluno ou professor devem ser números válidos'
+          message: 'IDs do aluno e professor devem ser válidos.'
         });
       }
 
@@ -144,13 +124,69 @@ export class PdiController {
       });
     } catch (error) {
       if (error instanceof ErrorHandler) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: 'Erro interno ao obter resumo professor-aluno.'
+      });
+    }
+  }
+
+  /**
+   * Atualiza os dados de um PDI.
+   * @async
+   * @param req - Request contendo os valores atualizados e o ID do PDI.
+   * @param res - Response com o status da operação.
+   * @returns {Promise<Response>} - PDI atualizado com sucesso.
+   */
+  async atualizarPDI(req: Request, res: Response): Promise<Response> {
+    try {
+      const { pdiValues, comments } = req.body;
+      const pdiId = Number(req.params.id);
+
+      const pdi = await this.pdiService.atualizarPDI(
+        pdiId,
+        pdiValues,
+        comments
+      );
+
+      return res.status(200).json({
+        message: 'PDI atualizado com sucesso',
+        data: pdi
+      });
+    } catch (error) {
+      if (error instanceof ErrorHandler) {
         return res.status(error.statusCode).json({
-          message: error.message
+          message: 'Erro ao atualizar PDI',
+          error: error.message
         });
       }
       return res.status(500).json({
-        message:
-          'Não foi possível carregar as informações. Erro interno do servidor.'
+        message: 'Erro interno ao atualizar PDI.'
+      });
+    }
+  }
+
+  /**
+   * Deleta um PDI específico.
+   * @async
+   * @param req - Request contendo o ID do PDI a ser deletado.
+   * @param res - Response com o status da operação.
+   * @returns {Promise<Response>} - Confirmação da exclusão.
+   */
+  async deletarPDI(req: Request, res: Response): Promise<Response> {
+    try {
+      const pdiId = Number(req.params.id);
+
+      await this.pdiService.deletearPdi(pdiId);
+
+      return res.status(200).json({
+        message: 'PDI removido com sucesso'
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: 'Erro ao remover PDI.',
+        error: error.message
       });
     }
   }
