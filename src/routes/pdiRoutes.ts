@@ -35,3 +35,246 @@ pdiRouter.get('/professor/turmas/:id/alunos', (req, res) =>
 pdiRouter.delete('/:id', (req, res) => pdiController.deletarPDI(req, res));
 
 export default pdiRouter;
+
+/**
+ * @swagger
+ * /pdi/alunos/{id}:
+ *   post:
+ *     summary: Cria um novo PDI para um aluno.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do aluno
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *     responses:
+ *       201:
+ *         description: PDI criado com sucesso.
+ *       404:
+ *         description: Aluno ou professor não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/{id}/detalhes:
+ *   get:
+ *     summary: Obtém os detalhes de um PDI específico.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do PDI
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Detalhes do PDI retornados com sucesso.
+ *       404:
+ *         description: PDI não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/alunos/{id}/dados:
+ *   get:
+ *     summary: Obtém o resumo da relação entre professor e aluno.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do aluno
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados retornados com sucesso.
+ *       404:
+ *         description: Aluno ou professor não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/alunos/{id}/registros:
+ *   get:
+ *     summary: Lista todos os PDIs de um aluno.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do aluno
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de PDIs retornada com sucesso.
+ *       404:
+ *         description: Nenhum PDI encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/{id}:
+ *   delete:
+ *     summary: Deleta um PDI específico.
+ *     tags: [PDI]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do PDI
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: PDI removido com sucesso.
+ *       404:
+ *         description: PDI não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+/**
+ * @swagger
+ * /pdi/alunos/{id}:
+ *   post:
+ *     summary: Cria um novo PDI para um aluno.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do aluno
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *     responses:
+ *       201:
+ *         description: PDI criado com sucesso.
+ *       404:
+ *         description: Aluno ou professor não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/{id}/detalhes:
+ *   get:
+ *     summary: Obtém os detalhes de um PDI específico.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do PDI
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Detalhes do PDI retornados com sucesso.
+ *       404:
+ *         description: PDI não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/alunos/{id}/dados:
+ *   get:
+ *     summary: Obtém o resumo da relação entre professor e aluno.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do aluno
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados retornados com sucesso.
+ *       404:
+ *         description: Aluno ou professor não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/alunos/{id}/registros:
+ *   get:
+ *     summary: Lista todos os PDIs de um aluno.
+ *     tags: [PDI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do aluno
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de PDIs retornada com sucesso.
+ *       404:
+ *         description: Nenhum PDI encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
+
+/**
+ * @swagger
+ * /pdi/{id}:
+ *   delete:
+ *     summary: Deleta um PDI específico.
+ *     tags: [PDI]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do PDI
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: PDI removido com sucesso.
+ *       404:
+ *         description: PDI não encontrado.
+ *       500:
+ *         description: Erro interno do servidor.
+ */
