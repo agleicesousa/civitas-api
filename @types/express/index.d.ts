@@ -1,5 +1,3 @@
-import { Membros } from '../../entities/membrosEntities';
-
 declare global {
   namespace Express {
     export interface Request {
