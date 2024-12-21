@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import crypto from 'crypto';
+import { decrypt } from '../utils/cryptoUtils';
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
@@ -30,7 +31,11 @@ export function gerarToken(payload: {
   email: string;
   tipoConta: string;
 }): string {
-  return jwt.sign({ ...payload }, SECRET_KEY, { expiresIn: '1d' });
+  const emailDescriptografado = decrypt(payload.email);
+
+  return jwt.sign({ ...payload, email: emailDescriptografado }, SECRET_KEY, {
+    expiresIn: '1d'
+  });
 }
 
 /**
