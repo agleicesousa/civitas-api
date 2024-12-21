@@ -81,9 +81,7 @@ docker-compose up
 Caso não use Docker, execute a aplicação com:
 
 ```bash
-npm start
-# ou
-yarn start
+npm start:dev
 ```
 
 ## **Uso**
