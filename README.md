@@ -35,8 +35,8 @@ Este projeto é uma aplicação **Node.js** utilizando **TypeScript**, com supor
 Primeiro, clone o repositório para o seu ambiente local:
 
 ```bash
-git clone https://seu-repositorio.git
-cd nome-do-projeto
+git clone https://github.com/agleicesousa/civitas-api.git
+cd civitas-api
 ```
 
 ### **Instalar Dependências**
