@@ -12,6 +12,7 @@ import { Admin } from './adminEntities';
 import { Professor } from './professorEntities';
 import { Alunos } from './alunosEntities';
 import { criptografarSenha } from '../utils/validarSenhaUtils';
+import { encrypt, decrypt } from '../utils/cryptoUtils';
 
 /**
  * Representa a entidade principal para os membros do sistema, como administradores, professores e alunos.
@@ -91,5 +92,34 @@ export class Membros extends BaseEntity {
     if (this.senha && !this.senha.startsWith('$2b$')) {
       this.senha = await criptografarSenha(this.senha);
     }
+  }
+
+  /**
+   * Hook para criptografar o e-mail e CPF antes de salvar no banco de dados.
+   * Executado tanto na inserção quanto na atualização da entidade.
+   */
+  @BeforeInsert()
+  @BeforeUpdate()
+  async handleCriptografiaDados(): Promise<void> {
+    if (this.email) {
+      this.email = encrypt(this.email);
+    }
+    if (this.cpf) {
+      this.cpf = encrypt(this.cpf);
+    }
+  }
+
+  /**
+   * Método para descriptografar o e-mail.
+   */
+  getDecryptedEmail(): string {
+    return this.email ? decrypt(this.email) : '';
+  }
+
+  /**
+   * Método para descriptografar o CPF.
+   */
+  getDecryptedCpf(): string {
+    return this.cpf ? decrypt(this.cpf) : '';
   }
 }
