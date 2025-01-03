@@ -31,12 +31,7 @@ export const swaggerConfig: swaggerJSDoc.Options = {
           bearerFormat: 'JWT'
         }
       }
-    },
-    security: [
-      {
-        BearerAuth: []
-      }
-    ]
+    }
   },
   apis: ['src/routes/*.ts', 'routes/*.js']
 };
