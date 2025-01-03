@@ -50,8 +50,9 @@ export default adminRouter;
  *   post:
  *     summary: Cadastrar um novo administrador
  *     description: Cria um novo administrador no sistema, validando e criptografando a senha.
- *     tags:
- *       - Admin
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       description: Dados do novo administrador
  *       content:
@@ -98,8 +99,9 @@ export default adminRouter;
  *   get:
  *     summary: Listar administradores
  *     description: Lista todos os administradores criados pelo administrador autenticado.
- *     tags:
- *       - Admin
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: Lista de administradores
@@ -127,8 +129,9 @@ export default adminRouter;
  *   get:
  *     summary: Buscar administrador por ID
  *     description: Busca um administrador específico pelo ID fornecido.
- *     tags:
- *       - Admin
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -164,8 +167,9 @@ export default adminRouter;
  *   put:
  *     summary: Atualizar administrador
  *     description: Atualiza as informações de um administrador. Permite modificar dados como email, nome ou senha.
- *     tags:
- *       - Admin
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -219,8 +223,9 @@ export default adminRouter;
  *   delete:
  *     summary: Deletar administrador
  *     description: Deleta um administrador do sistema.
- *     tags:
- *       - Admin
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

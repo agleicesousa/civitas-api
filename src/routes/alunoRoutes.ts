@@ -53,7 +53,7 @@ export default alunoRouter;
 
 /**
  * @swagger
- * /:
+ * /alunos:
  *   post:
  *     summary: Cadastra um novo aluno.
  *     tags: [Alunos]
@@ -80,7 +80,7 @@ export default alunoRouter;
 
 /**
  * @swagger
- * /paginado:
+ * /alunos/paginado:
  *   get:
  *     summary: Lista alunos com paginação e busca por termo.
  *     tags: [Alunos]
@@ -111,7 +111,7 @@ export default alunoRouter;
 
 /**
  * @swagger
- * /:
+ * /alunos:
  *   get:
  *     summary: Lista todos os alunos vinculados ao administrador logado.
  *     tags: [Alunos]
@@ -126,7 +126,7 @@ export default alunoRouter;
 
 /**
  * @swagger
- * /{id}:
+ * /alunos/{id}:
  *   get:
  *     summary: Busca detalhes de um aluno específico pelo ID.
  *     tags: [Alunos]
@@ -148,7 +148,7 @@ export default alunoRouter;
 
 /**
  * @swagger
- * /{id}:
+ * /alunos/{id}:
  *   put:
  *     summary: Atualiza os dados de um aluno específico.
  *     tags: [Alunos]
@@ -179,7 +179,7 @@ export default alunoRouter;
 
 /**
  * @swagger
- * /{id}:
+ * /alunos/{id}:
  *   delete:
  *     summary: Exclui um aluno do sistema.
  *     tags: [Alunos]

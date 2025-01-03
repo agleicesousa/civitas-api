@@ -27,8 +27,7 @@ export default loginRoutes;
  *   post:
  *     summary: Realiza o login do usuário.
  *     description: Realiza o login de um usuário verificando credenciais e retornando token.
- *     tags:
- *       - Login
+ *     tags: [Login]
  *     requestBody:
  *       required: true
  *       content:
@@ -74,8 +73,9 @@ export default loginRoutes;
  *   post:
  *     summary: Atualiza a senha do usuário no primeiro login.
  *     description: Atualiza a senha de um usuário no caso de primeiro login.
- *     tags:
- *       - Login
+ *     tags: [Login]
+ *     security:
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -101,8 +101,9 @@ export default loginRoutes;
  *   post:
  *     summary: Solicita recuperação de senha.
  *     description: Envia um token de recuperação para o e-mail do usuário.
- *     tags:
- *       - Login
+ *     tags: [Login]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -128,8 +129,9 @@ export default loginRoutes;
  *   post:
  *     summary: Redefine a senha através do token de recuperação.
  *     description: Utiliza o token de recuperação para redefinir a senha.
- *     tags:
- *       - Login
+ *     tags: [Login]
+ *     security:
+ *      - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

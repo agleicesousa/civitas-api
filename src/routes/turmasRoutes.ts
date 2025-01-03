@@ -37,8 +37,7 @@ export default turmasRouter;
  * /turmas:
  *   post:
  *     summary: Cria uma nova turma
- *     tags:
- *       - Turmas
+ *     tags: [Turmas]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -85,8 +84,7 @@ export default turmasRouter;
  * /turmas:
  *   get:
  *     summary: Lista todas as turmas com paginação
- *     tags:
- *       - Turmas
+ *     tags: [Turmas]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -119,8 +117,7 @@ export default turmasRouter;
  * /turmas/{id}:
  *   get:
  *     summary: Busca uma turma pelo ID
- *     tags:
- *       - Turmas
+ *     tags: [Turmas]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -148,8 +145,7 @@ export default turmasRouter;
  * /turmas/{id}:
  *   put:
  *     summary: Atualiza os dados de uma turma
- *     tags:
- *       - Turmas
+ *     tags: [Turmas]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -200,8 +196,7 @@ export default turmasRouter;
  * /turmas/{id}:
  *   delete:
  *     summary: Exclui uma turma pelo ID
- *     tags:
- *       - Turmas
+ *     tags: [Turmas]
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -229,8 +224,7 @@ export default turmasRouter;
  * /turmas/{id}/alunos:
  *   get:
  *     summary: Busca todos os alunos de uma turma
- *     tags:
- *       - Turmas
+ *     tags: [Turmas]
  *     security:
  *       - BearerAuth: []
  *     parameters:

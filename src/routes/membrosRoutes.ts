@@ -50,8 +50,9 @@ export default membrosRouter;
  *   post:
  *     summary: Cria um novo membro.
  *     description: Cria um novo membro no sistema, associando-o ao administrador logado.
- *     tags:
- *       - Membros
+ *     tags: [Membros]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -86,8 +87,9 @@ export default membrosRouter;
  *   get:
  *     summary: Lista todos os membros.
  *     description: Lista todos os membros criados por um administrador autenticado.
- *     tags:
- *       - Membros
+ *     tags: [Membros]
+ *     security:
+ *      - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de membros com sucesso.
@@ -103,8 +105,9 @@ export default membrosRouter;
  *   get:
  *     summary: Busca um membro pelo ID.
  *     description: Busca os detalhes de um membro específico pelo ID, desde que o administrador tenha permissão.
- *     tags:
- *       - Membros
+ *     tags: [Membros]
+ *     security:
+ *      - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -130,8 +133,9 @@ export default membrosRouter;
  *   put:
  *     summary: Atualiza os dados de um membro.
  *     description: Atualiza os dados de um membro específico. O administrador deve ter permissão para realizar essa operação.
- *     tags:
- *       - Membros
+ *     tags: [Membros]
+ *     security:
+ *     - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -170,8 +174,9 @@ export default membrosRouter;
  *   delete:
  *     summary: Deleta um membro.
  *     description: Deleta um membro específico. O administrador precisa ter permissão para realizar essa operação.
- *     tags:
- *       - Membros
+ *     tags: [Membros]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
