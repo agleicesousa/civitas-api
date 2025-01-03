@@ -23,7 +23,7 @@ export default loginRoutes;
 
 /**
  * @swagger
- * /login:
+ * /auth/login:
  *   post:
  *     summary: Realiza o login do usuário.
  *     description: Realiza o login de um usuário verificando credenciais e retornando token.
@@ -69,7 +69,7 @@ export default loginRoutes;
 
 /**
  * @swagger
- * /primeiro-login:
+ * /auth/primeiro-login:
  *   post:
  *     summary: Atualiza a senha do usuário no primeiro login.
  *     description: Atualiza a senha de um usuário no caso de primeiro login.
@@ -97,7 +97,7 @@ export default loginRoutes;
 
 /**
  * @swagger
- * /solicitar-recuperacao:
+ * /auth/solicitar-recuperacao:
  *   post:
  *     summary: Solicita recuperação de senha.
  *     description: Envia um token de recuperação para o e-mail do usuário.
@@ -125,7 +125,7 @@ export default loginRoutes;
 
 /**
  * @swagger
- * /resetar-senha:
+ * /auth/resetar-senha:
  *   post:
  *     summary: Redefine a senha através do token de recuperação.
  *     description: Utiliza o token de recuperação para redefinir a senha.
