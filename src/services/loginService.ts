@@ -26,7 +26,6 @@ export class LoginService {
    * @throws ErrorHandler caso falhe na autenticação.
    */
   async login(email: string, senha: string) {
-    // Busca usuário pelo e-mail.
     const user = await this.membroRepository.findOne({ where: { email } });
 
     if (!user) {
