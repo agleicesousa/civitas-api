@@ -101,19 +101,9 @@ export class Membros extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async handleCriptografiaDados(): Promise<void> {
-    if (this.email) {
-      this.email = encrypt(this.email);
-    }
     if (this.cpf) {
       this.cpf = encrypt(this.cpf);
     }
-  }
-
-  /**
-   * Método para descriptografar o e-mail.
-   */
-  getDecryptedEmail(): string {
-    return this.email ? decrypt(this.email) : '';
   }
 
   /**
